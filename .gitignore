@@ -1,0 +1,27 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# secrets
+.env
+
+# raw experiment output and LLM cache (large, regenerable); keep summaries in results/summary/
+results/raw/
+results/cache/
+!results/summary/
+
+# third-party starter repos are cloned locally, not vendored
+third_party/*
+!third_party/README.md
+
+# LaTeX build artifacts
+report/*.aux
+report/*.log
+report/*.out
+report/*.bbl
+report/*.blg
+report/*.synctex.gz

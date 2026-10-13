@@ -1,0 +1,18 @@
+Part A: Bonjour Table 2 replication (CDA %)
+n_games  100   200   300    400    500    1000
+cp                                            
+0.3      39.5  60.0  74.5   83.0   91.0   99.5
+0.4      64.5  90.8  98.5  100.0  100.0  100.0 
+
+Part B: false-alarm rate (null_*) / correct-pair rate (pair_*), 200 iterations per cell
+population              null_herd        null_uniform        pair_herd        pair_uniform       
+n_games                       200    500          200    500       200    500          200    500
+detector                                                                                         
+bonjour_alpha_nostate       0.165  0.020        0.000  0.000     0.575  0.740        1.000  1.000
+bonjour_alpha_prevstate     0.135  0.075        0.160  0.075     0.305  0.720        0.385  0.940
+net_crt                     0.045  0.030        0.040  0.015     0.410  0.785        1.000  1.000
+net_shuffle                 0.310  0.530        0.055  0.025     0.740  0.955        1.000  1.000
+net_stratified_prev         0.020  0.090        0.040  0.060     0.185  0.735        0.250  0.935
+raw_gamma_shuffle           1.000  1.000        0.045  0.030     0.885  0.975        1.000  1.000
+
+84s
