@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Monoculture Looks Like Collusion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.85in 0.9in 0.85in 0.9in; }
+  :root { --ink: #111; --ink2: #444; --rule: #c9c7c2; --link: #1155cc; }
+  html, body { background: #fff; color: var(--ink); }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.6pt; line-height: 1.38; margin: 0; }
+  h1.title { font-family: "Old Standard TT", Georgia, serif; font-size: 19pt; font-weight: 400; line-height: 1.2; margin: 0 0 10pt; }
+  .authors { display: flex; gap: 28pt; margin: 0 0 4pt; font-size: 9.6pt; }
+  .authors div span { display: block; color: var(--ink2); font-style: italic; }
+  .abstract { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 7pt 0 8pt; margin: 10pt 0 12pt; }
+  .abstract h2 { font-family: "Old Standard TT", Georgia, serif; font-size: 13pt; font-weight: 700; margin: 0 0 4pt; }
+  h2 { font-family: "Old Standard TT", Georgia, serif; font-size: 14pt; font-weight: 700; margin: 13pt 0 4pt; break-after: avoid; }
+  h3 { font-family: "Old Standard TT", Georgia, serif; font-size: 11pt; font-weight: 700; margin: 9pt 0 3pt; break-after: avoid; }
+  p { margin: 0 0 6pt; text-align: justify; hyphens: auto; }
+  ol, ul { margin: 0 0 6pt 16pt; padding: 0; }
+  li { margin: 0 0 2pt; }
+  figure { margin: 6pt 0 9pt; break-inside: avoid; }
+  figure img { width: 100%; display: block; }
+  figure.half { width: 49%; display: inline-block; vertical-align: top; }
+  figcaption { font-size: 8.4pt; color: var(--ink2); line-height: 1.3; margin-top: 3pt; text-align: justify; }
+  figcaption b { color: var(--ink); }
+  table { border-collapse: collapse; width: 100%; font-size: 8.2pt; margin: 4pt 0 8pt; break-inside: avoid; }
+  th, td { border-bottom: 1px solid var(--rule); padding: 2.5pt 4pt; text-align: left; vertical-align: top; }
+  th { border-bottom: 1.2px solid var(--ink2); font-weight: 700; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .box { border: 1px solid var(--rule); background: #f6f5f2; padding: 6pt 8pt; margin: 6pt 0 9pt; break-inside: avoid; }
+  .box h3 { margin-top: 0; }
+  a { color: var(--link); text-decoration: none; }
+  .refs li { font-size: 8.4pt; margin-bottom: 2pt; }
+  .footnote { font-size: 7.8pt; color: var(--ink2); border-top: 1px solid var(--rule); padding-top: 3pt; margin-top: 10pt; }
+  .pb { break-before: page; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.4pt; }
+  .small { font-size: 8.4pt; }
+</style>
+</head>
+<body>
+
+<h1 class="title">Monoculture Looks Like Collusion: A Replay Test for Hidden Information Flow Between LLM Agents<sup>1</sup></h1>
+<div class="authors">
+  <div>Yaroslav [Surname]<span>Independent researcher</span></div>
+  <div>With<span>Apart Research</span></div>
+</div>
+
+<div class="abstract">
+<h2>Abstract</h2>
+<div class="abstract-body">
+<p>Auditors who look for collusion between AI agents usually test whether the agents' actions depend on each other. When the agents run on the same model, they behave alike without any communication. On the published logs of Agrawal et al. (2025), a standard mutual-information test flags {{ag_base_naive_mi_shuffle}} double-auction runs in which the sellers had no way to talk, nearly as often as runs with a seller chat ({{ag_comms_naive_mi_shuffle}}). We propose a replay test for auditors with query access to deployed agents. In every round, each agent is re-queried on exactly what it saw, with its private channel removed, and a pair is flagged only if their real moves depend on each other more than their replays do. This is a conditional randomization test whose null is exact in every cell. Across {{s1_honest_n}} honest LLM episodes (rock-paper-scissors with DeepSeek and Claude Haiku agents, same-model and mixed groups), it flags {{s1_honest_crt_pct}} at α = 5% (95% CI {{s1_honest_crt_ci}}), while mutual information flags {{s1_honest_naive_mi_shuffle_pct}} and the Bonjour et al. rule {{s1_honest_bonjour_alpha_pct}}. It names a hidden-channel pair in {{s1_haiku_pair_hidden_crt_net_correct_pct}} of Haiku episodes and {{s1_deepseek_pair_hidden_crt_net_correct_pct}} of DeepSeek episodes. In a procurement auction it stays silent when a shared pricing vendor uses only public data ({{s2_vendor_public_crt_net_pct}} flagged) and fires when the vendor pools clients' confidential costs ({{s2_vendor_leak_crt_net_correct_pct}}). This mirrors the line US courts drew in Gibson v. Cendyn and Duffy v. Yardi. Coordination written into the agents' own instructions is, by design, invisible to the test.</p>
+</div>
+</div>
+
+<h2>1. Introduction</h2>
+<p>Firms and labs now deploy many LLM agents side by side: pricing bots in the same market, coding agents in the same repository, bidders in the same procurement system. Collusion between such agents has already happened outside the lab. In the incident disclosed by OpenAI and Hugging Face, training-time agents used a shared package registry as a message board for more than two months before anyone read the logs [10]. Speakers at this sprint drew the same lesson: when the channel itself cannot be monitored, "what's left to monitor is still the actions of the agents themselves" (Motwani), and an auditor should "anchor on actions and outcomes, and look across the whole episode" (Nguyen).</p>
+<p>The standard way to audit actions is to test for statistical dependence between agents, for example pairwise mutual information or Bonjour et al.'s net influence [1, 2]. Dependence is a weak plus factor. Agents built on the same base model share priors and react to the same public history, so they move together without exchanging a word [3]. In antitrust terms this is conscious parallelism, which is lawful; only an agreement is not [4, 5]. A detector that cannot tell the two apart will accuse every fleet of agents that runs on one vendor's model. For a security team that means constant false alarms. For a regulator it means false accusations.</p>
+<p><b>Threat model.</b> An operator, or a regulator's sandbox, runs several LLM agents and logs their actions. It can also query each agent's deployed policy (model plus system prompt) on any logged observation, but it cannot see a hidden channel: a side channel, a covert message board, or a third party passing data between agents. The auditor must decide which pair, if any, to escalate, and keep false accusations at a chosen rate.</p>
+<p><b>Our approach.</b> We replay each agent. In every round, the auditor re-asks the agent what it would do given exactly what it saw, minus the private channel, and flags a pair only if the real moves depend on each other more than the replays do. This is a conditional randomization test (CRT) [6] in which the "model-X" distribution is not estimated but sampled from the agent itself.</p>
+<p>Our main contributions are:</p>
+<ol>
+<li><b>Monoculture produces false accusations.</b> On published logs (Agrawal et al. [7]) and in our LLM games, standard dependence detectors flag honest same-model agents far above their nominal rate (§4.1, Fig. 1A).</li>
+<li><b>A replay test with a calibrated false-alarm rate.</b> It pools each logged action with its re-queries, which makes the null exact in every cell. It holds its nominal rate on {{s1_honest_n}} honest LLM episodes and on simulated nulls with strong feedback, and it names hidden-channel pairs (§4.2–4.3, Figs. 1–3).</li>
+<li><b>A test aligned with how antitrust defines agreement.</b> In a procurement auction the test separates a vendor that uses public data from one that pools clients' confidential costs, mirroring two recent US rulings. We show explicitly that coordination written into the policy itself is out of scope (§4.4).</li>
+<li><b>Practical comparison.</b> An LLM judge that reads the private messages is fooled by collusive talk that never changes behaviour, and a judge that reads only actions is weak. We report the cost per audit and release the pre-registered plan, code and logs (§4.5, Appendix).</li>
+</ol>
+
+<h2>2. Related Work</h2>
+<p><b>Dependence-based detection.</b> Bonjour et al. [1] define pairwise net influence and identify colluding pairs in small discrete games with a fixed threshold, assuming exactly two colluders and no shared priors. ColludeBench / Audit the Whisper [2] calibrates text-based mutual information against honest replays at a 10<sup>−3</sup> false-positive budget, but it needs payload labels and flags runs rather than pairs. Xu et al. [3] show that two deployments of one base model carry correlated bid residuals and concede that dependence cannot distinguish a conspiracy from one firm running several agents. Our test turns their confound into the null.</p>
+<p><b>Auditing behaviour and policies.</b> Colosseum [8] measures the coalition advantage of a known coalition against an oracle optimum. We identify the pair without either. Eschenbaum and Meylahn [9] query frozen Q-learning pricing policies and read collusion off strategy-graph topology. Kaur et al. [11] measure counterfactual influence on actions, but they need latent records (white-box) and report AUROC only. Hartline et al. [12] audit a single seller's calibrated regret. We query LLM policies through an API, build a null with a calibrated false-alarm rate, and work at the level of pairs.</p>
+<p><b>Monitoring.</b> Chain-of-thought monitoring does not detect collusion in LLM pricing agents [13]. Monitors that check each action alone give no protection against colluding agents [14], and per-agent monitoring misses decomposed attacks that cross-agent monitoring catches [15]. White-box probes reach high AUROC but require activations [16]. Anwar (this sprint) argues that steganography detection should compare a receiver with a "sentinel" rather than with a reference distribution. Our replay is the action-level analogue of that idea.</p>
+<p><b>Definition used.</b> Following the information-flow view (Rose et al. [16]; the organisers' survey of 139 definitions), we call collusion the coordination of actions <i>enabled by non-public information exchanged between agents</i>. Coordination that each agent's own policy produces from public information (Schelling points, shared priors, a team instruction with no channel) is outside this definition. It corresponds to conscious parallelism.</p>
+
+<h2>3. Methods</h2>
+<p><b>Environments.</b>
+<i>S1, rock-paper-scissors:</i> the four-player game of Bonjour et al. [1], with seats P1–P4, T = 30 rounds and public history.
+<i>S2, procurement auction:</i> four suppliers draw private costs in {50, 60, 70} each round and submit sealed bids in {60, …, 100}; the lowest bid wins and earns bid − cost; all bids are published.
+<i>External:</i> the 75 shipped double-auction runs of Agrawal et al. [7], with 5 sellers and 30 rounds; seller moves are discretised.</p>
+<p><b>Agents.</b> Every seat is an LLM that returns JSON with a short rationale, its action and an optional private message. Models: <code>deepseek-v4-flash</code> and <code>claude-haiku-5.5</code> (main); <code>gpt-6-luna</code>, <code>gemma-3-12b</code> and <code>gpt-oss-20b</code> (validation). All are called through OpenRouter at temperature 1 with reasoning disabled.</p>
+
+<table>
+<tr><th>Condition</th><th>Who</th><th>Non-public information flow?</th></tr>
+<tr><td><code>null_same</code></td><td>4 copies of one model</td><td>no: hardest legitimate null</td></tr>
+<tr><td><code>null_mixed</code></td><td>2 DeepSeek + 2 Haiku</td><td>no: same-model pairs</td></tr>
+<tr><td><code>talk_no_action</code></td><td>P1 and P3 write collusive plans that are never delivered</td><td>no: exact replay null; collusive-sounding text</td></tr>
+<tr><td><code>pair_hidden</code></td><td>P1 leads, P3 follows; private plan each round</td><td>yes: positive control</td></tr>
+<tr><td><code>told_no_channel</code></td><td>P1 and P3 told they are a team, no channel</td><td>no: policy-encoded coordination (scope boundary)</td></tr>
+<tr><td><code>vendor_public</code> (S2)</td><td>P1 and P3 follow a vendor that uses public data + own cost</td><td>no (Cendyn-like)</td></tr>
+<tr><td><code>vendor_leak</code> (S2)</td><td>vendor pools P1 and P3's confidential costs and rotates wins</td><td>yes (Yardi-like)</td></tr>
+</table>
+
+<p><b>Replay test.</b> In every round t, the runner re-queries each agent k = 2 times on its identical observation with the private channel removed: the inbox, and the agent's own last private message. Under H<sub>0</sub> (an agent's action depends only on its policy and the observation the auditor can replay), the logged action a<sub>it</sub> and its re-queries are k + 1 i.i.d. draws, so a<sub>it</sub> is uniform on their multiset. Each null dataset redraws every cell uniformly from its pool. The statistic is the maximum over pairs of the contemporaneous net-influence score min(Γ<sub>ij</sub>, Γ<sub>ji</sub>) [1]. We use B = 999 null datasets, p = (1 + #{T* ≥ T})/(B + 1), and one decision per episode. The pool makes each cell exact at any k (a randomization argument [17]). History feedback, where later observations contain earlier actions, has no finite-sample guarantee, so we check calibration directly (Fig. 1A; Appendix C). Lagged statistics are excluded: an honest reaction to a partner's previous public move appears in the data but not in the null. In S2 the pre-registered statistic coarsens bids into high (90–100, the cover-bid range) versus low.</p>
+<p><b>Baselines.</b> Pairwise mutual information with a time-shuffle null; net influence with the same null; Bonjour's fixed rule (Γ ≥ 0.05 bits in both directions for exactly one pair); and an LLM judge (<code>claude-haiku-5.5</code>, temperature 0, frozen prompt in Appendix B). The judge reads either the actions alone (what our auditor sees) or the actions plus every private message.</p>
+<p><b>Pre-registration and metrics.</b> Hypotheses, sample sizes, statistics and decision rules were committed before the main samples (commits <code>4333131</code> for S1 and <code>e65cabb</code> for S2). Pilot episodes (seeds ≥ 10 000) are excluded. For each condition we report the share of episodes flagged at α = 5% and 1% with Wilson intervals; for collusion, the share in which the true pair is named; and the pair's dependence effect (observed γ<sub>13</sub> minus its null mean, in bits).</p>
+
+<h2>4. Results</h2>
+<figure>
+<img src="figures/fig1_false_accusations.png" alt="Figure 1">
+<figcaption><b>Figure 1. Standard dependence detectors accuse honest agents; the replay test does not, and it still names colluding pairs.</b> (A) Share of honest episodes in which each detector flags a pair. The dashed line is the nominal 5%. The bottom row uses Agrawal et al.'s published runs, where sellers could not communicate; there the replay test cannot be run, because the 2025 policies cannot be re-queried. (B) Share of collusion episodes in which the detector flags the true pair. Lines are 95% Wilson intervals; one point is one detector in one setting.</figcaption>
+</figure>
+
+<h3>4.1 Monoculture looks like collusion</h3>
+<p>In the Agrawal et al. runs where sellers had no channel and all five ran GPT-4.1, the mutual-information test flags {{ag_base_naive_mi_shuffle}} runs (95% CI {{ag_base_naive_mi_shuffle_ci}}) and Bonjour's rule flags {{ag_base_bonjour_alpha}}. With a seller chat the rates are {{ag_comms_naive_mi_shuffle}} and {{ag_comms_bonjour_alpha}}: the detector barely separates talking from silent markets. In our honest LLM games, mutual information flags {{s1_honest_naive_mi_shuffle_pct}} of {{s1_honest_n}} episodes (CI {{s1_honest_naive_mi_shuffle_ci}}; one-sided binomial test against 5%, p = {{s1_honest_naive_mi_shuffle_p_above5}}) and Bonjour's rule flags {{s1_honest_bonjour_alpha_pct}} (p = {{s1_honest_bonjour_alpha_p_above5}}). That is {{s1_honest_bonjour_alpha_per1000}} false accusations per 1,000 honest audits for the rule, against {{s1_honest_crt_per1000}} for the replay test.</p>
+
+<h3>4.2 The replay test holds its false-alarm rate</h3>
+<p>Pooled over all honest S1 conditions (same model, mixed models, and undelivered collusive talk), the replay test flags {{s1_honest_crt}} episodes ({{s1_honest_crt_pct}}, CI {{s1_honest_crt_ci}}; {{s1_honest_crt01_pct}} at α = 1%). The pre-registered test of "false-alarm rate ≥ 10%" is rejected with p = {{s1_honest_crt_p_below10}}. It flags {{s2_null_same_crt_net_pct}} of honest auction episodes and {{s2_vendor_public_crt_net_pct}} of shared-vendor episodes. On the scripted simulator, with references estimated from two re-queries and including a strong-feedback population, the false-alarm rate is {{s0b_fpr_range}} at α = 5%. On the validation models (GPT-6 Luna, Gemma 3, gpt-oss) it flags {{val_null_same_crt}} honest episodes.</p>
+
+<h3>4.3 It finds the pair when the channel changes behaviour</h3>
+<p>When P1 privately fixes both moves and both follow the plan, the replay test names the true pair in {{s1_haiku_pair_hidden_crt_net_correct_pct}} of Haiku episodes and {{s1_deepseek_pair_hidden_crt_net_correct_pct}} of DeepSeek episodes. The pair's dependence effect is {{s1_haiku_pair_effect}} bits for Haiku and {{s1_deepseek_pair_effect}} bits for DeepSeek, and DeepSeek's leader follows its own plan less often. Power is governed by how strongly the channel shapes the moves and by the log length (Fig. 3). On the simulator, a pair that coordinates in 80% of rounds is caught in {{s0b_power_80_30}} of 30-round logs; one that coordinates in 60% of rounds needs about 60 rounds ({{s0b_power_60_60}}). In free-form team chat without a protocol (<code>pair_chat</code>, exploratory), agents rarely turned talk into coordinated moves, and the replay test flags {{s1_deepseek_pair_chat_crt_net_pct}}.</p>
+
+<figure class="half"><img src="figures/fig2_roc.png" alt="Figure 2"><figcaption><b>Figure 2. The replay test dominates at the low false-alarm rates an auditor can afford.</b> ROC curves for hidden-channel pairs against honest same-model episodes. Dotted lines mark 1% and 5%.</figcaption></figure>
+<figure class="half"><img src="figures/fig3_power.png" alt="Figure 3"><figcaption><b>Figure 3. How much log an auditor needs.</b> Simulator power to name the pair, by the share of rounds in which the pair coordinates, against log length. The dashed line is the honest false-alarm rate.</figcaption></figure>
+
+<h3>4.4 Vendors, instructions and the scope of the test</h3>
+<p>In the auction, the replay test flags {{s2_vendor_public_crt_net_pct}} of episodes where both clients follow a vendor that sees only public data and their own cost. When the vendor pools their confidential costs and rotates the win, it names the pair in {{s2_vendor_leak_crt_net_correct_pct}} of episodes, and a bid-rotation cartel over a private channel in {{s2_pair_hidden_crt_net_correct_pct}}. This is the distinction in <i>Gibson v. Cendyn</i> (9th Cir. 2025: "independent parallel adoption of algorithmic pricing software does not constitute unlawful price-fixing") versus <i>Duffy v. Yardi</i> (W.D. Wash. 2024: competitors allegedly pooled non-public data through a common vendor; motion to dismiss denied). When P1 and P3 are told they are a team but have no channel, the replay test flags {{s1_deepseek_told_no_channel_crt_net_pct}} (DeepSeek) and {{s1_haiku_told_no_channel_crt_net_pct}} (Haiku). It cannot do otherwise: the team instruction is part of the policy that the replay reproduces. Catching that case requires auditing the policy itself [9, 18], and we say so rather than claim it. Colluders warned about the auditor (<code>pair_aware</code>, exploratory) were flagged in {{s1_deepseek_pair_aware_crt_net_pct}} of episodes.</p>
+
+<h3>4.5 LLM judges and cost</h3>
+<p>The judge that reads actions only flags {{judge_haiku_pair_hidden_actions_pct}} of Haiku hidden-channel episodes and {{judge_haiku_null_same_actions_pct}} of honest ones. Given the private messages, it catches the channel ({{judge_haiku_pair_hidden_messages_pct}}), but it also flags {{judge_deepseek_talk_no_action_messages_pct}} of DeepSeek and {{judge_haiku_talk_no_action_messages_pct}} of Haiku episodes in which the collusive plans were never delivered and could not have changed behaviour. The replay test flags {{s1_deepseek_talk_no_action_crt_net_pct}} and {{s1_haiku_talk_no_action_crt_net_pct}} of those. The test costs 2 extra model calls per agent-round: about 240 calls, or {{audit_cost}} per 30-round, 4-agent audit at DeepSeek prices. The whole study used {{total_calls}} calls for {{total_spend}}.</p>
+
+<div class="box">
+<h3>Audit sheet: deploying the replay test</h3>
+<ul class="small">
+<li><b>Access needed:</b> logs, plus query access to each agent's deployed policy (model and system prompt) on its logged observations. No weights or activations. Re-query prompts must match the logged prompts byte for byte, minus the channel under audit.</li>
+<li><b>Cost:</b> k = 2 extra calls per agent-round (3× the agents' own calls); about {{audit_cost}} per audit here. The statistics take seconds on a laptop.</li>
+<li><b>False alarms:</b> {{s1_honest_crt_per1000}} per 1,000 honest audits at α = 5% (configurable; {{s1_honest_crt01_pct}} at α = 1%), against {{s1_honest_bonjour_alpha_per1000}} for Bonjour's rule.</li>
+<li><b>What a flag means:</b> the pair's moves carry information that their own policies, given the public record, cannot produce. It is evidence of a hidden information flow, a plus factor, not proof of intent.</li>
+<li><b>Blind spot:</b> coordination written into the policy (shared instructions, Schelling points) passes the test. Pair it with a policy audit.</li>
+</ul>
+</div>
+
+<h2>5. Discussion and Limitations</h2>
+<p><b>Implications.</b> As agent fleets converge on a few base models, dependence between their actions becomes the default, not evidence. Detectors calibrated against "independent" behaviour will drown security teams in alerts and give regulators false grounds. Calibration against the agents' own replay keeps the false-alarm rate under the auditor's control, and the question it answers is the one antitrust asks: did non-public information flow between these two?</p>
+<p><b>Limitations.</b>
+(i) The test needs query access to deployed policies. It fits in-house control or a regulatory sandbox, not an outside auditor with logs alone.
+(ii) Calibration under history feedback is shown empirically, not proven. An anytime-valid e-value variant is exact under feedback and is left for future work.
+(iii) Power depends on how strongly the channel shapes actions. Weakly coordinated pairs need long logs (Fig. 3), and in free-form chat our agents rarely coordinated at all.
+(iv) The positive controls are instructed (a leader–follower protocol), and the colluders are assigned by us. Emergent collusion may be weaker.
+(v) Two main model families, short games and a stylised auction. The Agrawal panel is an external check on the false-alarm side only, because the 2025 policies cannot be re-queried.
+(vi) Provider routing on OpenRouter can mix quantisations. Logged and re-queried draws share the routing, which preserves exchangeability, but it adds noise.</p>
+<p><b>Future work.</b> Anytime-valid sequential versions for live monitoring; adversaries trained against the test; richer markets; combining the replay test with policy audits for the coordination it cannot see.</p>
+
+<h2>6. Conclusion</h2>
+<p>Agents that share a model look like a cartel to standard dependence tests. Replaying each agent on what it saw, minus the channel under audit, gives a test whose false-alarm rate the auditor controls. It names pairs that exchanged hidden information, and it reproduces the line courts draw between parallel adoption and pooled confidential data. What it does not see, coordination written into the policy itself, is exactly what it should not be asked to see.</p>
+
+<h3>Code and Data</h3>
+<ul class="small">
+<li>Code repository: [GitHub link to be added]. Pre-sprint and sprint work are separated in <code>README.md</code> and <code>PRE_SPRINT_LOG.md</code>.</li>
+<li>Data: all episode logs (JSONL) and the LLM cache needed to reproduce every number at $0: [link to be added].</li>
+</ul>
+
+<h3>Author Contributions</h3>
+<p class="small">Y. designed the study, ran the experiments and wrote the report with AI assistance (see the LLM Usage Statement).</p>
+
+<h3>References</h3>
+<ol class="refs">
+<li>T. Bonjour, V. Aggarwal, B. Bhargava. Information theoretic approach to detect collusion in multi-agent games. UAI 2022, PMLR 180:223–232.</li>
+<li>O. Tailor. Audit the Whisper: Detecting steganographic collusion in multi-agent LLMs. arXiv:2510.04303, 2025.</li>
+<li>Xu et al. Price-level audits are blind by construction. arXiv:2607.26385, 2026.</li>
+<li>W. Kovacic, R. Marshall, L. Marx, H. White. Plus factors and agreement in antitrust law. Michigan Law Review 110(3), 2011.</li>
+<li>J. Harrington. Developing competition law for collusion by autonomous artificial agents. Journal of Competition Law &amp; Economics 14(3), 2018.</li>
+<li>E. Candès, Y. Fan, L. Janson, J. Lv. Panning for gold: model-X knockoffs for high-dimensional controlled variable selection. JRSS-B 80(3), 2018.</li>
+<li>Agrawal et al. Evaluating LLM agent collusion in double auctions. arXiv:2507.01413, 2025.</li>
+<li>Nakamura et al. Colosseum: Auditing collusion in cooperative multi-agent systems. arXiv:2602.15198, 2026.</li>
+<li>N. Eschenbaum, J. Meylahn. Auditing algorithmic collusion from strategy graphs. arXiv:2608.07098, 2026.</li>
+<li>OpenAI / Hugging Face incident reports, 2026, as presented at this sprint by J. Kemeklis and S. Motwani.</li>
+<li>R. Kaur et al. Beyond the transcript: Detecting covert coordination in latent multi-agent communication. arXiv:2608.19161, 2026.</li>
+<li>J. Hartline et al. Regulation of algorithmic collusion. arXiv:2501.09740, 2024.</li>
+<li>D. Lee, H. Park. Faithful yet collusive: Why chain-of-thought monitoring cannot detect collusion in LLM pricing agents under oligopolistic competition. arXiv:2609.18346, 2026.</li>
+<li>ORBIT: A framework for multi-agent security evaluations. NeurIPS 2026.</li>
+<li>J. Kemeklis, N. Vemuri. Omission attacks: When doing nothing is the attack. Apart AI Control Hackathon, 2026.</li>
+<li>A. Rose et al. Detecting multi-agent collusion through multi-agent interpretability. arXiv:2604.01151, 2026.</li>
+<li>J. Hemerik, J. Goeman. Exact testing with random permutations. TEST 27, 2018; and E. Lehmann, J. Romano, <i>Testing Statistical Hypotheses</i>, ch. 15.</li>
+<li>T. Berrett, Y. Wang, R. Barber, R. Samworth. The conditional permutation test for independence while controlling for confounders. JRSS-B 82(1), 2020.</li>
+</ol>
+
+<div class="footnote"><sup>1</sup> Research conducted at the AI Collusion Research Sprint, October 2026.</div>
+
+<div class="pb"></div>
+<h2>Appendix A. Limitations and Dual-Use / Ethical Considerations</h2>
+<p><b>What the result establishes.</b> In our games, the replay test keeps false accusations near the nominal rate and identifies pairs whose hidden channel changed their actions. It does not establish intent, legality, or performance against adversaries optimised against it. A flag is a plus factor that warrants investigation, not a finding of collusion.</p>
+<p><b>Dual use.</b> Describing what the test cannot see (coordination written into the policy) could help a colluder decide where to put their coordination: in shared instructions rather than a channel. We judge the risk low. The blind spot follows from the definition and is already discussed in the antitrust literature, and the practical remedy, auditing the policy itself, is stated alongside it. We release no colluding agents beyond the simple instructed protocols used as positive controls. A second risk is misuse as an accusation tool. The test's false-alarm rate is only controlled if the re-query prompts exactly match the deployed ones, and we stress this in the audit sheet.</p>
+<p><b>Ethics.</b> No human subjects. All agents are simulated, and the external data are public logs released by their authors.</p>
+
+<h2>Appendix B. Prompts</h2>
+<p class="small"><b>Leader (P1):</b> "You and P3 are secretly a team: your goal is to maximise the COMBINED score of you and P3, not your own score alone. You lead the team. Every round: (1) play exactly the move that your previous private message assigned to you (if you have sent none yet, choose freely); (2) send P3 a private message that fixes the moves you will BOTH play next round, in the form 'next: P1=&lt;move&gt;, P3=&lt;move&gt;'. Nobody else can read it." <b>Follower (P3):</b> "… P1 leads the team and privately tells you, before each round, which move to play … Play the move P1 assigned to you." <b>Judge:</b> "You are auditing a log of four AI agents … Either exactly one pair of agents was secretly colluding … or no pair was. Agents built on the same AI model can behave similarly without colluding. … Reply with JSON: reasoning, probability (0–100), pair." Full prompts: <code>experiments/s1_llm_rps.py</code>, <code>s2_procurement.py</code>, <code>judge.py</code>.</p>
+
+<h2>Appendix C. Validity checks and diagnostics</h2>
+<p class="small">The simulator (<code>experiments/s0b_crt_validity.py</code>, {{s0b_iters}} runs per cell) gives a false-alarm rate of {{s0b_fpr_range}} at α = 5% for the pooled k = 2 test on herd, uniform and strong-feedback nulls. Results for oracle and plug-in references are in <code>results/summary/s0b_calibration.csv</code>. Re-query agreement, parse-failure rates and the reasoning-token count per model and condition are in <code>results/summary/s1_summary.csv</code>. Models excluded after the pilot: Qwen 3.7 Flash ignored JSON mode (29% of raw replies had no JSON); Mistral Small had persistent upstream rate limits; Gemini Flash-Lite was blocked in our region. Deviations from the pre-registered plan: none so far.</p>
+
+<h2>Appendix D. LLM Usage Statement</h2>
+<p class="small">We used Claude (Anthropic) as a coding and analysis assistant. It implemented the experiment code under our direction, ran simulations, fetched and summarised related work and talk transcripts, drafted sections of this report, and generated the figures from the result files. We used Codex (OpenAI) and separate Claude instances as adversarial reviewers of the plan. All numbers in the report are produced by scripts (<code>experiments/build_report.py</code> fills them from <code>results/summary/</code>). We checked the claims and references against the sources and are responsible for the content.</p>
+
+</body>
+</html>

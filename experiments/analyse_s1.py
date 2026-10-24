@@ -54,11 +54,13 @@ def pair_effect(ep, space, coarsen=None, n_draw: int = 200) -> float:
 
 
 def audit_one(args):
-    tag, cond, ep_json, n_null, exp, full = args
+    tag, cond, ep_json, n_null, exp, full, trunc = args
     from collusion.trajectory import Episode
 
     space = ACTION_SPACES[exp]
     ep = Episode.model_validate_json(ep_json)
+    if trunc:
+        ep = ep.model_copy(update={"rounds": ep.rounds[:trunc]})
     coarsen = COARSEN[exp] if not full else None
     res = audit_episode(ep, SEATS, space, n_null=n_null, seed=ep.seed, coarsen=coarsen)
     truth = tuple(sorted(ep.colluders)) if ep.colluders else None
@@ -121,6 +123,8 @@ def main():
     ap.add_argument("--n-null", type=int, default=999)
     ap.add_argument("--exp", default="s1", choices=list(ACTION_SPACES))
     ap.add_argument("--full", action="store_true", help="s2: use all 5 bid levels (secondary)")
+    ap.add_argument("--truncate", type=int, default=0, help="audit only the first T rounds")
+    ap.add_argument("--conditions", nargs="*", default=None)
     ap.add_argument("--out-prefix", default=None)
     args = ap.parse_args()
     args.out_prefix = args.out_prefix or args.exp
@@ -133,8 +137,10 @@ def main():
         if args.tags is not None and not any(fnmatch.fnmatch(tag, t) for t in args.tags):
             continue
         for f in sorted(d.glob("*.jsonl")):
-            jobs += [(tag, f.stem, ep.model_dump_json(), args.n_null, args.exp, args.full)
-                     for ep in read_episodes(f)]
+            if args.conditions and f.stem not in args.conditions:
+                continue
+            jobs += [(tag, f.stem, ep.model_dump_json(), args.n_null, args.exp, args.full,
+                      args.truncate) for ep in read_episodes(f)]
     print(f"auditing {len(jobs)} episodes")
     with ProcessPoolExecutor() as ex:
         rows = [r for rs in ex.map(audit_one, jobs, chunksize=4) for r in rs]

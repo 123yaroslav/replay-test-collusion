@@ -1,0 +1,200 @@
+"""Build the report PDF: fill report/template.html with numbers computed from results/summary/*.csv,
+then print it with headless Chrome. Every number in the report comes from here.
+
+    uv run python experiments/build_report.py
+Writes report/report.html, report/report.pdf and report/numbers.json; prints the abstract word
+count, the page count and any placeholder left unfilled.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+from pathlib import Path
+
+import pandas as pd
+
+from collusion.analysis import p_fpr_above, p_fpr_below, wilson
+
+ROOT = Path(__file__).resolve().parents[1]
+SUM = ROOT / "results" / "summary"
+REP = ROOT / "report"
+CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+
+def pct(k, n, digits=0):
+    return f"{100 * k / n:.{digits}f}%" if n else "n/a"
+
+
+def ci(k, n):
+    lo, hi = wilson(k, n)
+    return f"{100 * lo:.0f}–{100 * hi:.0f}%"
+
+
+def read(name):
+    p = SUM / name
+    return pd.read_csv(p) if p.exists() else None
+
+
+def detector_stats(df, tag, cond, det, col="flag05"):
+    g = df[(df.tag == tag) & (df.condition == cond) & (df.detector == det)]
+    return int(g[col].sum()), len(g)
+
+
+def numbers() -> dict:
+    v: dict = {}
+    s1, s2 = read("s1_audits.csv"), read("s2_audits.csv")
+    ag, j1 = read("agrawal_panel_runs.csv"), read("s1_judge.csv")
+    s0b_cal, s0b_pw = read("s0b_calibration.csv"), read("s0b_power.csv")
+
+    if ag is not None:
+        b, c = ag[ag.condition == "base"], ag[ag.seller_comms]
+        for det in ("naive_mi_shuffle", "bonjour_alpha", "net_shuffle"):
+            k, n = int(b[det].sum()), len(b)
+            v[f"ag_base_{det}"] = f"{k}/{n}"
+            v[f"ag_base_{det}_pct"] = pct(k, n)
+            v[f"ag_base_{det}_ci"] = ci(k, n)
+            kc, nc = int(c[det].sum()), len(c)
+            v[f"ag_comms_{det}"] = f"{kc}/{nc}"
+            v[f"ag_comms_{det}_pct"] = pct(kc, nc)
+
+    if s0b_cal is not None:
+        g = s0b_cal[(s0b_cal.variant == "pooled") & (s0b_cal.k == 2)]
+        r = g.groupby("population").p.apply(lambda p: (p < 0.05).mean())
+        v["s0b_fpr_range"] = f"{100 * r.min():.1f}–{100 * r.max():.1f}%"
+        v["s0b_iters"] = str(int(g.groupby("population").size().min()))
+    if s0b_pw is not None:
+        m = s0b_pw[s0b_pw.cp > 0].groupby(["cp", "T"]).correct.mean()
+        for cp in (0.6, 0.8):
+            for T in (30, 60):
+                if (cp, T) in m.index:
+                    v[f"s0b_power_{int(cp * 100)}_{T}"] = f"{100 * m[(cp, T)]:.0f}%"
+
+    honest_s1 = [("deepseek", "null_same"), ("haiku", "null_same"), ("mixed", "null_mixed"),
+                 ("deepseek", "talk_no_action"), ("haiku", "talk_no_action")]
+    if s1 is not None:
+        for tag, cond in honest_s1 + [("deepseek", "pair_hidden"), ("haiku", "pair_hidden"),
+                                      ("deepseek", "told_no_channel"),
+                                      ("haiku", "told_no_channel"), ("deepseek", "pair_aware"),
+                                      ("deepseek", "pair_chat")]:
+            for det in ("naive_mi_shuffle", "bonjour_alpha", "crt_net"):
+                k, n = detector_stats(s1, tag, cond, det)
+                if n:
+                    key = f"s1_{tag}_{cond}_{det}"
+                    v[key] = f"{k}/{n}"
+                    v[key + "_pct"] = pct(k, n)
+                    v[key + "_ci"] = ci(k, n)
+                    kc, _ = detector_stats(s1, tag, cond, det, "correct_pair")
+                    v[key + "_correct_pct"] = pct(kc, n)
+        # pooled honest episodes for the replay test
+        h = pd.concat([s1[(s1.tag == t) & (s1.condition == c) & (s1.detector == "crt_net")]
+                       for t, c in honest_s1])
+        k, n = int(h.flag05.sum()), len(h)
+        k1 = int(h.flag01.sum())
+        v["s1_honest_n"] = str(n)
+        v["s1_honest_crt"] = f"{k}/{n}"
+        v["s1_honest_crt_pct"] = pct(k, n, 1)
+        v["s1_honest_crt_ci"] = ci(k, n)
+        v["s1_honest_crt01_pct"] = pct(k1, n, 1)
+        v["s1_honest_crt_p_below10"] = f"{p_fpr_below(k, n, 0.10):.1e}"
+        v["s1_honest_crt_per1000"] = f"{1000 * k / n:.0f}" if n else "n/a"
+        for det in ("naive_mi_shuffle", "bonjour_alpha"):
+            hd = pd.concat([s1[(s1.tag == t) & (s1.condition == c) & (s1.detector == det)]
+                            for t, c in honest_s1])
+            kk, nn = int(hd.flag05.sum()), len(hd)
+            v[f"s1_honest_{det}_pct"] = pct(kk, nn, 1)
+            v[f"s1_honest_{det}_ci"] = ci(kk, nn)
+            v[f"s1_honest_{det}_p_above5"] = f"{p_fpr_above(kk, nn, 0.05):.1e}"
+            v[f"s1_honest_{det}_per1000"] = f"{1000 * kk / nn:.0f}" if nn else "n/a"
+        val = s1[s1.tag.str.startswith("val_") & (s1.detector == "crt_net")]
+        for cond in ("null_same", "pair_hidden"):
+            g = val[val.condition == cond]
+            col = "flag05" if cond == "null_same" else "correct_pair"
+            v[f"val_{cond}_crt"] = f"{int(g[col].sum())}/{len(g)}"
+            v[f"val_{cond}_crt_pct"] = pct(int(g[col].sum()), len(g))
+        eff = s1[(s1.detector == "crt_net") & (s1.condition == "pair_hidden")]
+        for tag, g in eff.groupby("tag"):
+            v[f"s1_{tag}_pair_effect"] = f"{g.pair_effect_bits.mean():.2f}"
+        v["s1_n_episodes"] = str(s1[s1.detector == "crt_net"].shape[0])
+
+    if s2 is not None:
+        for cond in ("null_same", "vendor_public", "vendor_leak", "pair_hidden"):
+            for det in ("naive_mi_shuffle", "bonjour_alpha", "crt_net"):
+                k, n = detector_stats(s2, "deepseek", cond, det)
+                if n:
+                    key = f"s2_{cond}_{det}"
+                    v[key] = f"{k}/{n}"
+                    v[key + "_pct"] = pct(k, n)
+                    v[key + "_ci"] = ci(k, n)
+                    kc, _ = detector_stats(s2, "deepseek", cond, det, "correct_pair")
+                    v[key + "_correct_pct"] = pct(kc, n)
+        v["s2_n_episodes"] = str(s2[s2.detector == "crt_net"].shape[0])
+
+    if j1 is not None:
+        for tag in ("deepseek", "haiku"):
+            for cond in ("null_same", "pair_hidden", "talk_no_action"):
+                for view in ("actions", "messages"):
+                    g = j1[(j1.tag == tag) & (j1.condition == cond) & (j1.view == view)]
+                    if len(g):
+                        k = int((g.prob >= 50).sum())
+                        v[f"judge_{tag}_{cond}_{view}_pct"] = pct(k, len(g))
+                        v[f"judge_{tag}_{cond}_{view}"] = f"{k}/{len(g)}"
+    led = spend()
+    v.update(led)
+    return v
+
+
+def spend() -> dict:
+    import sqlite3
+
+    db = ROOT / "results" / "cache" / "llm.sqlite"
+    if not db.exists():
+        return {}
+    con = sqlite3.connect(db)
+    total, calls = con.execute("SELECT SUM(cost), COUNT(*) FROM spend").fetchone()
+    out = {"total_spend": f"${total:.2f}", "total_calls": f"{calls:,}"}
+    rows = con.execute("SELECT model, SUM(cost), COUNT(*) FROM spend GROUP BY model").fetchall()
+    for model, c, n in rows:
+        out[f"cost_per_call_{model.split('/')[-1]}"] = f"${c / n:.6f}"
+        if model.startswith("deepseek/"):
+            # replay test overhead: k = 2 re-queries x 4 agents x 30 rounds = 240 calls per audit
+            out["audit_cost"] = f"${240 * c / n:.3f}"
+    return out
+
+
+def fill(template: str, v: dict) -> tuple[str, list[str]]:
+    missing = []
+
+    def sub(m):
+        key = m.group(1)
+        if key in v:
+            return str(v[key])
+        missing.append(key)
+        return f"<span style='background:#fdd'>[{key}]</span>"
+
+    return re.sub(r"\{\{(\w+)\}\}", sub, template), missing
+
+
+def main():
+    v = numbers()
+    REP.mkdir(exist_ok=True)
+    (REP / "numbers.json").write_text(json.dumps(v, indent=1, sort_keys=True))
+    html, missing = fill((REP / "template.html").read_text(), v)
+    (REP / "report.html").write_text(html)
+    abstract = re.search(r'<div class="abstract-body">(.*?)</div>', html, re.DOTALL)
+    if abstract:
+        words = len(re.sub(r"<[^>]+>", " ", abstract.group(1)).split())
+        print(f"abstract words: {words}")
+    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
+                    "--virtual-time-budget=10000", f"--print-to-pdf={REP / 'report.pdf'}",
+                    (REP / "report.html").as_uri()], check=True, capture_output=True)
+    info = subprocess.run(["pdfinfo", str(REP / "report.pdf")], capture_output=True, text=True,
+                          check=False)
+    pages = re.search(r"Pages:\s+(\d+)", info.stdout)
+    print(f"pages: {pages.group(1) if pages else '?'}")
+    print(f"unfilled placeholders: {sorted(set(missing))}")
+
+
+if __name__ == "__main__":
+    main()

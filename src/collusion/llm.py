@@ -277,9 +277,9 @@ class LLM:
                 raise  # malformed request or unsupported parameter: retrying will not help
             except (openai.AuthenticationError, openai.PermissionDeniedError):
                 raise
-            except openai.RateLimitError:
-                # upstream 429s can last minutes: up to 30 waits of at most 60 s each, not counted
-                # against the ordinary retry budget
+            except (openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError):
+                # upstream 429s and network blips can last minutes: up to 30 waits of at most
+                # 60 s each, not counted against the ordinary retry budget
                 rate_hits += 1
                 if rate_hits > 30:
                     raise
