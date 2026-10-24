@@ -1,0 +1,14 @@
+detector                                 crt_net           seq       
+k                                              1      2      1      2
+exp tag      condition      metric                                   
+s1  deepseek null_same      false_alarm    0.033  0.040  0.000  0.000
+             pair_hidden    correct_pair   0.075  0.100  0.000  0.000
+             talk_no_action false_alarm    0.067  0.067  0.000  0.000
+    haiku    null_same      false_alarm    0.040  0.040  0.000  0.000
+             pair_hidden    correct_pair   0.375  0.350  0.725  0.825
+             talk_no_action false_alarm    0.050  0.075  0.000  0.000
+    mixed    null_mixed     false_alarm    0.020  0.027  0.000  0.007
+s2  deepseek null_same      false_alarm    0.000  0.010  0.000  0.000
+             pair_hidden    correct_pair   0.575  0.575  0.025  0.050
+             vendor_leak    correct_pair   0.925  0.925  0.275  0.450
+             vendor_public  false_alarm    0.017  0.017  0.000  0.000

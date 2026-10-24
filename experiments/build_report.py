@@ -267,6 +267,16 @@ def numbers() -> dict:
         hs = s0d[s0d.setup.str.endswith("honest") & (s0d.detector == "seq")]
         v["s0d_seq_honest_max"] = f"{100 * hs.flag.max():.0f}%"
         v["s0d_honest_worst"] = f"{100 * worst.flag:.1f}%"
+    kq = read("k_requeries_summary.csv")
+    if kq is not None:
+        for _, r in kq.iterrows():
+            v[f"kq_{r.exp}_{r.tag}_{r.condition}_{r.detector}_k{r.k}"] = pct(round(r.rate * r.n), int(r.n))
+        hon = kq[kq.metric == "false_alarm"]
+        for det in ("crt_net", "seq"):
+            for k in (1, 2):
+                h = hon[(hon.detector == det) & (hon.k == k)]
+                kk, n = int((h.rate * h.n).round().sum()), int(h.n.sum())
+                v[f"kq_honest_{det}_k{k}"] = pct(kk, n, 1)
     ex = read("exchangeability.csv")
     if ex is not None:
         v["exch_max_abs"] = f"{ex['diff'].abs().max():.3f}"

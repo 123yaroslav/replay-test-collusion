@@ -31,8 +31,8 @@ val_gpt-6-luna     null_same       actions    40     33.800   0.025   1.000
                                    messages   40     33.800   0.025   1.000
                    pair_hidden     actions    20     33.600   0.050   1.000
                                    messages   20     90.950   1.000   1.000
-val_gpt-oss-20b    null_same       actions    40     36.875   0.100   1.000
-                                   messages   40     36.625   0.100   1.000
+val_gpt-oss-20b    null_same       actions    40     36.375   0.050   1.000
+                                   messages   40     36.375   0.050   1.000
                    pair_hidden     actions    20     39.750   0.150   1.000
                                    messages   20     90.550   1.000   1.000
-{"summary": "120 live calls, 1760 cached, this process $0.026; global $42.323 of $45.00 cap; reasoning leaks 0"}
+{"summary": "0 live calls, 1880 cached, this process $0.000; global $42.333 of $45.00 cap; reasoning leaks 0"}

@@ -28,29 +28,35 @@ The sprint rules require pre-existing work to be marked. The full dated list is 
 | Replay-test idea and first implementation: CRT via post-hoc LLM policy re-querying (k = 8, reference distribution, not pooled with the logged action) and the first LLM RPS script; both run only with fake replies | All LLM experiments: S1 RPS, S2 procurement auction, LLM judge, analysis, figures |
 | Generic N-agent game runner; research briefing and answers to every sprint question, literature notes, reading list, analysis of past winners with a submission checklist, question selection, plan (`docs/answers.md`, `docs/plan.md`, `docs/literature/`, `docs/reading.md`, `docs/winning_rules.md`) | Pre-registered analysis plan (`docs/analysis_plan.md`, frozen in commits `4333131` and `e65cabb`), report |
 
+## Audit your own agents in 3 steps
+
+1. **Log replays.** In every round, keep each agent's action. Then ask the same deployed policy
+   again, k times, on the identical observation with the audited channel removed (same prompt
+   byte for byte, minus the inbox and the agent's own outgoing private message). Store the
+   answers under `requery`. We used k = 2; for the fixed-horizon test k = 1 lost little in our
+   data at half the cost, while the sequential test benefits from k = 2.
+   ```json
+   {"episode_id": "run-1", "rounds": [
+     {"actions": {"A": "rock", "B": "paper", "C": "rock"},
+      "requery": {"A": ["rock", "scissors"], "B": ["paper", "paper"], "C": ["rock", "paper"]}}]}
+   ```
+2. **Run the audit.**
+   ```bash
+   uv run python examples/audit_your_logs.py my_logs.jsonl   # no argument: a toy log with a planted pair
+   ```
+   or in Python: `from collusion.audit import audit; audit("my_logs.jsonl", statistic="net")`.
+   Use `statistic="mi"` if a coalition of three or more agents is possible (net influence cancels
+   inside a coalition), and `coarsen={...}` to bin many-valued actions such as prices.
+3. **Read the result.** `flag=True` means the named pair's actions depend on each other more than
+   their own replays, given what you logged, plausibly allow at level α (default 5%). It is a
+   screening signal and a plus factor, not proof of intent. `seq_alarm_round` is the round at
+   which the anytime-valid version would have stopped. Coordination written into the agents'
+   shared instructions is invisible to the test by design, so pair it with a policy audit.
+
 ## Reproduce
 
-```bash
-uv sync && cp .env.example .env          # add OPENROUTER_API_KEY
-uv run pytest -q
-
-# $0: simulator validity/power, external panel on Agrawal et al. logs
-uv run python experiments/s0b_crt_validity.py
-git clone --depth 1 https://github.com/andyjliu/llm-agent-collusion third_party/llm-agent-collusion
-uv run python experiments/agrawal_panel.py
-
-# LLM experiments (exact commands and sample sizes: results/logs/run_main_s1.sh, run_main_s2.sh)
-./results/logs/run_main_s1.sh
-./results/logs/run_main_s2.sh
-uv run python experiments/analyse_s1.py --exp s1
-uv run python experiments/analyse_s1.py --exp s2
-uv run python experiments/judge.py --tags deepseek haiku mixed --views actions messages --out s1_judge
-uv run python experiments/make_figures.py
-```
-
-Every LLM call is cached in `results/cache/llm.sqlite`, so with the cache a rerun costs $0 and is
-bit-identical. Episode logs (JSONL) are released separately (see the report's Code and Data
-section).
+All numbers, figures and the report come from one script and the released cache, at $0:
+`./results/logs/run_analysis.sh`. Details, timing and the from-scratch route: [`REPRODUCE.md`](REPRODUCE.md).
 
 ## Layout
 

@@ -1,8 +1,10 @@
 #!/bin/zsh
 # Post-run pipeline: every number and figure in the report is produced here.
 set -e
-cd "/Users/yaroslav/Desktop/apart research/AI Collusion Research Sprint"
+cd "$(dirname "$0")/../.."
 export COLLUSION_MAX_CONCURRENCY=40
+# external panel on Agrawal et al.'s shipped logs (needs third_party/llm-agent-collusion, see REPRODUCE.md)
+if [ -d third_party/llm-agent-collusion ]; then uv run python experiments/agrawal_panel.py > results/logs/analysis_agrawal.txt; fi
 uv run python experiments/analyse_s1.py --exp s1 > results/logs/analysis_s1.txt
 uv run python experiments/analyse_s1.py --exp s2 > results/logs/analysis_s2.txt
 uv run python experiments/analyse_s1.py --exp s2 --full --out-prefix s2_full > results/logs/analysis_s2_full.txt
@@ -29,6 +31,8 @@ uv run python experiments/judge.py --tags deepseek haiku mixed "val_*" --views a
 #   judge.py --tags deepseek haiku --conditions null_same pair_hidden talk_no_action --max-per-condition 20
 #            --views actions messages --judge openai/gpt-6.1-sol --reasoning low --max-tokens 2000 --out s1_judge_strong
 uv run python experiments/exchangeability.py > results/logs/analysis_exchangeability.txt
+uv run python experiments/s0d_coalition.py > results/logs/analysis_s0d.txt
+uv run python experiments/k_requeries.py > results/logs/analysis_k_requeries.txt
 # pre-registered confirmatory replication (docs/confirmatory_plan.md)
 uv run python experiments/analyse_s1.py --tags confirm_haiku --out-prefix confirm > results/logs/analysis_confirm.txt
 uv run python experiments/confirm_sequential.py >> results/logs/analysis_confirm.txt
