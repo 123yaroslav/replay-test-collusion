@@ -61,6 +61,13 @@ def main():
     checks.append(("s1_honest_crt_pct", f"{100 * hon.flag05.mean():.1f}%", len(hon)))
 
     bad = 0
+    # abstract length under the strictest count (hyphens, dashes and slashes split words)
+    import re
+    ab = (REP / "abstract_for_form.txt").read_text()
+    strict = len([w for w in re.split(r"[\s\-–—/]+", ab) if re.search(r"\w", w)])
+    ok_ab = 150 <= len(ab.split()) and strict <= 250
+    bad += not ok_ab
+    print(f"{'OK ' if ok_ab else 'BAD'} abstract words: {len(ab.split())} plain, {strict} strict (limit 150-250)")
     for key, mine, n in checks:
         theirs = str(v.get(key))
         in_pdf = theirs in pdf

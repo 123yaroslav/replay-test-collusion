@@ -322,7 +322,8 @@ def main():
     d, abstract, missing = render((REP / "content.md").read_text(), v)
     OUT_DOCX.parent.mkdir(parents=True, exist_ok=True)
     d.save(str(OUT_DOCX))
-    print(f"abstract words: {len(abstract.split())}")
+    strict = len([w for w in re.split(r"[\s\-–—/]+", abstract) if re.search(r"\w", w)])
+    print(f"abstract words: {len(abstract.split())} (strict, hyphens and dashes split: {strict})")
     # plain-text abstract for the submission form's "Project summary" field
     plain = re.sub(r"[*`~^]", "", abstract)
     (REP / "abstract_for_form.txt").write_text(plain + "\n")
