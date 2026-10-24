@@ -78,7 +78,7 @@ def fill(text: str, v: dict, missing: list) -> str:
         missing.append(m.group(1))
         return f"[{m.group(1)}]"
 
-    return re.sub(r"\{\{(\w+)\}\}", sub, text)
+    return re.sub(r"\{\{([^{}]+)\}\}", sub, text)
 
 
 # ---------------------------------------------------------------- template surgery ------
@@ -318,6 +318,9 @@ def main():
     OUT_DOCX.parent.mkdir(parents=True, exist_ok=True)
     d.save(str(OUT_DOCX))
     print(f"abstract words: {len(abstract.split())}")
+    # plain-text abstract for the submission form's "Project summary" field
+    plain = re.sub(r"[*`~^]", "", abstract)
+    (REP / "abstract_for_form.txt").write_text(plain + "\n")
     script = f'''with timeout of 180 seconds
 tell application "Pages"
   set doc to open POSIX file "{OUT_DOCX}"

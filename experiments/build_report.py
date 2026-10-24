@@ -234,8 +234,22 @@ def numbers() -> dict:
                 k, n = detector_stats(s1, tag, cond, "crt_net",
                                       "flag05" if cond == "null_same" else "correct_pair")
                 if n:
-                    v[f"{tag}_{cond}_crt"] = f"{k}/{n}"
-                    v[f"{tag}_{cond}_crt_ci"] = ci(k, n)
+                    key = re.sub(r"\W", "_", tag)  # placeholder names are \w only
+                    v[f"{key}_{cond}_crt"] = f"{k}/{n}"
+                    v[f"{key}_{cond}_crt_ci"] = ci(k, n)
+    conf = SUM / "confirm_results.json"
+    if conf.exists():
+        import json as _json
+        c = _json.loads(conf.read_text())
+        v["conf_c1"] = f"{c['c1_seq_correct']}/{c['c1_n']}"
+        v["conf_c1_crt"] = f"{c['c1_crt_correct']}/{c['c1_n']}"
+        v["conf_c1_p"] = f"{c['c1_p_mcnemar_one_sided']:.3f}"
+        v["conf_c1_round"] = f"{c['c1_median_round']:.0f}" if c["c1_median_round"] is not None else "–"
+        v["conf_c2"] = f"{c['c2_seq_alarms']}/{c['c2_n']}"
+        v["conf_c2_p"] = f"{c['c2_p_fpr_below10']:.3f}"
+        v["conf_sec_crt"] = f"{c['sec_crt_null_flags']}/{c['c2_n']}"
+        v["conf_c1_verdict"] = "supported" if c["c1_supported"] else "not supported"
+        v["conf_c2_verdict"] = "supported" if c["c2_supported"] else "not supported"
     seq_sim = read("s0c_sequential.csv")
     if seq_sim is not None:
         honest = seq_sim[~seq_sim.population.str.startswith("pair")]
@@ -319,7 +333,7 @@ def fill(template: str, v: dict) -> tuple[str, list[str]]:
         missing.append(key)
         return f"<span style='background:#fdd'>[{key}]</span>"
 
-    return re.sub(r"\{\{(\w+)\}\}", sub, template), missing
+    return re.sub(r"\{\{([^{}]+)\}\}", sub, template), missing
 
 
 def main():

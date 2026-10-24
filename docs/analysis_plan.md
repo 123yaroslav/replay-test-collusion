@@ -140,3 +140,6 @@ prompt) applied to its logged observation **with the private inbox removed**.
    - A team-advantage analysis (`collusion_gain.py`).
    - An example-episode table (`example_episode.py`).
    - None of these changes a pre-registered decision rule.
+5. **Correction to item 3 (sample size of the stronger judge).** Budget allowed 20 episodes per cell, not 40. The first pass with `max_tokens` 400 parsed only 56% of replies, and failures clustered on honest episodes. We reran all calls with `max_tokens` 2000 (same prompt, temperature 0), which parsed at least 19 of 20 per cell. Only the rerun is reported.
+6. **Fix in the exploratory sequential test (found by the Codex review).** `sequential_replay_test` named the pair with the largest *final* e-value. It now names the pair with the largest e-value at the round the alarm fires, i.e. with the information the auditor has when stopping. All sequential results were recomputed: Haiku pairs named 85% → 82.5%, vendor leak 50% → 45%. The rejection decision itself is unchanged.
+7. **Report-only additions after the reviews.** Recall at a fixed false-alarm budget (Table A1), bootstrap CIs for AUROC, and Fisher's exact test for the two Agrawal conditions. These are computed from the frozen statistics; no new data were collected for them.
