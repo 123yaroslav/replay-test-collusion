@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from scipy import stats
 
@@ -43,9 +44,16 @@ def main():
                          "seq_correct": r["reject_round"] is not None and truth is not None
                          and tuple(r["top"]) == truth})
     seq = pd.DataFrame(rows)
+    # sample enforcement (plan addendum): exactly the pre-registered seeds, nothing else
+    for cond, start, n in (("pair_hidden", 270_000, 20), ("null_same", 70_000, 40)):
+        got = sorted(seq[seq.condition == cond].seed)
+        assert got == list(range(start, start + n)), f"{cond}: seeds {got[:3]}... n={len(got)}"
+    assert set(seq.condition) == {"pair_hidden", "null_same"}, set(seq.condition)
     aud = pd.read_csv(SUM / "confirm_audits.csv")
     crt = aud[aud.detector == "crt_net"][["condition", "seed", "flag05", "correct_pair"]]
     df = seq.merge(crt, on=["condition", "seed"], how="left", validate="one_to_one")
+    assert df[["flag05", "correct_pair"]].notna().all().all(), "missing fixed-horizon audits"
+    df["flag05"], df["correct_pair"] = df.flag05.astype(bool), df.correct_pair.astype(bool)
     df.to_csv(SUM / "confirm_sequential.csv", index=False)
 
     out = {}
@@ -60,6 +68,11 @@ def main():
     out["c1_p_mcnemar_one_sided"] = (float(stats.binomtest(b, b + c, 0.5, "greater").pvalue)
                                      if b + c else 1.0)
     out["c1_supported"] = out["c1_p_mcnemar_one_sided"] < 0.05
+    rng = np.random.default_rng(0)
+    d = (pos.seq_correct.astype(int) - pos.correct_pair.astype(int)).to_numpy()
+    boots = [rng.choice(d, len(d)).mean() for _ in range(5000)]
+    out["c1_diff"] = float(d.mean())
+    out["c1_diff_ci"] = (float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5)))
     out["c1_median_round"] = float(pos.seq_round.median()) if pos.seq_reject.any() else None
     # C2: false alarms of the sequential test on fresh honest episodes
     k, n = int(neg.seq_reject.sum()), len(neg)
@@ -70,6 +83,7 @@ def main():
     # secondary, descriptive: fixed-horizon test on the same fresh honest episodes
     out["sec_crt_null_flags"] = int(neg.flag05.sum())
     out["sec_crt_null_ci"] = wilson(int(neg.flag05.sum()), n)
+    out["replication_successful"] = bool(out["c1_supported"] and out["c2_supported"])
     (SUM / "confirm_results.json").write_text(json.dumps(out, indent=2))
     print(json.dumps(out, indent=2))
 

@@ -21,3 +21,11 @@ Written and committed before any episode of this sample existed. The sequential 
 
 ## Reporting
 Both outcomes are reported in the report (§4.6 and Appendix C) whichever way they go, with this file's commit hash. Analysis: `experiments/analyse_s1.py --tags confirm_haiku --out-prefix confirm`, then `experiments/confirm_sequential.py`.
+
+## Addendum (after a Codex review of this plan, before any confirmatory episode existed)
+Written while the run was in progress but before any episode file was written (`results/raw/s1/confirm_haiku/` did not exist yet). It changes no test and only tightens the rules.
+- **Joint decision rule.** The replication counts as successful only if both C1 and C2 are supported. Otherwise we report which part failed. C2 tests "false-alarm rate below 10%" on one honest condition. It does not by itself show a rate at or below 5%; the Wilson interval is reported alongside it.
+- **Sample enforcement.** The analysis refuses to run unless `pair_hidden` has exactly the 20 seeds 270000–270019 and `null_same` exactly the 40 seeds 70000–70039, and every episode has a fixed-horizon audit. Episodes dropped by provider errors are filled by rerunning `results/logs/run_confirm.sh` (completed calls come from the cache).
+- **Effect size.** Next to the McNemar p-value we report the difference in correct-pair rates with a 95% bootstrap interval (descriptive).
+- **Scope.** A positive result supports detection of this instructed leader–follower positive control, not detection of subtle or emergent collusion.
+- **Cache check.** We report the number of cached versus live calls in the run log. All calls are expected to be live, because the seeds are new.
