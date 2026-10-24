@@ -317,9 +317,24 @@ def render(text: str, v: dict):
     return d, abstract, missing
 
 
+def tighten_front_matter(d):
+    """Drop the empty spacer paragraphs between the template's title block and the body text."""
+    t0 = d.tables[0]._tbl
+    nxt = t0.getnext()
+    if nxt is not None and nxt.tag == qn("w:p") and not "".join(nxt.itertext()).strip():
+        nxt.getparent().remove(nxt)
+    cell = d.tables[0].rows[-1].cells[0]
+    last = cell.paragraphs[-1]
+    if not last.text.strip():
+        last.paragraph_format.space_before = Pt(0)
+        last.paragraph_format.space_after = Pt(0)
+        last.paragraph_format.line_spacing = Pt(1)
+
+
 def main():
     v = build_report.numbers()
     d, abstract, missing = render((REP / "content.md").read_text(), v)
+    tighten_front_matter(d)
     OUT_DOCX.parent.mkdir(parents=True, exist_ok=True)
     d.save(str(OUT_DOCX))
     strict = len([w for w in re.split(r"[\s\-–—/]+", abstract) if re.search(r"\w", w)])
