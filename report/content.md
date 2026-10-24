@@ -152,6 +152,7 @@ Agents that share a model look like a cartel to standard dependence tests. Repla
 ## Code and Data
 - Code repository: [link to be added]. Work done before the sprint is marked as pre-existing in Appendix E, `README.md` and `PRE_SPRINT_LOG.md`.
 - Data: episode logs (JSONL) and the LLM cache that reproduces every number at $0: [link to be added].
+- To audit your own agents: `collusion.audit.audit()` on a JSONL log of actions and replays; `examples/audit_your_logs.py` and the README give a three-step guide. `REPRODUCE.md` rebuilds every number from the cache with one script (about 13 minutes).
 
 ## Author Contributions
 Y. designed the study, ran the experiments and wrote the report with AI assistance (see the LLM Usage Statement).
