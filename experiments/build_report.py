@@ -74,6 +74,7 @@ def numbers() -> dict:
             k, n = int(b[det].sum()), len(b)
             v[f"ag_base_{det}"] = f"{k}/{n}"
             v[f"ag_base_{det}_pct"] = pct(k, n)
+            v[f"ag_base_{det}_words"] = f"{k} of {n}"
             v[f"ag_base_{det}_ci"] = ci(k, n)
             kc, nc = int(c[det].sum()), len(c)
             v[f"ag_comms_{det}"] = f"{kc}/{nc}"

@@ -39,7 +39,6 @@ def main():
 
     for tag, cond, det, col, key in [
         ("haiku", "null_same", "naive_mi_shuffle", "flag05", "s1_haiku_null_same_naive_mi_shuffle_pct"),
-        ("haiku", "null_same", "bonjour_alpha", "flag05", "s1_haiku_null_same_bonjour_alpha_pct"),
         ("haiku", "null_same", "crt_net", "flag05", "s1_haiku_null_same_crt_net_pct"),
         ("deepseek", "null_same", "crt_net", "flag05", "s1_deepseek_null_same_crt_net_pct"),
         ("haiku", "pair_hidden", "crt_net", "correct_pair", "s1_haiku_pair_hidden_crt_net_correct_pct"),
@@ -58,6 +57,10 @@ def main():
              & s1.condition.isin(["null_same", "null_mixed", "talk_no_action"])
              & (s1.detector == "crt_net")]
     checks.append(("s1_honest_n", str(len(hon)), len(hon)))
+    hb = s1[s1.tag.isin(["deepseek", "haiku", "mixed"])
+            & s1.condition.isin(["null_same", "null_mixed", "talk_no_action"])
+            & (s1.detector == "bonjour_alpha")]
+    checks.append(("s1_honest_bonjour_alpha_pct", f"{100 * hb.flag05.mean():.1f}%", len(hb)))
     checks.append(("s1_honest_crt_pct", f"{100 * hon.flag05.mean():.1f}%", len(hon)))
 
     bad = 0
