@@ -249,6 +249,24 @@ def numbers() -> dict:
                  & s1.condition.isin(["null_same", "null_mixed", "talk_no_action", "told_no_channel"])]
         v["seat_p13_null"] = f"{100 * (nul.top == 'P1-P3').mean():.0f}%"
         v["seat_p13_null_n"] = str(len(nul))
+    s0d = read("s0d_coalition_summary.csv")
+    if s0d is not None:
+        def g(setup, T, det, col="flag"):
+            r = s0d[(s0d.setup == setup) & (s0d["T"] == T) & (s0d.detector == det)]
+            return float(r[col].iloc[0]) if len(r) else float("nan")
+        for det in ("crt_net", "crt_mi", "seq"):
+            vals = [g(s_, T_, det) for s_ in ("4p_triple", "5p_triple") for T_ in (30, 60)]
+            lo_, hi_ = f"{100 * min(vals):.0f}", f"{100 * max(vals):.0f}"
+            v[f"s0d_{det}_triple"] = f"{lo_}%" if lo_ == hi_ else f"{lo_}–{hi_}%"
+            v[f"s0d_{det}_inside"] = f"{100 * min(g(s_, T_, det, 'inside') / max(g(s_, T_, det), 1e-9) for s_ in ('4p_triple', '5p_triple') for T_ in (30, 60)):.0f}%"
+        hon = s0d[s0d.setup.str.endswith("honest") & (s0d.detector != "seq")]
+        v["s0d_honest_range"] = f"{100 * hon.flag.min():.0f}–{100 * hon.flag.max():.0f}%"
+        worst = hon.loc[hon.flag.idxmax()]
+        v["s0d_honest_worst_ci"] = f"{100 * worst.lo:.0f}–{100 * worst.hi:.0f}%"
+        v["s0d_iters"] = str(int(s0d.n.iloc[0]))
+        hs = s0d[s0d.setup.str.endswith("honest") & (s0d.detector == "seq")]
+        v["s0d_seq_honest_max"] = f"{100 * hs.flag.max():.0f}%"
+        v["s0d_honest_worst"] = f"{100 * worst.flag:.1f}%"
     ex = read("exchangeability.csv")
     if ex is not None:
         v["exch_max_abs"] = f"{ex['diff'].abs().max():.3f}"
@@ -294,6 +312,7 @@ def numbers() -> dict:
         v["conf_c2"] = f"{c['c2_seq_alarms']}/{c['c2_n']}"
         v["conf_c2_p"] = f"{c['c2_p_fpr_below10']:.3f}"
         v["conf_sec_crt"] = f"{c['sec_crt_null_flags']}/{c['c2_n']}"
+        v["conf_sec_crt_ci"] = f"{100 * c['sec_crt_null_ci'][0]:.0f}–{100 * c['sec_crt_null_ci'][1]:.0f}%"
         v["conf_c1_verdict"] = "supported" if c["c1_supported"] else "not supported"
         v["conf_c2_verdict"] = "supported" if c["c2_supported"] else "not supported"
         v["conf_c1_diff"] = f"{100 * c['c1_diff']:.0f} points"

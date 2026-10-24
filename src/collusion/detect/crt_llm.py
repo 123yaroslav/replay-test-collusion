@@ -168,7 +168,7 @@ def sequential_replay_test(pool: np.ndarray, alpha: float = 0.05, mix: float = 0
     so E[e_t | past] = 1 even when later observations contain earlier actions. The running product
     is a test martingale; the average over pairs is an e-process, and by Ville's inequality
     P(sup_t E_t >= 1/alpha) <= alpha. Returns the e-process paths, the first rejection round and
-    the pair with the largest final e-value. (Model-X testing by betting: Shaer, Maman & Romano
+    the pair with the largest e-value at that round (the final round if there is no rejection). (Model-X testing by betting: Shaer, Maman & Romano
     2023; Grunwald, Henzi & Lardy 2024; here the conditional is sampled, not known.)
     """
     t_max, n, _ = pool.shape
