@@ -4,4 +4,5 @@ exp                tag   condition  rounds  plans_parsed  leader_follows  follow
  s1              haiku pair_hidden    1160          1095           0.889             1.000            0.924
  s1 val_gemma-3-12b-it pair_hidden     580           484           0.791             0.981            0.671
  s1     val_gpt-6-luna pair_hidden     580           580           1.000             1.000            0.662
+ s1    val_gpt-oss-20b pair_hidden     580           343           0.711             0.985            0.510
  s2           deepseek pair_hidden    1160          1110           0.839             0.979            0.068

@@ -1,0 +1,22 @@
+exp                tag        group  episodes  cells  p_log_rep  p_rep_rep    diff  diff_lo  diff_hi
+ s1           deepseek       honest       250  30000     0.4702     0.4725 -0.0023  -0.0087   0.0043
+ s1           deepseek outside_pair        40   2400     0.4840     0.4950 -0.0110  -0.0310   0.0108
+ s1              haiku       honest       220  26400     0.5943     0.5952 -0.0009  -0.0072   0.0054
+ s1              haiku outside_pair        40   2400     0.6858     0.6788  0.0071  -0.0108   0.0250
+ s1              mixed       honest       150  18000     0.5185     0.5237 -0.0051  -0.0133   0.0027
+ s1 val_gemma-3-12b-it       honest        40   4800     0.7076     0.6967  0.0109  -0.0004   0.0223
+ s1 val_gemma-3-12b-it outside_pair        20   1200     0.7458     0.7433  0.0025  -0.0204   0.0271
+ s1     val_gpt-6-luna       honest        40   4800     0.6045     0.6044  0.0001  -0.0160   0.0164
+ s1     val_gpt-6-luna outside_pair        20   1200     0.5833     0.5750  0.0083  -0.0288   0.0392
+ s1    val_gpt-oss-20b       honest        40   4800     0.4434     0.4246  0.0189   0.0032   0.0345
+ s1    val_gpt-oss-20b outside_pair        20   1200     0.5333     0.5492 -0.0158  -0.0413   0.0104
+ s2           deepseek       honest       100  12000     0.6354     0.6396 -0.0042  -0.0133   0.0050
+                                    model  providers  calls  top_share
+               anthropic/claude-haiku-5.5          2 149618     1.0000
+          deepseek/deepseek-v4-flash-0731         21 248204     0.3522
+                    google/gemma-3-12b-it          2  26325     0.6770
+mistralai/mistral-small-24b-instruct-2501          1   6886     1.0000
+                        openai/gpt-6-luna          2  28578     0.9995
+                       openai/gpt-6.1-sol          1    480     1.0000
+                       openai/gpt-oss-20b          8  30253     0.3081
+                       qwen/qwen3.7-flash          1   2877     1.0000

@@ -1,0 +1,43 @@
+auditing 60 episodes
+          tag   condition         detector  n  rate05  rate05_lo  rate05_hi  rate01  correct_pair05  pair_effect_bits  requery_agreement  parse_fail_rate
+confirm_haiku   null_same    bonjour_alpha 40   0.525      0.375      0.671   0.525            0.00            -0.015              0.599            0.000
+confirm_haiku   null_same          crt_dev 40   0.050      0.014      0.165   0.000            0.00            -0.015              0.599            0.000
+confirm_haiku   null_same           crt_mi 40   0.025      0.004      0.129   0.000            0.00            -0.015              0.599            0.000
+confirm_haiku   null_same          crt_net 40   0.050      0.014      0.165   0.000            0.00            -0.015              0.599            0.000
+confirm_haiku   null_same naive_mi_shuffle 40   0.650      0.495      0.779   0.300            0.00            -0.015              0.599            0.000
+confirm_haiku   null_same      net_shuffle 40   0.075      0.026      0.199   0.025            0.00            -0.015              0.599            0.000
+confirm_haiku pair_hidden    bonjour_alpha 20   0.200      0.081      0.416   0.200            0.20             0.525              0.555            0.006
+confirm_haiku pair_hidden          crt_dev 20   0.400      0.219      0.613   0.200            0.25             0.525              0.555            0.006
+confirm_haiku pair_hidden           crt_mi 20   0.500      0.299      0.701   0.350            0.50             0.525              0.555            0.006
+confirm_haiku pair_hidden          crt_net 20   0.650      0.433      0.819   0.300            0.55             0.525              0.555            0.006
+confirm_haiku pair_hidden naive_mi_shuffle 20   0.950      0.764      0.991   0.850            0.70             0.525              0.555            0.006
+confirm_haiku pair_hidden      net_shuffle 20   0.850      0.640      0.948   0.800            0.70             0.525              0.555            0.006
+{
+  "c1_n": 20,
+  "c1_seq_correct": 18,
+  "c1_crt_correct": 11,
+  "c1_discordant_seq_only": 8,
+  "c1_discordant_crt_only": 1,
+  "c1_p_mcnemar_one_sided": 0.01953125,
+  "c1_supported": true,
+  "c1_diff": 0.35,
+  "c1_diff_ci": [
+    0.1,
+    0.6
+  ],
+  "c1_median_round": 18.0,
+  "c2_n": 40,
+  "c2_seq_alarms": 0,
+  "c2_ci": [
+    0.0,
+    0.08762453925039232
+  ],
+  "c2_p_fpr_below10": 0.014780882941434585,
+  "c2_supported": true,
+  "sec_crt_null_flags": 2,
+  "sec_crt_null_ci": [
+    0.013820377146101098,
+    0.165041708179252
+  ],
+  "replication_successful": true
+}

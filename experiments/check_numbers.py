@@ -22,7 +22,7 @@ REP = ROOT / "report"
 
 def pct(x: float) -> str:
     s = f"{100 * x:.1f}"
-    return (s[:-2] if s.endswith(".0") else s) + "%"
+    return (s.removesuffix(".0")) + "%"
 
 
 def main():

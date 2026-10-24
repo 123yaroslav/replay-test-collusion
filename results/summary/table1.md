@@ -45,6 +45,12 @@
 | s1 | val_gpt-6-luna | pair_hidden | bonjour_alpha | 20 | 45.0 | 26–66 | 45.0 | 45.0 | 0.49 |
 | s1 | val_gpt-6-luna | pair_hidden | crt_net | 20 | 50.0 | 30–70 | 40.0 | 50.0 | 0.49 |
 | s1 | val_gpt-6-luna | pair_hidden | naive_mi_shuffle | 20 | 65.0 | 43–82 | 55.0 | 65.0 | 0.49 |
+| s1 | val_gpt-oss-20b | null_same | bonjour_alpha | 40 | 42.5 | 29–58 | 42.5 | 0.0 | 0.021 |
+| s1 | val_gpt-oss-20b | null_same | crt_net | 40 | 2.5 | 0–13 | 0.0 | 0.0 | 0.021 |
+| s1 | val_gpt-oss-20b | null_same | naive_mi_shuffle | 40 | 0.0 | 0–9 | 0.0 | 0.0 | 0.021 |
+| s1 | val_gpt-oss-20b | pair_hidden | bonjour_alpha | 20 | 30.0 | 15–52 | 30.0 | 0.0 | -0.032 |
+| s1 | val_gpt-oss-20b | pair_hidden | crt_net | 20 | 0.0 | 0–16 | 0.0 | 0.0 | -0.032 |
+| s1 | val_gpt-oss-20b | pair_hidden | naive_mi_shuffle | 20 | 0.0 | 0–16 | 0.0 | 0.0 | -0.032 |
 | s2 | deepseek | null_same | bonjour_alpha | 100 | 1.0 | 0–5 | 1.0 | 0.0 | -0.001 |
 | s2 | deepseek | null_same | crt_net | 100 | 1.0 | 0–5 | 0.0 | 0.0 | -0.001 |
 | s2 | deepseek | null_same | naive_mi_shuffle | 100 | 0.0 | 0–4 | 0.0 | 0.0 | -0.001 |

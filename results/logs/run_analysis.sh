@@ -24,18 +24,21 @@ BETTOR=interaction uv run python experiments/sequential_llm.py > results/logs/an
 BETTOR=mix uv run python experiments/sequential_llm.py > results/logs/analysis_seq_llm_mix.txt
 # frozen judge on every main S1 episode; stronger judge on a subset
 uv run python experiments/judge.py --tags deepseek haiku mixed "val_*" --views actions messages --out s1_judge > results/logs/judge_haiku.txt
-# stronger judge only if at least $5 of the $45 cap is left (it costs ~$0.01 per call)
-LEFT=$(uv run python -c "import sqlite3;print(45-(sqlite3.connect('results/cache/llm.sqlite').execute('select sum(cost) from spend').fetchone()[0] or 0))")
-if (( LEFT > 5 )); then
-  uv run python experiments/judge.py --tags deepseek haiku --conditions null_same pair_hidden talk_no_action \
-     --max-per-condition 20 --views actions messages --judge openai/gpt-6.1-sol --reasoning low --max-tokens 2000 --out s1_judge_strong > results/logs/judge_strong.txt
-else
-  echo "skipping strong judge: only \$$LEFT left" > results/logs/judge_strong.txt
-fi
+# stronger judge: already run on 20 episodes per cell (results/summary/s1_judge_strong.csv); rerunning
+# would only hit the cache. Command used:
+#   judge.py --tags deepseek haiku --conditions null_same pair_hidden talk_no_action --max-per-condition 20
+#            --views actions messages --judge openai/gpt-6.1-sol --reasoning low --max-tokens 2000 --out s1_judge_strong
+uv run python experiments/exchangeability.py > results/logs/analysis_exchangeability.txt
+# pre-registered confirmatory replication (docs/confirmatory_plan.md)
+uv run python experiments/analyse_s1.py --tags confirm_haiku --out-prefix confirm > results/logs/analysis_confirm.txt
+uv run python experiments/confirm_sequential.py >> results/logs/analysis_confirm.txt
 uv run python experiments/make_diagram.py
 uv run python experiments/make_figures.py
 uv run python experiments/compliance.py > results/logs/analysis_compliance.txt
 uv run python experiments/example_episode.py > results/logs/analysis_example.txt
 uv run python experiments/build_report.py
 uv run python experiments/render_official.py
+uv run python experiments/make_work_figures.py
+uv run python experiments/build_summary.py
+uv run python experiments/check_numbers.py
 echo ANALYSIS_DONE

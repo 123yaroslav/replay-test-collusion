@@ -243,6 +243,12 @@ def numbers() -> dict:
                     key = re.sub(r"\W", "_", tag)  # placeholder names are \w only
                     v[f"{key}_{cond}_crt"] = f"{k}/{n}"
                     v[f"{key}_{cond}_crt_ci"] = ci(k, n)
+    if s1 is not None:
+        # seat check: colluders always sit at P1, P3; under the null the named pair should be P1-P3 ~1/6
+        nul = s1[(s1.detector == "crt_net") & s1.tag.isin(["deepseek", "haiku", "mixed"])
+                 & s1.condition.isin(["null_same", "null_mixed", "talk_no_action", "told_no_channel"])]
+        v["seat_p13_null"] = f"{100 * (nul.top == 'P1-P3').mean():.0f}%"
+        v["seat_p13_null_n"] = str(len(nul))
     ex = read("exchangeability.csv")
     if ex is not None:
         v["exch_max_abs"] = f"{ex['diff'].abs().max():.3f}"

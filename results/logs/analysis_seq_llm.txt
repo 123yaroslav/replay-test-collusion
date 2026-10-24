@@ -14,6 +14,7 @@ exp                tag       condition   n  reject    lo    hi  correct  median_
  s1 val_gemma-3-12b-it     pair_hidden  20   0.150 0.052 0.360    0.100           9.0
  s1     val_gpt-6-luna       null_same  40   0.000 0.000 0.088    0.000           NaN
  s1     val_gpt-6-luna     pair_hidden  20   0.200 0.081 0.416    0.200          19.0
+ s1    val_gpt-oss-20b       null_same  40   0.025 0.004 0.129    0.000          20.0
  s1    val_gpt-oss-20b     pair_hidden  20   0.000 0.000 0.161    0.000           NaN
  s2           deepseek       null_same 100   0.000 0.000 0.037    0.000           NaN
  s2           deepseek     pair_hidden  40   0.050 0.014 0.165    0.050          19.5
