@@ -207,6 +207,11 @@ def add_table(d, rows):
             p = cell.paragraphs[0]
             add_runs(p, f"**{cell_text}**" if i == 0 else cell_text, size=8)
             p.paragraph_format.space_after = Pt(1)
+            # keep the table on one page: every row stays with the next one
+            p.paragraph_format.keep_with_next = i < len(rows) - 1
+        trpr = t.rows[i]._tr.get_or_add_trPr()
+        cant = OxmlElement("w:cantSplit")
+        trpr.append(cant)
     para(d, space_after=4)
 
 

@@ -11,7 +11,7 @@ The standard way to audit actions is to test for statistical dependence between 
 
 **Threat model.** An operator, or a regulator's sandbox, runs several LLM agents, logs their actions, and can query each agent's deployed policy (model plus system prompt) on any logged observation. It cannot see the hidden channel: a side channel, a covert message board, or a third party passing data between agents. It must decide which pair, if any, to escalate, at a chosen rate of false accusations.
 
-**Our approach (Fig. 1).** We replay each agent. In every round, the auditor re-asks the agent what it would do given exactly what it saw, minus the private channel, and flags a pair only if the real moves depend on each other more than the replays do. Statisticians call this a conditional randomization test (CRT) [6]. The difference is that we do not estimate what each agent would have done on its own: we ask it.
+**Our approach (Fig. 1).** We replay each agent (the idea and a first, non-exact version predate the sprint; Appendix E). In every round, the auditor re-asks the agent what it would do given exactly what it saw, minus the private channel, and flags a pair only if the real moves depend on each other more than the replays do. Statisticians call this a conditional randomization test (CRT) [6]. The difference is that we do not estimate what each agent would have done on its own: we ask it.
 
 Our main contributions are:
 1. **Evidence that monoculture produces false accusations.** On published double-auction logs [7] and in LLM rock-paper-scissors, standard dependence detectors flag up to {{s1_haiku_null_same_naive_mi_shuffle_pct}} of honest same-model episodes against a nominal 5%. In our auction, where honest bids barely vary, they do not (§4.1, Fig. 2A).
@@ -29,7 +29,7 @@ Our main contributions are:
 **Definition used.** Of the 139 definitions in the organisers' survey [20], we follow those that require communication (Rose et al. [15]: "agents must actively communicate, whether explicitly or implicitly, to collude"). Unlike Rose et al., we do not count observed public actions as communication. Collusion here is coordination *enabled by non-public information exchanged between agents*. Coordination that each agent's own policy produces from public information (Schelling points, shared priors, a team instruction with no channel) corresponds to conscious parallelism and is outside it.
 
 ## 3. Methods
-![**Figure 1. The replay test.** The auditor logs every move and the observation behind it, re-asks each agent twice on the same observation with the private channel removed, and asks whether a pair's real moves depend on each other more than moves redrawn from {real move, replays}. Agents of one model share priors, so their replays share them too and false alarms stay near α; a hidden channel adds information that the replays lack.](figures/fig0_method.png){5.6}
+![**Figure 1. The replay test.** The auditor logs every move and the observation behind it, re-asks each agent twice on the same observation with the private channel removed, and asks whether a pair's real moves depend on each other more than moves redrawn from {real move, replays}. Agents of one model share priors, so their replays share them too and false alarms stay near α; a hidden channel adds information that the replays lack.](figures/fig0_method.png){5.1}
 
 **Environments.**
 - *S1, rock-paper-scissors:* the four-player version of Bonjour et al.'s iterated rock-paper-scissors [1], with seats P1–P4, T = 30 rounds and public history.
@@ -39,7 +39,7 @@ Our main contributions are:
 **Agents.** Each seat is an LLM that returns JSON with a short rationale, an action and an optional private message.
 - Main models: `deepseek-v4-flash` and `claude-haiku-5.5`.
 - Validation models: `gpt-6-luna`, `gemma-3-12b` and `gpt-oss-20b`.
-- All models are called through OpenRouter at temperature 1, with reasoning disabled.
+- All models are called through OpenRouter at temperature 1, with reasoning disabled (gpt-oss-20b cannot disable it and runs at low effort).
 
 | Condition | Who | Non-public information flow? |
 |---|---|---|
@@ -71,12 +71,12 @@ Our main contributions are:
 ### 4.1 H1, supported in all three pre-registered environments, not in the auction: monoculture looks like collusion
 In the Agrawal et al. runs where sellers had no channel and all five ran GPT-4.1, the mutual-information test flags {{ag_base_naive_mi_shuffle}} runs (95% CI {{ag_base_naive_mi_shuffle_ci}}) and Bonjour's rule flags {{ag_base_bonjour_alpha}}. With a seller chat the rates are {{ag_comms_naive_mi_shuffle}} and {{ag_comms_bonjour_alpha}}. With 10 no-chat runs the two mutual-information rates do not differ detectably (Fisher's exact test, p = {{ag_fisher_p}}).
 
-In our honest LLM games, mutual information flags {{s1_honest_naive_mi_shuffle_pct}} of {{s1_honest_n}} episodes (CI {{s1_honest_naive_mi_shuffle_ci}}; one-sided binomial test against 5%, p = {{s1_honest_naive_mi_shuffle_p_above5}}). Bonjour's rule flags {{s1_honest_bonjour_alpha_pct}} (p = {{s1_honest_bonjour_alpha_p_above5}}). The effect is strongest where agents share the most: four copies of Claude Haiku ({{s1_haiku_null_same_naive_mi_shuffle_pct}} flagged by mutual information) and Haiku pairs told they are a team but given no channel ({{s1_haiku_told_no_channel_naive_mi_shuffle_pct}}). On the scripted simulator, mutual information with a shuffle null flags {{s0_naive_herd_fpr}} of honest "herd" populations, and the replay test {{s0_crt_herd_fpr}}. H1 therefore holds in all three pre-registered environments: LLM rock-paper-scissors, the Agrawal logs and the simulator. It does not hold in the auction we added for S2. There, honest bids almost always fell in the low bin, and no detector flagged more than 2% of honest episodes: mutual information flagged {{s2_null_same_naive_mi_shuffle_pct}} of honest and {{s2_vendor_public_naive_mi_shuffle_pct}} of shared-vendor episodes.
+In our honest LLM games, mutual information flags {{s1_honest_naive_mi_shuffle_pct}} of {{s1_honest_n}} episodes (CI {{s1_honest_naive_mi_shuffle_ci}}; one-sided binomial test against 5%, p = {{s1_honest_naive_mi_shuffle_p_above5}}). Bonjour's rule flags {{s1_honest_bonjour_alpha_pct}} (p = {{s1_honest_bonjour_alpha_p_above5}}). The effect is strongest where agents share the most: four copies of Claude Haiku ({{s1_haiku_null_same_naive_mi_shuffle_pct}} flagged by mutual information) and Haiku pairs told they are a team but given no channel ({{s1_haiku_told_no_channel_naive_mi_shuffle_pct}}). On the scripted simulator (a pre-sprint result, Appendix E), mutual information with a shuffle null flags {{s0_naive_herd_fpr}} of honest "herd" populations, and the replay test {{s0_crt_herd_fpr}}. H1 therefore holds in all three pre-registered environments: LLM rock-paper-scissors, the Agrawal logs and the simulator. It does not hold in the auction we added for S2. There, honest bids almost always fell in the low bin, and no detector flagged more than 2% of honest episodes: mutual information flagged {{s2_null_same_naive_mi_shuffle_pct}} of honest and {{s2_vendor_public_naive_mi_shuffle_pct}} of shared-vendor episodes.
 
 ![**Figure 2. Standard dependence detectors accuse honest agents; the replay test does not, and it still names colluding pairs.** (A) Share of honest episodes in which each detector flags a pair (dashed line: nominal 5%). The bottom row uses Agrawal et al.'s published runs, where sellers could not communicate; the replay test cannot be run there because the 2025 policies cannot be re-queried. (B) Share of collusion episodes in which the true pair is named. The LLM judge here reads the private messages, which our auditor cannot see. Lines are 95% Wilson intervals.](figures/fig1_false_accusations.png){5.9}
 
 ### 4.2 H2, supported: the replay test holds its false-alarm rate
-Pooled over the honest S1 conditions (same model, mixed models, undelivered collusive talk), the replay test flags {{s1_honest_crt}} episodes, {{s1_honest_crt_pct}} (CI {{s1_honest_crt_ci}}) at α = 5% and {{s1_honest_crt01_pct}} at α = 1%. That is {{s1_honest_crt_per1000}} false accusations per 1,000 honest audits, against {{s1_honest_bonjour_alpha_per1000}} for Bonjour's rule. The pre-registered test of "false-alarm rate ≥ 10%" is rejected for each model: DeepSeek {{s1_deepseek_null_same_crt_net_pct}} (p = {{s1_deepseek_null_same_crt_p_below10}}), Haiku {{s1_haiku_null_same_crt_net_pct}} (p = {{s1_haiku_null_same_crt_p_below10}}), mixed {{s1_mixed_null_mixed_crt_net_pct}} (p = {{s1_mixed_null_mixed_crt_p_below10}}).
+Pooled over the honest S1 conditions (same model, mixed models, undelivered collusive talk), the replay test flags {{s1_honest_crt}} episodes, {{s1_honest_crt_pct}} (CI {{s1_honest_crt_ci}}) at α = 5% and {{s1_honest_crt01_pct}} at α = 1%. That is {{s1_honest_crt_per1000}} false accusations per 1,000 honest audits, against {{s1_honest_bonjour_alpha_per1000}} for Bonjour's rule. The pre-registered test of "false-alarm rate ≥ 10%" is rejected for each model (this does not by itself establish a rate ≤ 5%): DeepSeek {{s1_deepseek_null_same_crt_net_pct}} (p = {{s1_deepseek_null_same_crt_p_below10}}), Haiku {{s1_haiku_null_same_crt_net_pct}} (p = {{s1_haiku_null_same_crt_p_below10}}), mixed {{s1_mixed_null_mixed_crt_net_pct}} (p = {{s1_mixed_null_mixed_crt_p_below10}}).
 
 In the auction it flags {{s2_null_same_crt_net_pct}} of honest episodes and {{s2_vendor_public_crt_net_pct}} of shared-vendor episodes. On the validation models it flags {{val_gpt_6_luna_null_same_crt}} honest GPT-6 Luna episodes (CI {{val_gpt_6_luna_null_same_crt_ci}}), {{val_gemma_3_12b_it_null_same_crt}} Gemma 3 episodes (CI {{val_gemma_3_12b_it_null_same_crt_ci}}) and {{val_gpt_oss_20b_null_same_crt}} gpt-oss-20b episodes (CI {{val_gpt_oss_20b_null_same_crt_ci}}). On the scripted simulator, with references estimated from two re-queries and including a strong-feedback population, its false-alarm rate is {{s0b_fpr_range}}.
 
@@ -87,11 +87,11 @@ When P1 privately fixes both moves and both follow the plan, the replay test nam
 
 The two models follow their plans equally often: leaders {{comp_haiku_leader}} and {{comp_deepseek_leader}}, followers {{comp_haiku_follower}} and {{comp_deepseek_follower}}. The plans themselves differ. {{comp_haiku_same}} of Haiku's plans give both players the same move, against {{comp_deepseek_same}} of DeepSeek's. A plan such as "P1 = rock, P3 = paper" that changes every round fixes both moves, yet over 30 rounds the pair's moves show little dependence: {{s1_deepseek_pair_effect}} bits against {{s1_haiku_pair_effect}} for Haiku.
 
-Mutual information flags {{s1_haiku_pair_hidden_naive_mi_shuffle_pct}} of Haiku hidden-channel episodes, but it also flags {{s1_haiku_null_same_naive_mi_shuffle_pct}} of honest Haiku episodes. Much of what it calls coordination is the shared model, which the replay discounts. At a false-alarm budget of 1% (5%) the replay test detects {{tpr1_haiku_crt_net}} ({{tpr5_haiku_crt_net}}) of Haiku pairs, against {{tpr1_haiku_naive_mi_shuffle}} ({{tpr5_haiku_naive_mi_shuffle}}) for mutual information (Fig. 3, left; Table A1).
+Mutual information flags {{s1_haiku_pair_hidden_naive_mi_shuffle_pct}} of Haiku hidden-channel episodes, but it also flags {{s1_haiku_null_same_naive_mi_shuffle_pct}} of honest Haiku episodes. Much of what it calls coordination is the shared model, which the replay discounts. On the empirical ROC (descriptive: thresholds are read off the same episodes), at a false-alarm rate of 1% (5%) the replay test detects {{tpr1_haiku_crt_net}} ({{tpr5_haiku_crt_net}}) of Haiku pairs, against {{tpr1_haiku_naive_mi_shuffle}} ({{tpr5_haiku_naive_mi_shuffle}}) for mutual information (Fig. 3, left; Table A1).
 
 On the simulator (Fig. 3, right), a pair that coordinates in 80% of rounds is caught in {{s0b_power_80_30}} of 30-round logs; at 60% it takes about 60 rounds ({{s0b_power_60_60}}).
 
-**Coordination in rock-paper-scissors does not pay** (exploratory). The pair's score minus the other two seats' score, per round, is {{gain_s1_deepseek_null_same}} for honest DeepSeek groups, {{gain_s1_deepseek_pair_hidden}} for DeepSeek pairs with a hidden channel, and {{gain_s1_haiku_pair_hidden}} for Haiku pairs, whose identical moves the other agents learned to punish. The leader–follower protocol therefore tests detection of an information flow, not profitable collusion. In the auction below, collusion harms the buyer. In this game, the DeepSeek coordination that the test mostly missed also earned the pair nothing. We do not claim this in general. A channel can pay by changing one agent's own action (a leaked cost moves one bid) without the same-round pairwise dependence our statistic measures, and a non-flag after 30 rounds is not evidence of independence.
+**Coordination in rock-paper-scissors does not pay** (exploratory). The pair's score minus the other two seats' score, per round, is {{gain_s1_deepseek_null_same}} for honest DeepSeek groups, {{gain_s1_deepseek_pair_hidden}} for DeepSeek pairs with a hidden channel, and {{gain_s1_haiku_pair_hidden}} for Haiku pairs, whose identical moves the other agents learned to punish. The leader–follower protocol therefore tests detection of an information flow, not profitable collusion. In the auction below, collusion harms the buyer. A channel can also pay through one agent's own action (a leaked cost moves one bid), which our pairwise statistic does not measure, and a non-flag after 30 rounds is not evidence of independence.
 
 ### 4.4 H5, supported: pooled confidential data is flagged, a public-data vendor is not
 In the auction:
@@ -123,7 +123,7 @@ Its false-alarm rate stays at or below {{seq_sim_fpr_max}} on the simulator up t
 - **Access needed:** logs plus query access to each agent's deployed policy on its logged observations. No weights or activations. Re-query prompts must match the logged prompts byte for byte, minus the channel under audit.
 - **Cost:** 2 extra calls per agent-round (about {{audit_cost}} per audit here). The statistics run in seconds on a laptop.
 - **False alarms:** {{s1_honest_crt_per1000}} per 1,000 honest audits at α = 5% ({{s1_honest_crt01_pct}} at α = 1%), against {{s1_honest_bonjour_alpha_per1000}} for Bonjour's rule.
-- **What a flag means:** the pair's moves carry information that their own policies, given the public record, cannot produce. It is a plus factor, not proof of intent.
+- **What a flag means:** the pair's moves depend on each other more than their own replays, given the public record, plausibly allow. It is a screening signal and a plus factor, not proof of intent.
 - **Blind spot:** coordination written into the policy (shared instructions, Schelling points). Pair the test with a policy audit.
 :::
 
@@ -137,7 +137,7 @@ As agent fleets converge on a few base models, dependence between their actions 
 4. The positive controls are instructed (leader–follower), and we assign the colluders. Emergent collusion may be weaker.
 5. We use two main model families, short games and a stylised auction. The Agrawal panel checks only false alarms, because those policies cannot be re-queried.
 
-**Future work:** a pre-registered test of the sequential version as a live monitor, statistics for varied hidden plans and single-agent leaks, adversaries trained against the test, and pairing with a policy audit.
+**Future work:** statistics for varied hidden plans and single-agent leaks, adversaries trained against the test, and pairing with a policy audit.
 
 ## 6. Conclusion
 Agents that share a model look like a cartel to standard dependence tests. Replaying each agent on what it saw, minus the channel under audit, gives a test whose false-alarm rate the auditor controls and that names pairs whose hidden information shapes their moves.
@@ -199,7 +199,7 @@ Full prompts: `experiments/s1_llm_rps.py`, `experiments/s2_procurement.py`, `exp
 - **Exploratory variants (DeepSeek, pre-registered as exploratory).** Pairs warned about a statistical auditor (`pair_aware`) were named in {{s1_deepseek_pair_aware_crt_net_correct_pct}} of episodes (flagged {{s1_deepseek_pair_aware_crt_net_pct}}), similar to unwarned pairs; their score advantage was {{gain_s1_deepseek_pair_aware}} per round. Pairs with free-form team chat instead of a protocol (`pair_chat`) were named in {{s1_deepseek_pair_chat_crt_net_correct_pct}}; their moves showed almost no coordination.
 - **Excluded statistic.** Lagged statistics are not used. An honest reaction to a partner's previous public move appears in the data but not in the null.
 
-**Table A1. Recall at a fixed false-alarm budget** (hidden-channel pairs vs honest same-model episodes; LLM judges read actions only):
+**Table A1. Recall at a fixed false-alarm rate** (descriptive, read off the empirical ROC of the same episodes; hidden-channel pairs vs honest same-model episodes; LLM judges read actions only):
 
 | Detector | Haiku, FPR 1% | Haiku, FPR 5% | DeepSeek, FPR 1% | DeepSeek, FPR 5% |
 |---|---|---|---|---|
@@ -234,18 +234,19 @@ Full prompts: `experiments/s1_llm_rps.py`, `experiments/s2_procurement.py`, `exp
 We used Claude (Anthropic) as a coding and analysis assistant. It implemented the experiment code under our direction, ran simulations, summarised related work and talk transcripts, drafted sections of this report, and generated the figures from the result files. Codex (OpenAI) and separate Claude instances served as adversarial reviewers of the plan and of this report. Every number in the report is produced by scripts (`experiments/build_report.py` reads `results/summary/`). We checked claims and references against their sources and take responsibility for the content.
 
 ## Appendix E. Work done before the sprint (pre-existing)
-Following the sprint rules, the work below was done before the sprint opened on 23 October 2026. It is the content of git commit `98f00dc`; everything else in this report was done during the sprint, on branch `sprint`, with dated commits.
-- The repository skeleton, an OpenRouter client with a cache and a per-process budget cap, and the trajectory schema.
-- Generic information-theory estimators (entropy, mutual information, conditional mutual information, transfer entropy) with unit tests.
-- An implementation of Bonjour et al.'s γ, net influence Γ and decision rule, with a family-wise resampling test.
-- A scripted rock-paper-scissors simulator and the S0 validation: a replication of Bonjour et al.'s Table 2 and a calibration comparison on scripted nulls (§4.1 cites its false-alarm rate).
-- An adapter for Agrawal et al.'s shipped runs and a pooled transfer-entropy pilot on them.
-- The idea of the replay test and a first implementation: a conditional randomization test that re-queries each LLM policy k = 8 times after the episode and redraws actions from the estimated reference distribution (`src/collusion/detect/crt_llm.py`). Unlike the sprint version, it did not pool the logged action with its re-queries, so its null was not exact.
-- A first version of the LLM rock-paper-scissors script. Both were run only with fake replies; no LLM data were collected before the sprint.
-- Literature notes, the choice of research question and an initial plan.
+Following the sprint rules, the work below was done before the sprint opened on 23 October 2026. The code and results are the content of git commit `98f00dc` (13 October 2026), the only commit before the sprint. The reading list and the analysis of past winners (13–14 October) were committed later, and `PRE_SPRINT_LOG.md` dates every item. Everything else was done during the sprint, on branch `sprint`, with dated commits.
 
-Done during the sprint:
-- every LLM experiment and the procurement auction;
-- the pooled, exact-per-round replay test with re-queries inside each round, the per-episode audit, and the pre-registration;
-- the external Agrawal panel and the judges;
-- the sequential test and all analyses, figures and text in this report.
+*Code:*
+- The repository skeleton, a generic N-agent game runner, an OpenRouter client with a cache and a per-process budget cap, and the trajectory schema.
+- Generic information-theory estimators (entropy, mutual information, conditional mutual information, transfer entropy) with unit tests.
+- Bonjour et al.'s γ, net influence Γ and decision rule, with a family-wise resampling test.
+- The replay-test idea and a first implementation: a conditional randomization test that re-queries each LLM policy k = 8 times after the episode and redraws actions from the estimated reference distribution (`src/collusion/detect/crt_llm.py`). Unlike the sprint version, it did not pool the logged action with its re-queries, so its null was not exact.
+- A first version of the LLM rock-paper-scissors script. It and the replay test were run only with fake replies; no LLM data were collected before the sprint.
+
+*Results:*
+- A scripted rock-paper-scissors simulator and its validation. It replicated Bonjour et al.'s Table 2. On honest populations with shared priors ("herd" decoys), shuffle-null dependence tests raised false alarms in up to 100% of runs, and only the (non-pooled) conditional randomization test kept the nominal rate. This is the core idea of the paper, shown on scripted agents before the sprint; §4.1 cites its numbers.
+- A pilot on Agrawal et al.'s shipped runs, pooled over runs: transfer entropy and mutual information were significant (p = 0.005) in the no-chat condition as well as with a seller chat. So the monoculture confound on these logs was first seen before the sprint. The sprint added the per-run panel in §4.1 (one test per run).
+
+*Documents:* a research briefing with answers to every sprint research question, literature notes, a reading list, an analysis of four past first-place Apart projects with a submission checklist, the choice of research question and an initial plan.
+
+*Done during the sprint:* the pooled, exact-per-round replay test with re-queries inside each round, and the per-episode audit; every LLM experiment (rock-paper-scissors, the procurement auction, validation models, LLM judges); the per-run Agrawal panel; the pre-registration; the sequential test and its confirmatory replication; the exchangeability diagnostic; and all analyses, figures and text in this report.

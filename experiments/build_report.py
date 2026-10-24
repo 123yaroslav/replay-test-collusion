@@ -24,8 +24,14 @@ REP = ROOT / "report"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 
-def pct(k, n, digits=0):
-    return f"{100 * k / n:.{digits}f}%" if n else "n/a"
+def pct(k, n, digits=None):
+    """Percent with one decimal only when it is not zero (37/40 -> 92.5%, 6/150 -> 4%)."""
+    if not n:
+        return "n/a"
+    if digits is not None:
+        return f"{100 * k / n:.{digits}f}%"
+    s = f"{100 * k / n:.1f}"
+    return (s[:-2] if s.endswith(".0") else s) + "%"
 
 
 def ci(k, n):

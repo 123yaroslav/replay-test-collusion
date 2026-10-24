@@ -23,10 +23,10 @@ The sprint rules require pre-existing work to be marked. The full dated list is 
 | Repo skeleton, OpenRouter client with cache and per-process cap, trajectory schema | Global spend ledger, reasoning control, seeds, 429 handling (`llm.py`) |
 | Information-theory estimators and tests (`detect/infotheory.py`) | In-round CRT re-queries, undelivered talk, vendor messages (`runner.py`) |
 | Bonjour et al. γ/Γ, Bonjour rule, family-wise resampling test (`detect/net_influence.py`) | Pooled exchangeable CRT and per-episode audit (`detect/crt_llm.py`) |
-| Scripted RPS simulator, S0 replication of Bonjour Table 2 (`games/rps.py`, `experiments/s0_scripted_validation.py`) | S0b validity and power with estimated references (`experiments/s0b_crt_validity.py`) |
-| Agrawal et al. adapter and pooled TE pilot (`adapters/agrawal.py`, `experiments/pilot_agrawal_te.py`) | Per-run Agrawal panel (`experiments/agrawal_panel.py`) |
+| Scripted RPS simulator, S0 replication of Bonjour Table 2, and the S0 finding that only the (non-pooled) CRT keeps the nominal false-alarm rate on shared-prior decoys (`games/rps.py`, `experiments/s0_scripted_validation.py`) | S0b validity and power with estimated references (`experiments/s0b_crt_validity.py`) |
+| Agrawal et al. adapter and pooled TE/MI pilot, which already found significant dependence (p = 0.005) in the no-chat condition (`adapters/agrawal.py`, `experiments/pilot_agrawal_te.py`) | Per-run Agrawal panel (`experiments/agrawal_panel.py`) |
 | Replay-test idea and first implementation: CRT via post-hoc LLM policy re-querying (k = 8, reference distribution, not pooled with the logged action) and the first LLM RPS script; both run only with fake replies | All LLM experiments: S1 RPS, S2 procurement auction, LLM judge, analysis, figures |
-| Literature notes, question selection, plan (`docs/answers.md`, `docs/plan.md`, `docs/literature/`) | Pre-registered analysis plan (`docs/analysis_plan.md`, frozen in commits `4333131` and `e65cabb`), report |
+| Generic N-agent game runner; research briefing and answers to every sprint question, literature notes, reading list, analysis of past winners with a submission checklist, question selection, plan (`docs/answers.md`, `docs/plan.md`, `docs/literature/`, `docs/reading.md`, `docs/winning_rules.md`) | Pre-registered analysis plan (`docs/analysis_plan.md`, frozen in commits `4333131` and `e65cabb`), report |
 
 ## Reproduce
 
