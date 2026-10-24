@@ -3005,7 +3005,7 @@ pair_cp0.6,60,True,47.0,True
 pair_cp0.6,60,False,,False
 pair_cp0.6,60,True,25.0,True
 pair_cp0.6,60,True,30.0,True
-pair_cp0.6,60,True,14.0,True
+pair_cp0.6,60,True,14.0,False
 pair_cp0.6,60,True,32.0,True
 pair_cp0.6,60,True,17.0,True
 pair_cp0.6,60,True,34.0,True
@@ -3074,13 +3074,13 @@ pair_cp0.6,60,True,18.0,True
 pair_cp0.6,60,False,,False
 pair_cp0.6,60,True,50.0,True
 pair_cp0.6,60,True,27.0,True
-pair_cp0.6,60,True,41.0,True
+pair_cp0.6,60,True,41.0,False
 pair_cp0.6,60,True,50.0,True
 pair_cp0.6,60,True,34.0,True
 pair_cp0.6,60,True,40.0,True
 pair_cp0.6,60,True,52.0,True
 pair_cp0.6,60,True,43.0,True
-pair_cp0.6,60,True,31.0,True
+pair_cp0.6,60,True,31.0,False
 pair_cp0.6,60,True,43.0,True
 pair_cp0.6,60,True,42.0,True
 pair_cp0.6,60,True,30.0,True
@@ -3351,7 +3351,7 @@ pair_cp0.6,120,True,24.0,True
 pair_cp0.6,120,True,30.0,True
 pair_cp0.6,120,True,48.0,True
 pair_cp0.6,120,True,28.0,True
-pair_cp0.6,120,True,71.0,True
+pair_cp0.6,120,True,71.0,False
 pair_cp0.6,120,True,41.0,True
 pair_cp0.6,120,True,51.0,True
 pair_cp0.6,120,True,35.0,True

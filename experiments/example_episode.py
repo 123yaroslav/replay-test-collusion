@@ -20,7 +20,7 @@ SUM = ROOT / "results" / "summary"
 SEATS = ["P1", "P2", "P3", "P4"]
 
 
-def main(n_rounds: int = 6):
+def main(n_rounds: int = 4):
     src = SUM / "s2_audits.csv"
     if not src.exists():
         src = SUM / "s2_partial_audits.csv"

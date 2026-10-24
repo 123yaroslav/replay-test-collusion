@@ -1,0 +1,21 @@
+exp                tag       condition   n  reject    lo    hi  correct  median_round
+ s1           deepseek       null_same 150   0.000 0.000 0.025    0.000           NaN
+ s1           deepseek      pair_aware  30   0.000 0.000 0.114    0.000           NaN
+ s1           deepseek       pair_chat  30   0.000 0.000 0.114    0.000           NaN
+ s1           deepseek     pair_hidden  40   0.000 0.000 0.088    0.000           NaN
+ s1           deepseek  talk_no_action  60   0.000 0.000 0.060    0.000           NaN
+ s1           deepseek told_no_channel  40   0.000 0.000 0.088    0.000           NaN
+ s1              haiku       null_same 150   0.000 0.000 0.025    0.000           NaN
+ s1              haiku     pair_hidden  40   0.650 0.495 0.779    0.625          22.5
+ s1              haiku  talk_no_action  40   0.000 0.000 0.088    0.000           NaN
+ s1              haiku told_no_channel  30   0.000 0.000 0.114    0.000           NaN
+ s1              mixed      null_mixed 150   0.000 0.000 0.025    0.000           NaN
+ s1 val_gemma-3-12b-it       null_same  40   0.000 0.000 0.088    0.000           NaN
+ s1 val_gemma-3-12b-it     pair_hidden  20   0.000 0.000 0.161    0.000           NaN
+ s1     val_gpt-6-luna       null_same  40   0.000 0.000 0.088    0.000           NaN
+ s1     val_gpt-6-luna     pair_hidden  20   0.300 0.145 0.519    0.300          20.0
+ s1    val_gpt-oss-20b     pair_hidden  20   0.000 0.000 0.161    0.000           NaN
+ s2           deepseek       null_same 100   0.000 0.000 0.037    0.000           NaN
+ s2           deepseek     pair_hidden  40   0.075 0.026 0.199    0.075          26.0
+ s2           deepseek     vendor_leak  40   0.675 0.520 0.799    0.675          23.0
+ s2           deepseek   vendor_public  60   0.000 0.000 0.060    0.000           NaN

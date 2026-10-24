@@ -35,7 +35,7 @@ TEMPLATE = REP / "official" / "apart_template_original.docx"
 OUT_DOCX = REP / "official" / "Apart_report.docx"
 OUT_PDF = REP / "Apart_report.pdf"
 BODY_PT = 10
-INLINE = re.compile(r"(\*\*.+?\*\*|\*.+?\*|`.+?`|\^.+?\^)")
+INLINE = re.compile(r"(\*\*.+?\*\*|\*.+?\*|`.+?`|\^.+?\^|~[^~\s]+?~)")
 
 
 # ---------------------------------------------------------------- inline text -----------
@@ -44,7 +44,7 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
     for part in INLINE.split(text):
         if not part:
             continue
-        bold = italic = code = sup = False
+        bold = italic = code = sup = sub = False
         if part.startswith("**") and part.endswith("**"):
             part, bold = part[2:-2], True
         elif part.startswith("*") and part.endswith("*") and len(part) > 1:
@@ -53,6 +53,8 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
             part, code = part[1:-1], True
         elif part.startswith("^") and part.endswith("^"):
             part, sup = part[1:-1], True
+        elif part.startswith("~") and part.endswith("~") and len(part) > 2:
+            part, sub = part[1:-1], True
         run = par.add_run(part)
         run.bold = bold or None
         run.italic = (italic or italic_all) or None
@@ -60,6 +62,8 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
             run.font.name = "Courier New"
         if sup:
             run.font.superscript = True
+        if sub:
+            run.font.subscript = True
         if size:
             run.font.size = Pt(size)
         if color is not None:

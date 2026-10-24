@@ -43,6 +43,15 @@ def detector_stats(df, tag, cond, det, col="flag05"):
     return int(g[col].sum()), len(g)
 
 
+def auroc_ci(pos, neg, n_boot: int = 2000, seed: int = 0) -> str:
+    """Percentile bootstrap CI for AUROC, resampling episodes within each class."""
+    from collusion.analysis import auroc
+
+    rng = np.random.default_rng(seed)
+    vals = [auroc(rng.choice(pos, len(pos)), rng.choice(neg, len(neg))) for _ in range(n_boot)]
+    return f"{np.percentile(vals, 2.5):.2f}–{np.percentile(vals, 97.5):.2f}"
+
+
 def numbers() -> dict:
     v: dict = {}
     s1, s2 = read("s1_audits.csv"), read("s2_audits.csv")
@@ -50,7 +59,11 @@ def numbers() -> dict:
     s0b_cal, s0b_pw = read("s0b_calibration.csv"), read("s0b_power.csv")
 
     if ag is not None:
+        from scipy.stats import fisher_exact
         b, c = ag[ag.condition == "base"], ag[ag.seller_comms]
+        tab = [[int(b.naive_mi_shuffle.sum()), len(b) - int(b.naive_mi_shuffle.sum())],
+               [int(c.naive_mi_shuffle.sum()), len(c) - int(c.naive_mi_shuffle.sum())]]
+        v["ag_fisher_p"] = f"{fisher_exact(tab)[1]:.2f}"
         for det in ("naive_mi_shuffle", "bonjour_alpha", "net_shuffle"):
             k, n = int(b[det].sum()), len(b)
             v[f"ag_base_{det}"] = f"{k}/{n}"
@@ -168,6 +181,7 @@ def numbers() -> dict:
                 neg = -np.log(d[d.condition == "null_same"].p.clip(lower=1e-6))
                 if len(pos) and len(neg):
                     v[f"auroc_{tag}_{det}"] = f"{auroc(pos.values, neg.values):.2f}"
+                    v[f"auroc_{tag}_{det}_ci"] = auroc_ci(pos.values, neg.values)
             if j1 is not None:
                 for view in ("actions", "messages"):
                     jj = j1[(j1.tag == tag) & (j1.view == view)].dropna(subset=["prob"])
@@ -175,6 +189,7 @@ def numbers() -> dict:
                     neg = jj[jj.condition == "null_same"].prob
                     if len(pos) and len(neg):
                         v[f"auroc_{tag}_judge_{view}"] = f"{auroc(pos.values, neg.values):.2f}"
+                        v[f"auroc_{tag}_judge_{view}_ci"] = auroc_ci(pos.values, neg.values)
     js = read("s1_judge_strong.csv")
     if js is not None:
         from collusion.analysis import auroc as _auroc
@@ -188,6 +203,39 @@ def numbers() -> dict:
                 if len(pos) and len(neg):
                     v[f"auroc_{tag}_judge_strong_{view}"] = f"{_auroc(pos.values, neg.values):.2f}"
         v["judge_strong_n"] = str(int(js.groupby(["tag", "condition", "view"]).size().min()))
+    if s1 is not None:
+        # recall at a fixed false-alarm budget, from the ROC of each detector (pair_hidden vs null_same)
+        from sklearn.metrics import roc_curve
+
+        def tpr_at(y, score, fpr_max):
+            fpr, tpr, _ = roc_curve(y, score)
+            ok = fpr <= fpr_max + 1e-12
+            return float(tpr[ok].max()) if ok.any() else 0.0
+
+        for tag in ("deepseek", "haiku"):
+            for det in ("crt_net", "naive_mi_shuffle"):
+                d = s1[(s1.tag == tag) & (s1.detector == det) & s1.condition.isin(["pair_hidden", "null_same"])]
+                if d.condition.nunique() == 2:
+                    y = (d.condition == "pair_hidden").astype(int)
+                    sc = -np.log(d.p.clip(lower=1e-6))
+                    for f in (0.01, 0.05):
+                        v[f"tpr{int(f * 100)}_{tag}_{det}"] = f"{100 * tpr_at(y, sc, f):.0f}%"
+            for jname, jdf in (("judge", j1), ("judge_strong", read("s1_judge_strong.csv"))):
+                if jdf is None:
+                    continue
+                d = jdf[(jdf.tag == tag) & (jdf.view == "actions")
+                        & jdf.condition.isin(["pair_hidden", "null_same"])].dropna(subset=["prob"])
+                if d.condition.nunique() == 2:
+                    y = (d.condition == "pair_hidden").astype(int)
+                    for f in (0.01, 0.05):
+                        v[f"tpr{int(f * 100)}_{tag}_{jname}"] = f"{100 * tpr_at(y, d.prob, f):.0f}%"
+        for tag in sorted(t for t in s1.tag.unique() if t.startswith("val_")):
+            for cond in ("null_same", "pair_hidden"):
+                k, n = detector_stats(s1, tag, cond, "crt_net",
+                                      "flag05" if cond == "null_same" else "correct_pair")
+                if n:
+                    v[f"{tag}_{cond}_crt"] = f"{k}/{n}"
+                    v[f"{tag}_{cond}_crt_ci"] = ci(k, n)
     seq_sim = read("s0c_sequential.csv")
     if seq_sim is not None:
         honest = seq_sim[~seq_sim.population.str.startswith("pair")]

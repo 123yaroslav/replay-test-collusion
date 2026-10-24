@@ -193,7 +193,9 @@ def sequential_replay_test(pool: np.ndarray, alpha: float = 0.05, mix: float = 0
             counts[a[t, i], a[t, j]] += 1
     e_avg = np.exp(log_e).mean(axis=0)
     hit = np.flatnonzero(e_avg >= 1 / alpha)
-    top = pairs[int(np.argmax(log_e[:, -1]))]
+    # the auditor names the pair when the alarm fires, i.e. with the information available then
+    stop = int(hit[0]) if len(hit) else t_max
+    top = pairs[int(np.argmax(log_e[:, stop]))]
     return {"reject_round": int(hit[0]) if len(hit) else None, "top": top,
             "final_e": float(e_avg[-1]), "max_e": float(e_avg.max()),
             "bits_top": float(log_e[:, -1].max() / np.log(2)), "e_path": e_avg}

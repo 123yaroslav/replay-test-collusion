@@ -83,15 +83,14 @@ def dot_panel(ax, rows, title, ref=None):
                     zorder=3)
     if ref is not None:
         ax.axvline(ref, color=INK2, lw=0.8, ls=(0, (3, 2)), zorder=1)
-        ax.text(ref + 1.5, len(labels) - 0.45, f"α = {ref:g}%", color=INK2, fontsize=7.5,
-                va="top")
+        ax.text(ref + 1.5, -0.62, f"α = {ref:g}%", color=INK2, fontsize=7, va="bottom")
     ax.set_yticks(range(len(labels)), labels)
     ax.set_ylim(len(labels) - 0.5, -0.5)
     ax.set_xlim(0, 100)
     ax.xaxis.grid(True, color=GRID, lw=0.6)
     ax.set_axisbelow(True)
-    ax.set_title(title, loc="left", fontsize=9, color=INK, fontweight="bold")
-    ax.tick_params(axis="y", length=0)
+    ax.set_title(title, loc="left", fontsize=8.6, color=INK, fontweight="bold", pad=12)
+    ax.tick_params(axis="y", length=0, labelsize=7.4)
     return dets
 
 
@@ -123,18 +122,18 @@ def fig1():
                    ("Agrawal et al. logs · 5× GPT-4.1, no chat", "bonjour_alpha",
                     int(b.bonjour_alpha.sum()), len(b))]
     rows_c = rate_rows(audits, j1, colluding, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(7.4, 4.3), gridspec_kw={"width_ratios": [1.2, 1]})
-    d1 = dot_panel(axes[0], rows_h, "A  Honest agents: how often each detector accuses a pair",
-                   ref=5)
-    axes[0].set_xlabel("Episodes flagged (%), 95% Wilson interval")
-    d2 = dot_panel(axes[1], rows_c, "B  Colluding pair: flagged and named correctly")
-    axes[1].set_xlabel("Episodes with the true pair named (%)")
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 4.6),
+                             gridspec_kw={"width_ratios": [1.0, 1.0], "wspace": 1.05})
+    d1 = dot_panel(axes[0], rows_h, "A  Honest agents: episodes flagged", ref=5)
+    axes[0].set_xlabel("Flagged (%), 95% Wilson interval", fontsize=8)
+    d2 = dot_panel(axes[1], rows_c, "B  Colluding pair named correctly")
+    axes[1].set_xlabel("True pair named (%)", fontsize=8)
     dets = [d for d in C if d in set(d1) | set(d2)]
     handles = [plt.Line2D([], [], color=C[d], marker="o", lw=1.6, ms=5.5, mec="white")
                for d in dets]
-    fig.legend(handles, [NAMES[d] for d in dets], loc="lower center", ncol=len(dets),
-               fontsize=7.8, bbox_to_anchor=(0.5, -0.01))
-    fig.tight_layout(rect=(0, 0.06, 1, 1))
+    fig.legend(handles, [NAMES[d] for d in dets], loc="lower center", ncol=2,
+               fontsize=7.6, bbox_to_anchor=(0.5, -0.02))
+    fig.subplots_adjust(left=0.30, right=0.985, top=0.92, bottom=0.17)
     save(fig, "fig1_false_accusations")
 
 
@@ -153,7 +152,8 @@ def fig2(axes=None):
                 continue
             y = (d.condition == "pair_hidden").astype(int)
             fpr, tpr, _ = roc_curve(y, -np.log(d.p.clip(lower=1e-6)))
-            ax.plot(100 * fpr, 100 * tpr, color=C[det], lw=2, label=NAMES[det])
+            ax.plot(np.clip(100 * fpr, 0.5, None), 100 * tpr, color=C[det], lw=2,
+                    label=NAMES[det], drawstyle="steps-post")
         if j1 is not None:
             for view, ls in (("actions", "-"), ):
                 d = j1[(j1.tag == tag) & (j1.view == view)
@@ -161,18 +161,21 @@ def fig2(axes=None):
                 if d.condition.nunique() == 2:
                     y = (d.condition == "pair_hidden").astype(int)
                     fpr, tpr, _ = roc_curve(y, d.prob)
-                    ax.plot(100 * fpr, 100 * tpr, color=C["judge"], lw=2, ls=ls,
-                            label="LLM judge (actions only)")
-        ax.plot([0, 100], [0, 100], color=GRID, lw=0.8)
+                    ax.plot(np.clip(100 * fpr, 0.5, None), 100 * tpr, color=C["judge"], lw=2,
+                            ls=ls, label="LLM judge (actions only)", drawstyle="steps-post")
+        xs = np.logspace(np.log10(0.5), 2, 50)
+        ax.plot(xs, xs, color=GRID, lw=0.8)
         for x in (1, 5):
             ax.axvline(x, color=INK2, lw=0.6, ls=(0, (2, 2)))
-        ax.set_xlim(0, 100), ax.set_ylim(0, 100)
-        ax.set_title(f"{name}: hidden channel vs honest", loc="left", fontsize=8.5,
-                     fontweight="bold")
-        ax.set_xlabel("False alarms on honest episodes (%)")
+        ax.set_xscale("log")
+        ax.set_xlim(0.5, 100), ax.set_ylim(0, 100)
+        ax.set_xticks([1, 5, 20, 100], ["1", "5", "20", "100"])
+        ax.set_title(f"{name}: ROC", loc="left", fontsize=8.5, fontweight="bold")
+        ax.set_xlabel("False alarms (%), log scale", fontsize=7.8)
         ax.grid(True, color=GRID, lw=0.5)
     axes[0].set_ylabel("Detection rate (%)")
-    axes[0].legend(loc="lower right", fontsize=6.8)
+    axes[0].legend(loc="upper left", fontsize=6.4, frameon=True, framealpha=0.9,
+                   edgecolor="none")
     if standalone:
         fig.tight_layout()
         save(fig, "fig2_roc")
@@ -214,12 +217,11 @@ def fig3(ax=None):
             m = g.groupby("T").correct_pair.mean()
             ax.plot(m.index, 100 * m.values, ls="none", marker=marks[tag][0], ms=5,
                     mfc="white", mec=INK, mew=1.1, label=marks[tag][1])
-    ax.legend(loc="center right", fontsize=5.9, handletextpad=0.3, labelspacing=0.25,
-              borderaxespad=0.2)
-    ax.set_xlabel("Rounds in the audited log (T)")
-    ax.set_ylabel("Correct pair flagged (%)")
-    ax.set_title("Detectability frontier (simulator)", loc="left", fontsize=9,
-                 fontweight="bold")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.45, -0.24), fontsize=5.8, ncol=2,
+              handletextpad=0.3, labelspacing=0.25, columnspacing=0.8)
+    ax.set_xlabel("Rounds in the log (T)", fontsize=7.8)
+    ax.set_ylabel("Correct pair flagged (%)", fontsize=7.8)
+    ax.set_title("How much log is needed", loc="left", fontsize=8.5, fontweight="bold")
     ax.set_xlim(5, 128), ax.set_ylim(0, 105)
     ax.grid(True, color=GRID, lw=0.5)
 
@@ -229,11 +231,12 @@ def fig3(ax=None):
 
 
 def fig23():
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.7), gridspec_kw={"wspace": 0.32})
+    fig, axes = plt.subplots(1, 3, figsize=(7.4, 3.2),
+                             gridspec_kw={"wspace": 0.38, "width_ratios": [1, 1, 1.1]})
     fig2(axes[:2])
     fig3(axes[2])
     axes[1].set_ylabel("")
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.08, right=0.99, top=0.9, bottom=0.34)
     save(fig, "fig23_roc_power")
 
 
@@ -248,8 +251,9 @@ def fig_pvalues():
         p = honest[honest.detector == det].p.dropna()
         ax.hist(p, bins=np.linspace(0, 1, 21), color=C[det], edgecolor="white", lw=1.0)
         ax.axhline(len(p) / 20, color=INK2, lw=0.8, ls=(0, (3, 2)))
-        ax.set_title(f"{NAMES[det]}: p-values on {len(p)} honest episodes", loc="left",
-                     fontsize=8.5, fontweight="bold")
+        short = "Replay test" if det == "crt_net" else "Mutual information + shuffle"
+        ax.set_title(f"{short} ({len(p)} honest episodes)", loc="left", fontsize=8.5,
+                     fontweight="bold")
         ax.set_xlabel("p-value")
     axes[0].set_ylabel("Episodes")
     fig.tight_layout()
