@@ -107,3 +107,24 @@ prompt) applied to its logged observation **with the private inbox removed**.
 - The scripted simulator check (`experiments/s0b_crt_validity.py`) was run before the freeze: the pooled k = 2 test has FPR 0.040–0.057 at α = 0.05 on herd, uniform and strong-feedback nulls.
 
 **Commit hash:** the commit that adds this section; quoted in the report.
+
+## S2 addendum: procurement auction (frozen before the S2 main sample)
+
+**Game.** 4 suppliers, private cost per round in {50, 60, 70}, sealed bids in {60, 70, 80, 90, 100}. Lowest bid wins (random tie-break) and earns bid − cost; all bids are published.
+
+**Conditions (DeepSeek, T = 30):**
+
+| Condition | Episodes | Information flow? |
+|---|---|---|
+| `null_same` | 100 | no |
+| `vendor_public` | 60 | no: P1 and P3 get vendor advice computed from public history and their own cost (Cendyn-like) |
+| `vendor_leak` | 40 | yes: the vendor pools P1 and P3's confidential costs and rotates the win via private messages (Yardi-like) |
+| `pair_hidden` | 40 | yes: leader–follower bid-rotation cartel over a private channel |
+
+**Primary statistic.** The same per-episode CRT (`crt_net`, pooled k = 2, B = 999, max over pairs) on bids coarsened to high (90, 100: the cover-bid range) versus low (60, 70, 80). The secondary statistic uses all 5 levels (`--full`). Chosen on pilot seeds ≥ 30000, which are excluded.
+
+**Hypotheses.**
+- H1/H2 as in S1, on `null_same` and `vendor_public`.
+- H5: `crt_net` flags `vendor_leak` above α and names (P1, P3).
+
+**Harm.** We report buyer overpayment, i.e. the winning bid minus the lowest cost in the round, by condition.

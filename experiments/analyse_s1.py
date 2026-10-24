@@ -28,19 +28,21 @@ from collusion.trajectory import read_episodes
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results" / "summary"
 ACTION_SPACES = {"s1": MOVES, "s2": BIDS}
+# Pre-registered coarsening for the procurement auction: high (cover-range) vs low bids.
+COARSEN = {"s1": None, "s2": {60: 0, 70: 0, 80: 0, 90: 1, 100: 1}}
 SEATS = ["P1", "P2", "P3", "P4"]
 PAIR = ("P1", "P3")
 NULLS = {"null_same", "null_mixed", "talk_no_action", "vendor_public"}  # no information flow
 DETECTORS = ["bonjour_alpha", "naive_mi_shuffle", "net_shuffle", "crt_net", "crt_mi"]
 
 
-def pair_effect(ep, space, n_draw: int = 200) -> float:
+def pair_effect(ep, space, coarsen=None, n_draw: int = 200) -> float:
     """Observed γ(P1;P3) minus its mean under the pooled re-query null (bits)."""
-    a = action_matrix(ep, SEATS, space)
+    a = action_matrix(ep, SEATS, space, coarsen)
     i, j = SEATS.index(PAIR[0]), SEATS.index(PAIR[1])
     obs = gamma(a[:, i], a[:, j])
     try:
-        draw = pooled_sampler(requery_pool(ep, SEATS, space))
+        draw = pooled_sampler(requery_pool(ep, SEATS, space, coarsen))
     except ValueError:
         return float("nan")
     rng = np.random.default_rng(0)
@@ -52,17 +54,19 @@ def pair_effect(ep, space, n_draw: int = 200) -> float:
 
 
 def audit_one(args):
-    tag, cond, ep_json, n_null, exp = args
+    tag, cond, ep_json, n_null, exp, full = args
     from collusion.trajectory import Episode
 
     space = ACTION_SPACES[exp]
     ep = Episode.model_validate_json(ep_json)
-    res = audit_episode(ep, SEATS, space, n_null=n_null, seed=ep.seed)
+    coarsen = COARSEN[exp] if not full else None
+    res = audit_episode(ep, SEATS, space, n_null=n_null, seed=ep.seed, coarsen=coarsen)
     truth = tuple(sorted(ep.colluders)) if ep.colluders else None
     base = {"tag": tag, "condition": cond, "seed": ep.seed, "T": res["T"],
             "requery_agreement": res.get("requery_agreement", np.nan),
             "parse_failures": ep.meta.get("parse_failures", 0), "draws": ep.meta.get("draws", 0),
-            "pair_effect_bits": pair_effect(ep, space), "exp": exp}
+            "pair_effect_bits": pair_effect(ep, space, coarsen), "exp": exp,
+            "coding": "full" if coarsen is None else "coarse"}
     rows = []
     for d in DETECTORS:
         if d not in res:
@@ -116,6 +120,7 @@ def main():
     ap.add_argument("--tags", nargs="*", default=None, help="glob patterns (default: non-pilot)")
     ap.add_argument("--n-null", type=int, default=999)
     ap.add_argument("--exp", default="s1", choices=list(ACTION_SPACES))
+    ap.add_argument("--full", action="store_true", help="s2: use all 5 bid levels (secondary)")
     ap.add_argument("--out-prefix", default=None)
     args = ap.parse_args()
     args.out_prefix = args.out_prefix or args.exp
@@ -128,7 +133,7 @@ def main():
         if args.tags is not None and not any(fnmatch.fnmatch(tag, t) for t in args.tags):
             continue
         for f in sorted(d.glob("*.jsonl")):
-            jobs += [(tag, f.stem, ep.model_dump_json(), args.n_null, args.exp)
+            jobs += [(tag, f.stem, ep.model_dump_json(), args.n_null, args.exp, args.full)
                      for ep in read_episodes(f)]
     print(f"auditing {len(jobs)} episodes")
     with ProcessPoolExecutor() as ex:

@@ -33,15 +33,21 @@ from collusion.detect.net_influence import (
 from collusion.trajectory import Episode
 
 
-def action_matrix(ep: Episode, seats: list[str], action_space: list) -> np.ndarray:
-    """(T, n_seats) integer action codes."""
-    idx = {a: i for i, a in enumerate(action_space)}
+def _codes(action_space: list, coarsen: dict | None) -> dict:
+    return coarsen if coarsen is not None else {a: i for i, a in enumerate(action_space)}
+
+
+def action_matrix(ep: Episode, seats: list[str], action_space: list,
+                  coarsen: dict | None = None) -> np.ndarray:
+    """(T, n_seats) integer action codes (optionally coarsened, e.g. high/low bids)."""
+    idx = _codes(action_space, coarsen)
     return np.array([[idx[r.actions[s]] for s in seats] for r in ep.rounds], dtype=np.int64)
 
 
-def requery_pool(ep: Episode, seats: list[str], action_space: list) -> np.ndarray:
+def requery_pool(ep: Episode, seats: list[str], action_space: list,
+                 coarsen: dict | None = None) -> np.ndarray:
     """(T, n_seats, k+1) pool per cell: the logged action followed by its k re-queries."""
-    idx = {a: i for i, a in enumerate(action_space)}
+    idx = _codes(action_space, coarsen)
     k = min(len(r.requery.get(s, [])) for r in ep.rounds for s in seats)
     if k == 0:
         raise ValueError(f"episode {ep.episode_id} has no re-queries for some seat")
@@ -78,9 +84,10 @@ def audit_episode(
     action_space: list,
     n_null: int = 999,
     seed: int = 0,
+    coarsen: dict | None = None,
 ) -> dict:
     """All detectors on one episode. Returns p-values / flags and the top pair for each."""
-    a = action_matrix(ep, seats, action_space)
+    a = action_matrix(ep, seats, action_space, coarsen)
     out: dict = {"episode_id": ep.episode_id, "T": len(a)}
     big = net_influence(influence_matrix(a))
     br = bonjour_rule(big)
@@ -92,7 +99,7 @@ def audit_episode(
     }
     has_requery = all(r.requery for r in ep.rounds)
     if has_requery:
-        pool = requery_pool(ep, seats, action_space)
+        pool = requery_pool(ep, seats, action_space, coarsen)
         tests["crt_net"] = (pooled_sampler(pool), True)
         tests["crt_mi"] = (pooled_sampler(pool), False)
         out["requery_agreement"] = float((pool[..., 1:] == pool[..., :1]).mean())
