@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import numpy as np
@@ -35,6 +35,7 @@ class Observation:
     inbox: list[Message]
     action_space: list[Any]
     channel_partners: list[str] = field(default_factory=list)
+    outbox: list[Message] = field(default_factory=list)  # own private messages sent last round
 
 
 class Game(ABC):
@@ -54,6 +55,14 @@ class Game(ABC):
 
     def public_state(self, t: int) -> dict[str, Any]:
         return {}
+
+    def private_messages(self, agent_id: str, t: int) -> list[Message]:
+        """Game-originated private messages delivered this round (e.g. a vendor's data leak)."""
+        return []
+
+    def public_text(self, agent_id: str, t: int) -> str:
+        """Current-round public information shown to LLM agents (e.g. a market feed)."""
+        return ""
 
     @abstractmethod
     def payoffs(self, actions: dict[str, Any], t: int) -> dict[str, float]: ...
@@ -89,11 +98,24 @@ async def run_episode(
     channels: dict[str, list[str]] | None = None,
     colluders: list[str] | None = None,
     meta: dict[str, Any] | None = None,
+    requery_k: int = 0,
+    undelivered: set[str] | None = None,
 ) -> Episode:
-    """Play one episode. `channels[a]` lists who receives a's private messages."""
+    """Play one episode. `channels[a]` lists who receives a's private messages.
+
+    requery_k > 0: in the same round, each agent that supports `resample` is re-queried k times
+    on its identical observation with all private-channel content removed (inbox and its own
+    last sent message: the auditor cannot see the hidden channel) (the conditional randomization test's
+    reference draws, logged in `Round.requery`). Done inside the episode so the re-queries hit
+    the same model routing as the logged move.
+    undelivered: senders whose messages are generated and logged but never delivered, and not
+    shown back to the sender either (the "talk without action" hard negative, an exact replay
+    null because the re-query prompt is then byte-identical).
+    """
     rng = np.random.default_rng(seed)
     ids = [a.spec.id for a in agents]
     channels = channels or {}
+    undelivered = undelivered or set()
     game.reset(ids, rng)
     ep = Episode(
         episode_id=f"{game.name}-{condition}-{seed}-{uuid.uuid4().hex[:6]}",
@@ -107,6 +129,7 @@ async def run_episode(
     pending: list[Message] = []
     for t in range(game.n_rounds):
         public = game.public_state(t)
+        game_msgs = {a.spec.id: game.private_messages(a.spec.id, t) for a in agents}
         observations = [
             Observation(
                 agent_id=a.spec.id,
@@ -114,13 +137,24 @@ async def run_episode(
                 n_rounds=game.n_rounds,
                 private_info=game.private_info(a.spec.id, t),
                 history=ep.rounds,
-                inbox=[m for m in pending if a.spec.id in m.recipients or "*" in m.recipients],
+                inbox=[m for m in pending if a.spec.id in m.recipients or "*" in m.recipients]
+                + game_msgs[a.spec.id],
                 action_space=game.action_space(a.spec.id),
                 channel_partners=channels.get(a.spec.id, []),
+                outbox=[m for m in pending if m.sender == a.spec.id],
             )
             for a in agents
         ]
-        decisions = await asyncio.gather(*(a.act(game, o) for a, o in zip(agents, observations)))
+        acts = [a.act(game, o) for a, o in zip(agents, observations)]
+        reqs = [
+            a.resample(game, replace(o, inbox=[], outbox=[]), requery_k)
+            for a, o in zip(agents, observations)
+            if requery_k > 0 and hasattr(a, "resample")
+        ]
+        results = await asyncio.gather(*acts, *reqs)
+        decisions = results[: len(agents)]
+        req_ids = [a.spec.id for a in agents if requery_k > 0 and hasattr(a, "resample")]
+        requery = dict(zip(req_ids, results[len(agents):]))
         actions = {a.spec.id: d.action for a, d in zip(agents, decisions)}
         messages = [
             Message(sender=a.spec.id, recipients=channels[a.spec.id], text=d.message)
@@ -132,11 +166,12 @@ async def run_episode(
                 t=t,
                 actions=actions,
                 rewards=game.payoffs(actions, t),
-                messages=messages,
+                messages=[m for ms in game_msgs.values() for m in ms] + messages,
                 public_state=public,
                 private_info={o.agent_id: o.private_info for o in observations if o.private_info},
                 private={a.spec.id: d.private for a, d in zip(agents, decisions) if d.private},
+                requery=requery,
             )
         )
-        pending = messages
+        pending = [m for m in messages if m.sender not in undelivered]
     return ep

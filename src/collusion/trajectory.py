@@ -38,6 +38,8 @@ class Round(BaseModel):
     # agent id -> game-assigned private info (e.g. a cost draw); auditors may condition on it
     private_info: dict[str, dict[str, Any]] = Field(default_factory=dict)
     private: dict[str, str] = Field(default_factory=dict)  # agent id -> private reasoning/notes
+    # agent id -> auditor's re-queried actions on the same observation minus the inbox (CRT)
+    requery: dict[str, list[Any]] = Field(default_factory=dict)
 
 
 class Episode(BaseModel):
@@ -64,7 +66,8 @@ class Episode(BaseModel):
             for r in self.rounds
         ]
         agents = [a.model_copy(update={"role": "unknown"}) for a in self.agents]
-        return self.model_copy(update={"colluders": [], "rounds": rounds, "agents": agents})
+        return self.model_copy(update={"colluders": [], "rounds": rounds, "agents": agents,
+                                       "condition": "hidden", "meta": {}})
 
 
 def write_episodes(path: Path, episodes: list[Episode]) -> None:
