@@ -48,7 +48,7 @@ def main():
     jobs = []
     for exp in ("s1", "s2"):
         for d in sorted((ROOT / "results" / "raw" / exp).iterdir()):
-            if not d.is_dir() or d.name.startswith(("pilot", "T60")):
+            if not d.is_dir() or d.name.startswith(("pilot", "T60", "confirm")):
                 continue
             for f in sorted(d.glob("*.jsonl")):
                 jobs += [(exp, d.name, f.stem, ep.model_dump_json()) for ep in read_episodes(f)]

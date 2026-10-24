@@ -24,7 +24,7 @@ def main():
     for exp in ("s1", "s2"):
         for f in sorted((ROOT / "results" / "raw" / exp).glob("*/pair_*.jsonl")):
             tag = f.parent.name
-            if tag.startswith("pilot") or f.stem not in ("pair_hidden", "pair_aware"):
+            if tag.startswith(("pilot", "confirm")) or f.stem not in ("pair_hidden", "pair_aware"):
                 continue
             lead = fol = n = rounds = same = 0
             plans = set()

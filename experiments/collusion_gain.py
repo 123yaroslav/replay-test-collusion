@@ -27,7 +27,7 @@ def main():
     for exp in ("s1", "s2"):
         for tag_dir in sorted((ROOT / "results" / "raw" / exp).iterdir()):
             tag = tag_dir.name
-            if not tag_dir.is_dir() or tag.startswith(("pilot", "T60", "val_")):
+            if not tag_dir.is_dir() or tag.startswith(("pilot", "T60", "val_", "confirm")):
                 continue
             for f in sorted(tag_dir.glob("*.jsonl")):
                 for ep in read_episodes(f):
