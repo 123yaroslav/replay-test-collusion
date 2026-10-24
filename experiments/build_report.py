@@ -260,7 +260,18 @@ def numbers() -> dict:
                 v[f"exch_{tag}_diff"] = f"{r['diff']:+.3f}"
                 v[f"exch_{tag}_ci"] = f"{r.diff_lo:+.3f} to {r.diff_hi:+.3f}"
                 v[f"exch_{tag}_p"] = f"{r.p_rep_rep:.2f}"
-        v["exch_all_cover_zero"] = bool(((ex.diff_lo <= 0) & (ex.diff_hi >= 0)).all())
+        cover = (ex.diff_lo <= 0) & (ex.diff_hi >= 0)
+        v["exch_all_cover_zero"] = bool(cover.all())
+        v["exch_groups"] = str(len(ex))
+        v["exch_chance_any"] = f"{100 * (1 - 0.95 ** len(ex)):.0f}%"
+        v["exch_cover"] = str(int(cover.sum()))
+        out_ = ex[~cover]
+        v["exch_exceptions"] = "; ".join(
+            f"{r.tag.replace('val_', '')} ({r.group.replace('_', ' ')}, {r.exp.upper()}): {r['diff']:+.3f}, "
+            f"CI {r.diff_lo:+.3f} to {r.diff_hi:+.3f}" for _, r in out_.iterrows()) or "none"
+        main = ex[ex.tag.isin(["deepseek", "haiku", "mixed"])]
+        v["exch_main_max_abs"] = f"{main['diff'].abs().max():.3f}"
+        v["exch_main_cover_all"] = bool(((main.diff_lo <= 0) & (main.diff_hi >= 0)).all())
     pv = read("exchangeability_providers.csv")
     if pv is not None:
         for tag, model in (("deepseek", "deepseek/deepseek-v4-flash-0731"),
@@ -311,8 +322,8 @@ def numbers() -> dict:
     if seq is not None:
         for _, r in seq.iterrows():
             key = f"seq_{r.exp}_{r.tag}_{r.condition}"
-            v[key + "_pct"] = f"{100 * r.reject:.0f}%"
-            v[key + "_correct_pct"] = f"{100 * r.correct:.0f}%"
+            v[key + "_pct"] = pct(round(r.reject * r.n), int(r.n))
+            v[key + "_correct_pct"] = pct(round(r.correct * r.n), int(r.n))
             v[key + "_round"] = f"{r.median_round:.0f}" if r.median_round == r.median_round else "–"
         h = seq[(seq.exp == "s1") & seq.condition.isin(["null_same", "null_mixed", "talk_no_action"])
                 & ~seq.tag.str.startswith("val_")]
