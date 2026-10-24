@@ -1,0 +1,29 @@
+{
+  "c1_n": 20,
+  "c1_seq_correct": 18,
+  "c1_crt_correct": 11,
+  "c1_discordant_seq_only": 8,
+  "c1_discordant_crt_only": 1,
+  "c1_p_mcnemar_one_sided": 0.01953125,
+  "c1_supported": true,
+  "c1_diff": 0.35,
+  "c1_diff_ci": [
+    0.1,
+    0.6
+  ],
+  "c1_median_round": 18.0,
+  "c2_n": 40,
+  "c2_seq_alarms": 0,
+  "c2_ci": [
+    0.0,
+    0.08762453925039232
+  ],
+  "c2_p_fpr_below10": 0.014780882941434585,
+  "c2_supported": true,
+  "sec_crt_null_flags": 2,
+  "sec_crt_null_ci": [
+    0.013820377146101098,
+    0.165041708179252
+  ],
+  "replication_successful": true
+}

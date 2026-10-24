@@ -31,7 +31,7 @@ def pct(k, n, digits=None):
     if digits is not None:
         return f"{100 * k / n:.{digits}f}%"
     s = f"{100 * k / n:.1f}"
-    return (s[:-2] if s.endswith(".0") else s) + "%"
+    return (s.removesuffix(".0")) + "%"
 
 
 def ci(k, n):
@@ -243,6 +243,29 @@ def numbers() -> dict:
                     key = re.sub(r"\W", "_", tag)  # placeholder names are \w only
                     v[f"{key}_{cond}_crt"] = f"{k}/{n}"
                     v[f"{key}_{cond}_crt_ci"] = ci(k, n)
+    ex = read("exchangeability.csv")
+    if ex is not None:
+        v["exch_max_abs"] = f"{ex['diff'].abs().max():.3f}"
+        v["exch_cells"] = f"{int(ex.cells.sum()):,}"
+        for tag in ("deepseek", "haiku"):
+            r = ex[(ex.exp == "s1") & (ex.tag == tag) & (ex.group == "honest")]
+            if len(r):
+                r = r.iloc[0]
+                v[f"exch_{tag}_diff"] = f"{r['diff']:+.3f}"
+                v[f"exch_{tag}_ci"] = f"{r.diff_lo:+.3f} to {r.diff_hi:+.3f}"
+                v[f"exch_{tag}_p"] = f"{r.p_rep_rep:.2f}"
+        v["exch_all_cover_zero"] = bool(((ex.diff_lo <= 0) & (ex.diff_hi >= 0)).all())
+    pv = read("exchangeability_providers.csv")
+    if pv is not None:
+        for tag, model in (("deepseek", "deepseek/deepseek-v4-flash-0731"),
+                           ("haiku", "anthropic/claude-haiku-5.5")):
+            r = pv[pv.model == model]
+            if len(r):
+                v[f"prov_{tag}_n"] = str(int(r.providers.iloc[0]))
+                v[f"prov_{tag}_top"] = f"{100 * r.top_share.iloc[0]:.0f}%"
+                calls = int(r.calls.iloc[0])
+                v[f"prov_{tag}_calls"] = f"{calls:,}"
+                v[f"prov_{tag}_other"] = f"{round(calls * (1 - r.top_share.iloc[0])):,}"
     conf = SUM / "confirm_results.json"
     if conf.exists():
         import json as _json
@@ -256,6 +279,15 @@ def numbers() -> dict:
         v["conf_sec_crt"] = f"{c['sec_crt_null_flags']}/{c['c2_n']}"
         v["conf_c1_verdict"] = "supported" if c["c1_supported"] else "not supported"
         v["conf_c2_verdict"] = "supported" if c["c2_supported"] else "not supported"
+        v["conf_c1_diff"] = f"{100 * c['c1_diff']:.0f} points"
+        v["conf_c1_diff_ci"] = f"{100 * c['c1_diff_ci'][0]:.0f} to {100 * c['c1_diff_ci'][1]:.0f}"
+        v["conf_c2_ci"] = f"0–{100 * c['c2_ci'][1]:.0f}%" if c["c2_seq_alarms"] == 0 else \
+            f"{100 * c['c2_ci'][0]:.0f}–{100 * c['c2_ci'][1]:.0f}%"
+        v["conf_success"] = "successful" if c["replication_successful"] else "not successful"
+        ca = read("confirm_audits.csv")
+        if ca is not None:
+            g = ca[(ca.condition == "null_same") & (ca.detector == "naive_mi_shuffle")]
+            v["conf_mi_null"] = f"{int(g.flag05.sum())}/{len(g)}"
     seq_sim = read("s0c_sequential.csv")
     if seq_sim is not None:
         honest = seq_sim[~seq_sim.population.str.startswith("pair")]
