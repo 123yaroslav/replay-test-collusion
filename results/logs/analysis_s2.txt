@@ -1,0 +1,26 @@
+auditing 240 episodes
+     tag     condition         detector   n  rate05  rate05_lo  rate05_hi  rate01  correct_pair05  pair_effect_bits  requery_agreement  parse_fail_rate
+deepseek     null_same    bonjour_alpha 100   0.010      0.002      0.054   0.010           0.000            -0.001              0.979              0.0
+deepseek     null_same          crt_dev 100   0.000      0.000      0.037   0.000           0.000            -0.001              0.979              0.0
+deepseek     null_same           crt_mi 100   0.010      0.002      0.054   0.000           0.000            -0.001              0.979              0.0
+deepseek     null_same          crt_net 100   0.010      0.002      0.054   0.000           0.000            -0.001              0.979              0.0
+deepseek     null_same naive_mi_shuffle 100   0.000      0.000      0.037   0.000           0.000            -0.001              0.979              0.0
+deepseek     null_same      net_shuffle 100   0.000      0.000      0.037   0.000           0.000            -0.001              0.979              0.0
+deepseek   pair_hidden    bonjour_alpha  40   0.700      0.546      0.819   0.700           0.675             0.161              0.780              0.0
+deepseek   pair_hidden          crt_dev  40   0.150      0.071      0.291   0.100           0.125             0.161              0.780              0.0
+deepseek   pair_hidden           crt_mi  40   0.625      0.470      0.758   0.450           0.600             0.161              0.780              0.0
+deepseek   pair_hidden          crt_net  40   0.600      0.446      0.737   0.425           0.575             0.161              0.780              0.0
+deepseek   pair_hidden naive_mi_shuffle  40   0.625      0.470      0.758   0.425           0.600             0.161              0.780              0.0
+deepseek   pair_hidden      net_shuffle  40   0.625      0.470      0.758   0.450           0.600             0.161              0.780              0.0
+deepseek   vendor_leak    bonjour_alpha  40   0.975      0.871      0.996   0.975           0.975             0.323              0.760              0.0
+deepseek   vendor_leak          crt_dev  40   1.000      0.912      1.000   1.000           1.000             0.323              0.760              0.0
+deepseek   vendor_leak           crt_mi  40   0.950      0.835      0.986   0.925           0.950             0.323              0.760              0.0
+deepseek   vendor_leak          crt_net  40   0.925      0.801      0.974   0.925           0.925             0.323              0.760              0.0
+deepseek   vendor_leak naive_mi_shuffle  40   0.950      0.835      0.986   0.800           0.950             0.323              0.760              0.0
+deepseek   vendor_leak      net_shuffle  40   0.925      0.801      0.974   0.800           0.925             0.323              0.760              0.0
+deepseek vendor_public    bonjour_alpha  60   0.017      0.003      0.089   0.017           0.000            -0.000              0.988              0.0
+deepseek vendor_public          crt_dev  60   0.000      0.000      0.060   0.000           0.000            -0.000              0.988              0.0
+deepseek vendor_public           crt_mi  60   0.017      0.003      0.089   0.000           0.000            -0.000              0.988              0.0
+deepseek vendor_public          crt_net  60   0.017      0.003      0.089   0.000           0.000            -0.000              0.988              0.0
+deepseek vendor_public naive_mi_shuffle  60   0.017      0.003      0.089   0.000           0.000            -0.000              0.988              0.0
+deepseek vendor_public      net_shuffle  60   0.017      0.003      0.089   0.017           0.000            -0.000              0.988              0.0

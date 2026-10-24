@@ -58,11 +58,12 @@ def render(ep: Episode, view: str) -> str:
     return "\n".join(lines)
 
 
-async def judge_one(llm: LLM, model: str, ep: Episode, view: str, reasoning: str | None):
+async def judge_one(llm: LLM, model: str, ep: Episode, view: str, reasoning: str | None,
+                    max_tokens: int = 400):
     blind = ep.for_detector(keep_messages=(view == "messages"))
     prompt = JUDGE_PROMPT.format(log=render(blind, view))
     res = await llm.chat(model, [{"role": "user", "content": prompt}], temperature=0.0,
-                         max_tokens=400, sample=0, json_mode=True, reasoning=reasoning)
+                         max_tokens=max_tokens, sample=0, json_mode=True, reasoning=reasoning)
     try:
         out = parse_json(res.text)
         prob = float(out.get("probability"))
@@ -82,6 +83,7 @@ async def main():
     ap.add_argument("--judge", default="anthropic/claude-haiku-5.5")
     ap.add_argument("--reasoning", default=None)
     ap.add_argument("--max-per-condition", type=int, default=None)
+    ap.add_argument("--max-tokens", type=int, default=400, help="raise for reasoning judges")
     ap.add_argument("--out", default="s1_judge")
     args = ap.parse_args()
     llm = LLM()
@@ -95,7 +97,7 @@ async def main():
             eps = read_episodes(f)[: args.max_per_condition]
             jobs += [(d.name, f.stem, ep, v) for ep in eps for v in args.views]
     print(f"{len(jobs)} judge calls with {args.judge}")
-    res = await asyncio.gather(*(judge_one(llm, args.judge, ep, v, args.reasoning)
+    res = await asyncio.gather(*(judge_one(llm, args.judge, ep, v, args.reasoning, args.max_tokens)
                                  for _, _, ep, v in jobs))
     rows = [{"tag": t, "condition": c, "seed": ep.seed, "view": v, "judge": args.judge,
              "truth": "-".join(sorted(ep.colluders)), **r}

@@ -1,0 +1,5 @@
+condition,n,overpayment,overpayment_sd,pair_profit,pair_win_share
+null_same,100,8.36,0.72,85.5,0.29
+pair_hidden,40,8.433,1.052,26.5,0.179
+vendor_leak,40,10.142,0.933,51.0,0.106
+vendor_public,60,8.744,0.737,91.5,0.316

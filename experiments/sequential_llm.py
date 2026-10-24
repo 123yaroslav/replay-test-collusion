@@ -9,6 +9,7 @@ Writes results/summary/seq_llm_episodes.csv and seq_llm_summary.csv.
 
 from __future__ import annotations
 
+import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -22,6 +23,7 @@ from collusion.trajectory import Episode, read_episodes
 
 ROOT = Path(__file__).resolve().parents[1]
 SUM = ROOT / "results" / "summary"
+BETTOR = os.environ.get("BETTOR", "joint")
 SEATS = ["P1", "P2", "P3", "P4"]
 SPACE = {"s1": (MOVES, None, 3), "s2": (BIDS, {60: 0, 70: 0, 80: 0, 90: 1, 100: 1}, 2)}
 
@@ -34,7 +36,7 @@ def one(args):
         pool = requery_pool(ep, SEATS, space, coarsen)
     except ValueError:
         return None
-    r = sequential_replay_test(pool, alpha=0.05, n_actions=k)
+    r = sequential_replay_test(pool, alpha=0.05, n_actions=k, bettor=BETTOR)
     truth = tuple(sorted(SEATS.index(c) for c in ep.colluders)) if ep.colluders else None
     return {"exp": exp, "tag": tag, "condition": cond, "seed": ep.seed,
             "reject": r["reject_round"] is not None, "reject_round": r["reject_round"],
@@ -53,7 +55,8 @@ def main():
     with ProcessPoolExecutor() as ex:
         rows = [r for r in ex.map(one, jobs, chunksize=8) if r]
     df = pd.DataFrame(rows)
-    df.to_csv(SUM / "seq_llm_episodes.csv", index=False)
+    sfx = "" if BETTOR == "joint" else "_" + BETTOR
+    df.to_csv(SUM / f"seq_llm_episodes{sfx}.csv", index=False)
     out = []
     for (exp, tag, cond), g in df.groupby(["exp", "tag", "condition"]):
         k, n = int(g.reject.sum()), len(g)
@@ -62,7 +65,7 @@ def main():
                     "lo": lo, "hi": hi, "correct": g.correct.mean(),
                     "median_round": g.reject_round.median()})
     s = pd.DataFrame(out)
-    s.to_csv(SUM / "seq_llm_summary.csv", index=False)
+    s.to_csv(SUM / f"seq_llm_summary{sfx}.csv", index=False)
     print(s.round(3).to_string(index=False))
 
 

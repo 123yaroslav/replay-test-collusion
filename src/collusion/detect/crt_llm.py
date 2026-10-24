@@ -158,7 +158,7 @@ def audit_episode(
 
 
 def sequential_replay_test(pool: np.ndarray, alpha: float = 0.05, mix: float = 0.5,
-                           n_actions: int | None = None) -> dict:
+                           n_actions: int | None = None, bettor: str = "joint") -> dict:
     """Exploratory, anytime-valid version of the replay test (testing by betting).
 
     Round factor for a pair (i, j): e_t = q_t(a_it, a_jt) / mean_{x in pool_it, y in pool_jt} q_t(x, y),
@@ -180,7 +180,13 @@ def sequential_replay_test(pool: np.ndarray, alpha: float = 0.05, mix: float = 0
         counts = np.zeros((K, K))
         for t in range(t_max):
             kt = (counts + 0.5) / (counts.sum() + 0.5 * K * K)
-            q = mix * kt + (1 - mix) / (K * K)
+            q_joint = mix * kt + (1 - mix) / (K * K)
+            if bettor == "joint":
+                q = q_joint
+            else:  # bet on interaction: joint frequency relative to the product of its marginals
+                ratio = q_joint / np.outer(q_joint.sum(1), q_joint.sum(0))
+                q = ratio if bettor == "interaction" else 0.5 * (q_joint / q_joint.mean()
+                                                                + ratio / ratio.mean())
             num = q[a[t, i], a[t, j]]
             den = q[np.ix_(pool[t, i], pool[t, j])].mean()
             log_e[p_idx, t + 1] = log_e[p_idx, t] + np.log(num / den)

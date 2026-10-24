@@ -103,7 +103,11 @@ def fill_front_matter(d, title: str, authors: list[tuple[str, str]], abstract: s
     pairs = [(slots[i], slots[i + 1]) for i in range(0, len(slots) - 1, 2)
              if "".join(t.text or "" for t in slots[i].iter(qn("w:t"))).startswith("Author name")]
     for k, (pn, pa) in enumerate(pairs):
-        name, aff = authors[k] if k < len(authors) else ("", "")
+        if k >= len(authors):  # drop unused author slots entirely (they leave blank lines)
+            for p in (pn, pa):
+                p.getparent().remove(p)
+            continue
+        name, aff = authors[k]
         for p, txt in ((pn, name), (pa, aff)):
             ts = list(p.iter(qn("w:t")))
             if ts:
@@ -317,7 +321,13 @@ tell application "Pages"
   close doc saving no
 end tell
 end timeout'''
-    subprocess.run(["osascript", "-e", script], check=True, capture_output=True)
+    for attempt in range(3):  # Pages occasionally fails transiently
+        r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, check=False)
+        if r.returncode == 0:
+            break
+        print(f"Pages export attempt {attempt + 1} failed: {r.stderr.strip()[:200]}")
+    else:
+        raise RuntimeError("Pages export failed three times")
     info = subprocess.run(["pdfinfo", str(OUT_PDF)], capture_output=True, text=True, check=False)
     pages = re.search(r"Pages:\s+(\d+)", info.stdout)
     print(f"pages: {pages.group(1) if pages else '?'}  -> {OUT_PDF}")

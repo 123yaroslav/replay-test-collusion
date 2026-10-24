@@ -40,11 +40,11 @@ def main():
         ax.add_patch(Ellipse((x, y), 0.05, 0.095, fc="white", ec=BLUE, lw=1.4))
         ax.text(x, y, name, ha="center", va="center", fontsize=7.5, color=INK)
     ax.plot([0.05, 0.05], [0.42, 0.32], color=ORANGE, lw=1.6, ls=(0, (3, 2)))
-    ax.text(0.058, 0.37, "hidden\nchannel", fontsize=6.0, color=ORANGE, ha="left", va="center")
+    ax.text(0.058, 0.37, "hidden\nchannel", fontsize=7.0, color=ORANGE, ha="left", va="center")
     ax.text(0.10, 0.575, "Deployed agents\n(same base model)", fontsize=7.2, ha="center",
             va="center", color=INK, fontweight="bold")
     ax.text(0.10, 0.17, "every agent sees the public\nhistory + its own private info",
-            fontsize=6.3, ha="center", va="center", color=INK2)
+            fontsize=7.2, ha="center", va="center", color=INK2)
     arrow(ax, 0.205, 0.37, 0.255, 0.37)
     box(ax, 0.255, 0.22, 0.18, 0.31, "1. Log\nevery agent's move\nand the observation\nit acted on\n(the auditor cannot\nsee the channel)")
     arrow(ax, 0.435, 0.37, 0.485, 0.37)
@@ -52,9 +52,9 @@ def main():
     arrow(ax, 0.695, 0.37, 0.745, 0.37)
     box(ax, 0.745, 0.22, 0.245, 0.31, "3. Compare\ndo the real moves of a pair\ndepend on each other more\nthan moves redrawn from\n{real move, replays}?\nflag the pair if p < α")
     ax.text(0.865, 0.15, "same model, no channel → replays share the\npriors → no flag (false alarms stay at α)",
-            fontsize=6.2, ha="center", va="center", color=INK2)
+            fontsize=7.2, ha="center", va="center", color=INK2)
     ax.text(0.865, 0.06, "hidden channel shapes the moves → real moves\ncarry what replays lack → pair flagged",
-            fontsize=6.2, ha="center", va="center", color=INK2)
+            fontsize=7.2, ha="center", va="center", color=INK2)
     FIG.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG / "fig0_method.png", dpi=220, bbox_inches="tight")
     fig.savefig(FIG / "fig0_method.pdf", bbox_inches="tight")

@@ -1,0 +1,16 @@
+exp      tag       condition   n  team_adv_per_round    sd  diff_vs_null_same  p_vs_null_same  adv_when_caught  adv_when_missed
+ s1 deepseek       null_same 150               0.009 0.135              0.000             NaN              NaN            0.009
+ s1 deepseek      pair_aware  30              -0.007 0.125             -0.015           0.549           -0.089            0.002
+ s1 deepseek       pair_chat  30              -0.026 0.134             -0.034           0.210              NaN           -0.026
+ s1 deepseek     pair_hidden  40              -0.057 0.145             -0.066           0.012            0.033           -0.068
+ s1 deepseek  talk_no_action  60              -0.087 0.151             -0.095           0.000           -0.150           -0.084
+ s1 deepseek told_no_channel  40              -0.058 0.147             -0.067           0.012              NaN           -0.058
+ s1    haiku       null_same 150               0.018 0.127              0.000             NaN              NaN            0.018
+ s1    haiku     pair_hidden  40              -0.528 0.170             -0.546           0.000           -0.436           -0.577
+ s1    haiku  talk_no_action  40              -0.141 0.135             -0.159           0.000              NaN           -0.141
+ s1    haiku told_no_channel  30              -0.093 0.160             -0.111           0.001              NaN           -0.093
+ s1    mixed      null_mixed 150               0.050 0.143                NaN             NaN              NaN            0.050
+ s2 deepseek       null_same 100               0.020 1.281              0.000             NaN              NaN            0.020
+ s2 deepseek     pair_hidden  40              -2.300 1.101             -2.320           0.000           -2.130           -2.529
+ s2 deepseek     vendor_leak  40              -2.958 1.761             -2.978           0.000           -2.928           -3.333
+ s2 deepseek   vendor_public  60              -0.083 1.629             -0.103           0.676              NaN           -0.083

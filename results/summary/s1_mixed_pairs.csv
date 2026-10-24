@@ -1,0 +1,7 @@
+detector,flags,same_model_share
+bonjour_alpha,83,0.482
+crt_dev,5,0.2
+crt_mi,6,0.833
+crt_net,4,0.75
+naive_mi_shuffle,30,0.633
+net_shuffle,8,0.75

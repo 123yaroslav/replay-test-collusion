@@ -1,0 +1,16 @@
+               tag       condition  blocks  rounds_per_block  flag_rate    lo    hi  correct_rate
+          deepseek       null_same      15               300      0.000 0.000 0.204          0.00
+          deepseek      pair_aware       3               300      0.000 0.000 0.562          0.00
+          deepseek       pair_chat       3               300      0.000 0.000 0.562          0.00
+          deepseek     pair_hidden       4               300      0.250 0.046 0.699          0.25
+          deepseek  talk_no_action       6               300      0.000 0.000 0.390          0.00
+          deepseek told_no_channel       4               300      0.000 0.000 0.490          0.00
+             haiku       null_same      15               300      0.267 0.109 0.520          0.00
+             haiku     pair_hidden       4               300      0.000 0.000 0.490          0.00
+             haiku  talk_no_action       4               300      0.750 0.301 0.954          0.00
+             haiku told_no_channel       3               300      0.000 0.000 0.562          0.00
+             mixed      null_mixed      15               300      0.600 0.357 0.802          0.00
+val_gemma-3-12b-it       null_same       4               300      0.250 0.046 0.699          0.00
+val_gemma-3-12b-it     pair_hidden       2               300      0.500 0.095 0.905          0.50
+    val_gpt-6-luna       null_same       4               300      0.250 0.046 0.699          0.00
+    val_gpt-6-luna     pair_hidden       2               300      0.000 0.000 0.658          0.00

@@ -13,7 +13,7 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     d = 1 + z * z / n
     c = (p + z * z / (2 * n)) / d
     h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return (float(c - h), float(c + h))
+    return (max(0.0, float(c - h)), min(1.0, float(c + h)))
 
 
 def p_fpr_below(k: int, n: int, bound: float) -> float:

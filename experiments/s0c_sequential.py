@@ -9,6 +9,7 @@ has no finite-sample guarantee) and power / rounds-to-detection for a colluding 
 from __future__ import annotations
 
 import argparse
+import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from collusion.detect.crt_llm import sequential_replay_test
 from collusion.games.rps import Population, simulate
 
 OUT = Path(__file__).resolve().parents[1] / "results" / "summary"
+BETTOR = os.environ.get("BETTOR", "joint")
 HERD = ("herd_x", "herd_x", "herd_y", "herd_y")
 POPS = {
     "herd": Population(types=HERD),
@@ -38,7 +40,7 @@ def cell(args):
     u = rng.random(ref.shape[:2] + (2,))
     d = (u[..., None] > cdf[:, :, None, :]).sum(axis=3).clip(max=2)
     pool = np.concatenate([a[..., None], d], axis=2)
-    r = sequential_replay_test(pool, alpha=0.05, n_actions=3)
+    r = sequential_replay_test(pool, alpha=0.05, n_actions=3, bettor=BETTOR)
     truth = POPS[pop].colluders
     return {"population": pop, "T": T, "reject": r["reject_round"] is not None,
             "reject_round": r["reject_round"],
@@ -54,7 +56,7 @@ def main():
     with ProcessPoolExecutor() as ex:
         df = pd.DataFrame(list(ex.map(cell, jobs, chunksize=20)))
     OUT.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUT / "s0c_sequential.csv", index=False)
+    df.to_csv(OUT / f"s0c_sequential{'' if BETTOR == 'joint' else '_' + BETTOR}.csv", index=False)
     s = df.groupby(["population", "T"]).agg(reject=("reject", "mean"), correct=("correct", "mean"),
                                            median_round=("reject_round", "median")).round(3)
     print(s.to_string())

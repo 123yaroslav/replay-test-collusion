@@ -190,13 +190,11 @@ def fig3(ax=None):
         if cp not in cols:
             continue
         m = g.groupby("T").correct.mean()
-        ax.plot(m.index, 100 * m.values, color=cols[cp], lw=2, marker="o", ms=4)
-        ax.text(m.index[-1] + 4, 100 * m.values[-1], f"{cp:.0%}", color=INK2, fontsize=7.5,
-                va="center")
+        ax.plot(m.index, 100 * m.values, color=cols[cp], lw=2, marker="o", ms=4,
+                label=f"sim, coordinates {cp:.0%} of rounds")
     fa = pw[pw.cp == 0].groupby("T").flag.mean()
-    ax.plot(fa.index, 100 * fa.values, color=INK2, lw=1.2, ls=(0, (3, 2)), marker="o", ms=3)
-    ax.text(fa.index[-1] + 4, 100 * fa.values[-1], "honest", color=INK2, fontsize=7.5,
-            va="center")
+    ax.plot(fa.index, 100 * fa.values, color=INK2, lw=1.2, ls=(0, (3, 2)), marker="o", ms=3,
+            label="sim, honest (false alarms)")
     # LLM episodes truncated to their first T rounds (results/summary/trunc_*_audits.csv)
     marks = {"deepseek": ("s", "DeepSeek pair (RPS)"), "haiku": ("D", "Haiku pair (RPS)"),
              "deepseek_s2": ("^", "Vendor leak (auction)")}
@@ -216,15 +214,15 @@ def fig3(ax=None):
             m = g.groupby("T").correct_pair.mean()
             ax.plot(m.index, 100 * m.values, ls="none", marker=marks[tag][0], ms=5,
                     mfc="white", mec=INK, mew=1.1, label=marks[tag][1])
-        ax.legend(loc="lower right", fontsize=6.8, handletextpad=0.3)
+    ax.legend(loc="center right", fontsize=5.9, handletextpad=0.3, labelspacing=0.25,
+              borderaxespad=0.2)
     ax.set_xlabel("Rounds in the audited log (T)")
     ax.set_ylabel("Correct pair flagged (%)")
     ax.set_title("Detectability frontier (simulator)", loc="left", fontsize=9,
                  fontweight="bold")
-    ax.set_xlim(15, 140), ax.set_ylim(0, 105)
+    ax.set_xlim(5, 128), ax.set_ylim(0, 105)
     ax.grid(True, color=GRID, lw=0.5)
-    ax.text(0.02, 0.97, "label = share of rounds the\npair coordinates", transform=ax.transAxes,
-            fontsize=6.5, color=INK2, va="top")
+
     if standalone:
         fig.tight_layout()
         save(fig, "fig3_power")
@@ -276,7 +274,9 @@ def table1():
     if rows:
         t = pd.DataFrame(rows)
         t.to_csv(SUM / "table1.csv", index=False)
-        (SUM / "table1.md").write_text(t.to_markdown(index=False))
+        head = "| " + " | ".join(t.columns) + " |\n|" + "---|" * len(t.columns) + "\n"
+        body = "\n".join("| " + " | ".join(str(x) for x in r) + " |" for r in t.itertuples(index=False))
+        (SUM / "table1.md").write_text(head + body)
 
 
 def save(fig, name):

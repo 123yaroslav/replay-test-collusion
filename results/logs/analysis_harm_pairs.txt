@@ -1,0 +1,16 @@
+                 n  overpayment  overpayment_sd  pair_profit  pair_win_share
+condition                                                                   
+null_same      100        8.360           0.720         85.5           0.290
+pair_hidden     40        8.433           1.052         26.5           0.179
+vendor_leak     40       10.142           0.933         51.0           0.106
+vendor_public   60        8.744           0.737         91.5           0.316
+
+null_mixed: share of flags on same-model pairs (2 of 6 pairs are same-model)
+                  flags  same_model_share
+detector                                 
+bonjour_alpha        83             0.482
+crt_dev               5             0.200
+crt_mi                6             0.833
+crt_net               4             0.750
+naive_mi_shuffle     30             0.633
+net_shuffle           8             0.750

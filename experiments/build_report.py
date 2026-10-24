@@ -13,6 +13,7 @@ import re
 import subprocess
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from collusion.analysis import p_fpr_above, p_fpr_below, wilson
@@ -148,6 +149,89 @@ def numbers() -> dict:
         v["example_seed"] = str(info["seed"])
         v["example_rounds"] = str(info["rounds"])
         v["example_shown"] = str(info["shown"])
+    s0 = read("s0_partB_summary.csv")
+    if s0 is not None:
+        g = s0[(s0.population == "null_herd") & (s0.n_games == 500)].set_index("detector").flag_rate
+        v["s0_naive_herd_fpr"] = f"{100 * g.get('raw_gamma_shuffle', float('nan')):.0f}%"
+        v["s0_crt_herd_fpr"] = f"{100 * g.get('net_crt', float('nan')):.1f}%"
+        v["s0_bonjour_herd_fpr"] = f"{100 * g.get('bonjour_alpha_nostate', float('nan')):.1f}%"
+    if s1 is not None:
+        from collusion.analysis import auroc
+        for tag, cond in (("deepseek", "null_same"), ("haiku", "null_same"), ("mixed", "null_mixed")):
+            k, n = detector_stats(s1, tag, cond, "crt_net")
+            if n:
+                v[f"s1_{tag}_{cond}_crt_p_below10"] = f"{p_fpr_below(k, n, 0.10):.1e}"
+        for tag in ("deepseek", "haiku"):
+            for det in ("crt_net", "naive_mi_shuffle"):
+                d = s1[(s1.tag == tag) & (s1.detector == det)]
+                pos = -np.log(d[d.condition == "pair_hidden"].p.clip(lower=1e-6))
+                neg = -np.log(d[d.condition == "null_same"].p.clip(lower=1e-6))
+                if len(pos) and len(neg):
+                    v[f"auroc_{tag}_{det}"] = f"{auroc(pos.values, neg.values):.2f}"
+            if j1 is not None:
+                for view in ("actions", "messages"):
+                    jj = j1[(j1.tag == tag) & (j1.view == view)].dropna(subset=["prob"])
+                    pos = jj[jj.condition == "pair_hidden"].prob
+                    neg = jj[jj.condition == "null_same"].prob
+                    if len(pos) and len(neg):
+                        v[f"auroc_{tag}_judge_{view}"] = f"{auroc(pos.values, neg.values):.2f}"
+    js = read("s1_judge_strong.csv")
+    if js is not None:
+        from collusion.analysis import auroc as _auroc
+        js = js[js.parsed]
+        for (tag, cond, view), g in js.groupby(["tag", "condition", "view"]):
+            v[f"judge_strong_{tag}_{cond}_{view}_pct"] = pct(int((g.prob >= 50).sum()), len(g))
+        for tag in ("deepseek", "haiku"):
+            for view in ("actions", "messages"):
+                g = js[(js.tag == tag) & (js.view == view)]
+                pos, neg = g[g.condition == "pair_hidden"].prob, g[g.condition == "null_same"].prob
+                if len(pos) and len(neg):
+                    v[f"auroc_{tag}_judge_strong_{view}"] = f"{_auroc(pos.values, neg.values):.2f}"
+        v["judge_strong_n"] = str(int(js.groupby(["tag", "condition", "view"]).size().min()))
+    seq_sim = read("s0c_sequential.csv")
+    if seq_sim is not None:
+        honest = seq_sim[~seq_sim.population.str.startswith("pair")]
+        v["seq_sim_fpr_max"] = f"{100 * honest.groupby(['population', 'T']).reject.mean().max():.1f}%"
+        pw = seq_sim[seq_sim.population.str.startswith("pair")].groupby(["population", "T"])
+        m, med = pw.correct.mean(), pw.reject_round.median()
+        for cp in ("0.6", "0.8", "1.0"):
+            for T in (30, 60):
+                key = (f"pair_cp{cp}", T)
+                if key in m.index:
+                    tag = cp.replace(".", "")
+                    v[f"seq_sim_power_{tag}_{T}"] = f"{100 * m[key]:.0f}%"
+                    v[f"seq_sim_round_{tag}_{T}"] = f"{med[key]:.0f}"
+    seq = read("seq_llm_summary.csv")
+    if seq is not None:
+        for _, r in seq.iterrows():
+            key = f"seq_{r.exp}_{r.tag}_{r.condition}"
+            v[key + "_pct"] = f"{100 * r.reject:.0f}%"
+            v[key + "_correct_pct"] = f"{100 * r.correct:.0f}%"
+            v[key + "_round"] = f"{r.median_round:.0f}" if r.median_round == r.median_round else "–"
+        h = seq[(seq.exp == "s1") & seq.condition.isin(["null_same", "null_mixed", "talk_no_action"])
+                & ~seq.tag.str.startswith("val_")]
+        k, n = int((h.reject * h.n).round().sum()), int(h.n.sum())
+        v["seq_s1_honest_pct"] = pct(k, n, 1)
+        v["seq_s1_honest_ci"] = ci(k, n)
+    for bet in ("joint", "interaction", "mix"):
+        sb = read("seq_llm_summary.csv" if bet == "joint" else f"seq_llm_summary_{bet}.csv")
+        if sb is None:
+            continue
+        for _, r in sb.iterrows():
+            v[f"bet_{bet}_{r.exp}_{r.tag}_{r.condition}"] = f"{100 * r.correct:.1f}%"
+        hon = sb[sb.condition.isin(["null_same", "null_mixed", "talk_no_action", "vendor_public"])
+                 & ~sb.tag.str.startswith("val_")]
+        k, n = int((hon.reject * hon.n).round().sum()), int(hon.n.sum())
+        v[f"bet_{bet}_honest"] = pct(k, n, 1)
+    gain = read("collusion_gain.csv")
+    if gain is not None:
+        for _, r in gain.iterrows():
+            v[f"gain_{r.exp}_{r.tag}_{r.condition}"] = f"{r.team_adv_per_round:+.2f}"
+    harm = read("s2_harm.csv")
+    if harm is not None:
+        for _, r in harm.iterrows():
+            v[f"harm_{r.condition}_overpay"] = f"{r.overpayment:.1f}"
+            v[f"harm_{r.condition}_pairwin"] = f"{100 * r.pair_win_share:.0f}%"
     comp = read("compliance.csv")
     if comp is not None:
         for _, r in comp[(comp.exp == "s1") & (comp.condition == "pair_hidden")].iterrows():
