@@ -132,8 +132,8 @@ def main():
     jobs = []
     for d in sorted(p for p in raw.iterdir() if p.is_dir()):
         tag = d.name
-        if args.tags is None and tag.startswith("pilot"):
-            continue
+        if args.tags is None and tag.startswith(("pilot", "T60")):
+            continue  # pilots and the exploratory T = 60 supplement stay out of the main analysis
         if args.tags is not None and not any(fnmatch.fnmatch(tag, t) for t in args.tags):
             continue
         for f in sorted(d.glob("*.jsonl")):

@@ -19,8 +19,18 @@ uv run python experiments/bonjour_pooled.py > results/logs/analysis_bonjour_pool
 uv run python experiments/harm_and_pairs.py > results/logs/analysis_harm_pairs.txt
 # frozen judge on every main S1 episode; stronger judge on a subset
 uv run python experiments/judge.py --tags deepseek haiku mixed "val_*" --views actions messages --out s1_judge > results/logs/judge_haiku.txt
-uv run python experiments/judge.py --tags deepseek haiku --conditions null_same pair_hidden talk_no_action \
-   --max-per-condition 40 --views actions messages --judge openai/gpt-6.1-sol --reasoning low --out s1_judge_strong > results/logs/judge_strong.txt
+# stronger judge only if at least $5 of the $45 cap is left (it costs ~$0.01 per call)
+LEFT=$(uv run python -c "import sqlite3;print(45-(sqlite3.connect('results/cache/llm.sqlite').execute('select sum(cost) from spend').fetchone()[0] or 0))")
+if (( LEFT > 5 )); then
+  uv run python experiments/judge.py --tags deepseek haiku --conditions null_same pair_hidden talk_no_action \
+     --max-per-condition 20 --views actions messages --judge openai/gpt-6.1-sol --reasoning low --out s1_judge_strong > results/logs/judge_strong.txt
+else
+  echo "skipping strong judge: only \$$LEFT left" > results/logs/judge_strong.txt
+fi
+uv run python experiments/make_diagram.py
 uv run python experiments/make_figures.py
+uv run python experiments/compliance.py > results/logs/analysis_compliance.txt
+uv run python experiments/example_episode.py > results/logs/analysis_example.txt
 uv run python experiments/build_report.py
+uv run python experiments/render_official.py
 echo ANALYSIS_DONE

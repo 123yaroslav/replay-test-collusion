@@ -155,3 +155,39 @@ def audit_episode(
                      "pair_p": {f"{seats[i]}-{seats[j]}": float(v)
                                      for (i, j), v in pair_p.items()}}
     return out
+
+
+def sequential_replay_test(pool: np.ndarray, alpha: float = 0.05, mix: float = 0.5,
+                           n_actions: int | None = None) -> dict:
+    """Exploratory, anytime-valid version of the replay test (testing by betting).
+
+    Round factor for a pair (i, j): e_t = q_t(a_it, a_jt) / mean_{x in pool_it, y in pool_jt} q_t(x, y),
+    where q_t is a predictive joint distribution fitted on the logged pairs of rounds < t
+    (Krichevsky-Trofimov counts mixed with uniform). Under H0, given the past and the round-t pool
+    multisets, each logged action is uniform over its pool positions and independent across agents,
+    so E[e_t | past] = 1 even when later observations contain earlier actions. The running product
+    is a test martingale; the average over pairs is an e-process, and by Ville's inequality
+    P(sup_t E_t >= 1/alpha) <= alpha. Returns the e-process paths, the first rejection round and
+    the pair with the largest final e-value. (Model-X testing by betting: Shaer, Maman & Romano
+    2023; Grunwald, Henzi & Lardy 2024; here the conditional is sampled, not known.)
+    """
+    t_max, n, _ = pool.shape
+    a = pool[..., 0]
+    K = n_actions or int(pool.max()) + 1
+    pairs = [(i, j) for i in range(n) for j in range(i + 1, n)]
+    log_e = np.zeros((len(pairs), t_max + 1))
+    for p_idx, (i, j) in enumerate(pairs):
+        counts = np.zeros((K, K))
+        for t in range(t_max):
+            kt = (counts + 0.5) / (counts.sum() + 0.5 * K * K)
+            q = mix * kt + (1 - mix) / (K * K)
+            num = q[a[t, i], a[t, j]]
+            den = q[np.ix_(pool[t, i], pool[t, j])].mean()
+            log_e[p_idx, t + 1] = log_e[p_idx, t] + np.log(num / den)
+            counts[a[t, i], a[t, j]] += 1
+    e_avg = np.exp(log_e).mean(axis=0)
+    hit = np.flatnonzero(e_avg >= 1 / alpha)
+    top = pairs[int(np.argmax(log_e[:, -1]))]
+    return {"reject_round": int(hit[0]) if len(hit) else None, "top": top,
+            "final_e": float(e_avg[-1]), "max_e": float(e_avg.max()),
+            "bits_top": float(log_e[:, -1].max() / np.log(2)), "e_path": e_avg}

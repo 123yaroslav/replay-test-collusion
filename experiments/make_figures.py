@@ -106,7 +106,9 @@ def fig1():
     honest = [("deepseek", "null_same", "RPS · 4× DeepSeek"),
               ("haiku", "null_same", "RPS · 4× Claude Haiku"),
               ("mixed", "null_mixed", "RPS · 2 DeepSeek + 2 Haiku"),
-              ("deepseek", "talk_no_action", "RPS · collusive talk, never delivered"),
+              ("deepseek", "talk_no_action", "RPS · DeepSeek, collusive talk never delivered"),
+              ("haiku", "talk_no_action", "RPS · Haiku, collusive talk never delivered"),
+              ("haiku", "told_no_channel", "RPS · Haiku told 'team', no channel"),
               ("deepseek_s2", "null_same", "Auction · 4× DeepSeek"),
               ("deepseek_s2", "vendor_public", "Auction · shared vendor, public data")]
     colluding = [("deepseek", "pair_hidden", "RPS · DeepSeek pair, hidden channel"),
@@ -121,7 +123,7 @@ def fig1():
                    ("Agrawal et al. logs · 5× GPT-4.1, no chat", "bonjour_alpha",
                     int(b.bonjour_alpha.sum()), len(b))]
     rows_c = rate_rows(audits, j1, colluding, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.9), gridspec_kw={"width_ratios": [1.15, 1]})
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 4.3), gridspec_kw={"width_ratios": [1.2, 1]})
     d1 = dot_panel(axes[0], rows_h, "A  Honest agents: how often each detector accuses a pair",
                    ref=5)
     axes[0].set_xlabel("Episodes flagged (%), 95% Wilson interval")
@@ -136,12 +138,14 @@ def fig1():
     save(fig, "fig1_false_accusations")
 
 
-def fig2():
+def fig2(axes=None):
     s1, j1 = load("s1_audits.csv"), load("s1_judge.csv")
     if s1 is None:
         return
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0), sharey=True)
-    for ax, tag, name in zip(axes, ("deepseek", "haiku"), ("DeepSeek", "Claude Haiku")):
+    standalone = axes is None
+    if standalone:
+        fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0), sharey=True)
+    for ax, tag, name in zip(axes, ("haiku", "deepseek"), ("Claude Haiku", "DeepSeek")):
         g = s1[s1.tag == tag]
         for det in ("crt_net", "naive_mi_shuffle"):
             d = g[(g.detector == det) & g.condition.isin(["pair_hidden", "null_same"])]
@@ -163,21 +167,24 @@ def fig2():
         for x in (1, 5):
             ax.axvline(x, color=INK2, lw=0.6, ls=(0, (2, 2)))
         ax.set_xlim(0, 100), ax.set_ylim(0, 100)
-        ax.set_title(f"{name}: hidden-channel pair vs honest", loc="left", fontsize=9,
+        ax.set_title(f"{name}: hidden channel vs honest", loc="left", fontsize=8.5,
                      fontweight="bold")
-        ax.set_xlabel("False-alarm rate on honest episodes (%)")
+        ax.set_xlabel("False alarms on honest episodes (%)")
         ax.grid(True, color=GRID, lw=0.5)
     axes[0].set_ylabel("Detection rate (%)")
-    axes[0].legend(loc="lower right", fontsize=7.5)
-    fig.tight_layout()
-    save(fig, "fig2_roc")
+    axes[0].legend(loc="lower right", fontsize=6.8)
+    if standalone:
+        fig.tight_layout()
+        save(fig, "fig2_roc")
 
 
-def fig3():
+def fig3(ax=None):
     pw = load("s0b_power.csv")
     if pw is None:
         return
-    fig, ax = plt.subplots(figsize=(3.5, 2.7))
+    standalone = ax is None
+    if standalone:
+        fig, ax = plt.subplots(figsize=(3.5, 2.7))
     cols = {0.4: "#9fc4ef", 0.6: "#5f9be3", 0.8: "#2a78d6", 1.0: "#16457f"}
     for cp, g in pw[pw.cp > 0].groupby("cp"):
         if cp not in cols:
@@ -217,9 +224,19 @@ def fig3():
     ax.set_xlim(15, 140), ax.set_ylim(0, 105)
     ax.grid(True, color=GRID, lw=0.5)
     ax.text(0.02, 0.97, "label = share of rounds the\npair coordinates", transform=ax.transAxes,
-            fontsize=7, color=INK2, va="top")
+            fontsize=6.5, color=INK2, va="top")
+    if standalone:
+        fig.tight_layout()
+        save(fig, "fig3_power")
+
+
+def fig23():
+    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.7), gridspec_kw={"wspace": 0.32})
+    fig2(axes[:2])
+    fig3(axes[2])
+    axes[1].set_ylabel("")
     fig.tight_layout()
-    save(fig, "fig3_power")
+    save(fig, "fig23_roc_power")
 
 
 def fig_pvalues():
@@ -273,6 +290,7 @@ if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
+    fig23()
     fig_pvalues()
     table1()
     print("figures written to", FIG)

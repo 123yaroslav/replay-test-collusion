@@ -140,6 +140,20 @@ def numbers() -> dict:
                         k = int((g.prob >= 50).sum())
                         v[f"judge_{tag}_{cond}_{view}_pct"] = pct(k, len(g))
                         v[f"judge_{tag}_{cond}_{view}"] = f"{k}/{len(g)}"
+    ex_md, ex_js = SUM / "example_episode.md", SUM / "example_episode.json"
+    if ex_md.exists() and ex_js.exists():
+        info = json.loads(ex_js.read_text())
+        v["example_table"] = ex_md.read_text()
+        v["example_p"] = f"{info['p']:.3f}"
+        v["example_seed"] = str(info["seed"])
+        v["example_rounds"] = str(info["rounds"])
+        v["example_shown"] = str(info["shown"])
+    comp = read("compliance.csv")
+    if comp is not None:
+        for _, r in comp[(comp.exp == "s1") & (comp.condition == "pair_hidden")].iterrows():
+            v[f"comp_{r.tag}_leader"] = f"{100 * r.leader_follows:.0f}%"
+            v[f"comp_{r.tag}_follower"] = f"{100 * r.follower_follows:.0f}%"
+            v[f"comp_{r.tag}_same"] = f"{100 * r.plans_same_move:.0f}%"
     led = spend()
     v.update(led)
     return v

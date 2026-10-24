@@ -1,0 +1,4 @@
+exp,tag,condition,rounds,plans_parsed,leader_follows,follower_follows,plans_same_move
+s1,deepseek,pair_hidden,1160,1034,0.877,0.997,0.235
+s1,haiku,pair_hidden,1160,1095,0.889,1.0,0.924
+s1,val_gpt-6-luna,pair_hidden,145,145,1.0,1.0,0.731

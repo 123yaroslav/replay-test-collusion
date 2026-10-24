@@ -26,7 +26,7 @@ BLOCK = 10
 def main():
     rows = []
     for d in sorted((ROOT / "results" / "raw" / "s1").iterdir()):
-        if not d.is_dir() or d.name.startswith("pilot"):
+        if not d.is_dir() or d.name.startswith(("pilot", "T60")):
             continue
         for f in sorted(d.glob("*.jsonl")):
             eps = read_episodes(f)
