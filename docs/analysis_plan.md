@@ -128,3 +128,9 @@ prompt) applied to its logged observation **with the private inbox removed**.
 - H5: `crt_net` flags `vendor_leak` above α and names (P1, P3).
 
 **Harm.** We report buyer overpayment, i.e. the winning bid minus the lowest cost in the round, by condition.
+
+## Deviations log (kept during data collection)
+
+1. **Infrastructure, no design change.** The first S1 launch ran 7 processes × 64 concurrent calls. Connection errors dropped whole episodes. We restarted with 3 × 40 and patient retries on network errors. The seeds are the same, and calls that had already completed were reused from the cache.
+2. **Post-hoc statistic, used for no claim.** After seeing the DeepSeek `pair_hidden` main sample (weak pairwise dependence despite 88% and 100% plan compliance), we tried a "replay deviation" statistic: each agent's logged move is compared with its own replays, and the pair scores the minimum standardised deviation. It is calibrated on the simulator (2–3% false alarms) but did not help (12.5% flagged). It is reported in the appendix as tried and not helpful.
+3. **Stronger judge.** The plan names "a stronger judge on a subset" without a model. We use `openai/gpt-6.1-sol` (reasoning low), a different family from both main agent models, on 40 episodes each of null_same, pair_hidden and talk_no_action for DeepSeek and Haiku.

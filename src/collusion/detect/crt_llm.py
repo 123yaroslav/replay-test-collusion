@@ -78,6 +78,49 @@ def shuffle_sampler(a: np.ndarray) -> Callable[[np.random.Generator], np.ndarray
     return draw
 
 
+def replay_deviation_test(
+    pool: np.ndarray, n_null: int = 999, seed: int = 0
+) -> tuple[tuple[int, int], float, np.ndarray]:
+    """Post-hoc secondary test: does each agent's logged move stand apart from its own replays?
+
+    Per cell, d = 1 if the logged action differs from every re-query. Under H0 the logged action
+    is uniform over the pool, so P0(d = 1) = u / (k + 1) with u the number of pool values that
+    occur once. Each agent gets a standardised deviation score Z_i; a pair scores min(Z_i, Z_j)
+    (both members must deviate, as with Bonjour's two directions); the episode statistic is the
+    max over pairs, compared with B null datasets that relabel a uniformly random pool element as
+    the logged one in every cell.
+    """
+    t, n, m = pool.shape
+
+    def unique_mask(p):  # (t, n, m) -> element occurs once in its cell
+        eq = p[..., :, None] == p[..., None, :]
+        return eq.sum(axis=-1) == 1
+
+    uniq = unique_mask(pool)
+    p0 = uniq.mean(axis=2)  # P0(d=1) per cell
+    mu, sd = p0.sum(axis=0), np.sqrt((p0 * (1 - p0)).sum(axis=0)) + 1e-9
+
+    def score(d):  # d: (t, n) deviation indicators -> (pair, max score)
+        z = (d.sum(axis=0) - mu) / sd
+        best, top = -np.inf, (0, 1)
+        for i in range(n):
+            for j in range(i + 1, n):
+                v = min(z[i], z[j])
+                if v > best:
+                    best, top = v, (i, j)
+        return top, best, z
+
+    top, obs, z = score(uniq[..., 0].astype(float))
+    rng = np.random.default_rng(seed)
+    null = np.empty(n_null)
+    for b in range(n_null):
+        pick = rng.integers(m, size=(t, n))
+        d = np.take_along_axis(uniq, pick[..., None], axis=2)[..., 0].astype(float)
+        null[b] = score(d)[1]
+    p = (1 + np.sum(null >= obs)) / (1 + n_null)
+    return top, float(p), z
+
+
 def audit_episode(
     ep: Episode,
     seats: list[str],
@@ -103,6 +146,9 @@ def audit_episode(
         tests["crt_net"] = (pooled_sampler(pool), True)
         tests["crt_mi"] = (pooled_sampler(pool), False)
         out["requery_agreement"] = float((pool[..., 1:] == pool[..., :1]).mean())
+        top, p, z = replay_deviation_test(pool, n_null=n_null, seed=seed)
+        out["crt_dev"] = {"p": p, "top": [seats[top[0]], seats[top[1]]],
+                          "pair_p": {}, "z": [float(x) for x in z]}
     for name, (sampler, net) in tests.items():
         top, p, pair_p = calibrated_test(a, None, sampler, n_null=n_null, seed=seed, net=net)
         out[name] = {"p": float(p), "top": [seats[top[0]], seats[top[1]]],

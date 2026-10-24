@@ -33,7 +33,7 @@ COARSEN = {"s1": None, "s2": {60: 0, 70: 0, 80: 0, 90: 1, 100: 1}}
 SEATS = ["P1", "P2", "P3", "P4"]
 PAIR = ("P1", "P3")
 NULLS = {"null_same", "null_mixed", "talk_no_action", "vendor_public"}  # no information flow
-DETECTORS = ["bonjour_alpha", "naive_mi_shuffle", "net_shuffle", "crt_net", "crt_mi"]
+DETECTORS = ["bonjour_alpha", "naive_mi_shuffle", "net_shuffle", "crt_net", "crt_mi", "crt_dev"]
 
 
 def pair_effect(ep, space, coarsen=None, n_draw: int = 200) -> float:

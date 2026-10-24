@@ -98,6 +98,8 @@ def dot_panel(ax, rows, title, ref=None):
 def fig1():
     s1, s2 = load("s1_audits.csv"), load("s2_audits.csv")
     j1, ag = load("s1_judge.csv"), load("agrawal_panel_runs.csv")
+    if s1 is None and s2 is None:
+        return
     if s2 is not None:
         s2 = s2.assign(tag=s2.tag + "_s2")  # S1 and S2 both use the tag "deepseek"
     audits = pd.concat([d for d in (s1, s2) if d is not None], ignore_index=True)
@@ -188,6 +190,26 @@ def fig3():
     ax.plot(fa.index, 100 * fa.values, color=INK2, lw=1.2, ls=(0, (3, 2)), marker="o", ms=3)
     ax.text(fa.index[-1] + 4, 100 * fa.values[-1], "honest", color=INK2, fontsize=7.5,
             va="center")
+    # LLM episodes truncated to their first T rounds (results/summary/trunc_*_audits.csv)
+    marks = {"deepseek": ("s", "DeepSeek pair (RPS)"), "haiku": ("D", "Haiku pair (RPS)"),
+             "deepseek_s2": ("^", "Vendor leak (auction)")}
+    pts = []
+    for f in sorted(SUM.glob("trunc*_audits.csv")):
+        d = pd.read_csv(f)
+        d = d[(d.detector == "crt_net") & d.condition.isin(["pair_hidden", "vendor_leak"])]
+        if "exp" in d and (d.exp == "s2").any():
+            d = d.assign(tag=d.tag + "_s2")
+        pts.append(d)
+    if pts:
+        d = pd.concat(pts)
+        d = d[~((d.tag == "deepseek_s2") & (d.condition == "pair_hidden"))]
+        for tag, g in d.groupby("tag"):
+            if tag not in marks:
+                continue
+            m = g.groupby("T").correct_pair.mean()
+            ax.plot(m.index, 100 * m.values, ls="none", marker=marks[tag][0], ms=5,
+                    mfc="white", mec=INK, mew=1.1, label=marks[tag][1])
+        ax.legend(loc="lower right", fontsize=6.8, handletextpad=0.3)
     ax.set_xlabel("Rounds in the audited log (T)")
     ax.set_ylabel("Correct pair flagged (%)")
     ax.set_title("Detectability frontier (simulator)", loc="left", fontsize=9,
@@ -198,6 +220,25 @@ def fig3():
             fontsize=7, color=INK2, va="top")
     fig.tight_layout()
     save(fig, "fig3_power")
+
+
+def fig_pvalues():
+    s1 = load("s1_audits.csv")
+    if s1 is None:
+        return
+    honest = s1[s1.condition.isin(["null_same", "null_mixed", "talk_no_action"])
+                & ~s1.tag.str.startswith("val_")]
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.2), sharey=True)
+    for ax, det in zip(axes, ("crt_net", "naive_mi_shuffle")):
+        p = honest[honest.detector == det].p.dropna()
+        ax.hist(p, bins=np.linspace(0, 1, 21), color=C[det], edgecolor="white", lw=1.0)
+        ax.axhline(len(p) / 20, color=INK2, lw=0.8, ls=(0, (3, 2)))
+        ax.set_title(f"{NAMES[det]}: p-values on {len(p)} honest episodes", loc="left",
+                     fontsize=8.5, fontweight="bold")
+        ax.set_xlabel("p-value")
+    axes[0].set_ylabel("Episodes")
+    fig.tight_layout()
+    save(fig, "figA_pvalues")
 
 
 def table1():
@@ -232,5 +273,6 @@ if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
+    fig_pvalues()
     table1()
     print("figures written to", FIG)
