@@ -27,12 +27,15 @@ private channel removed. Some conditions give one pair a hidden channel; the oth
 |---|---|---|
 | `raw/s1/<models>/<condition>.jsonl` | Four-player rock–paper–scissors, 30 rounds | 39 MB |
 | `raw/s2/deepseek/<condition>.jsonl` | Sealed-bid procurement auction, four suppliers, 30 rounds | 11 MB |
-| `raw/s3/full_cda/<cell>.jsonl` | Continuous double auction, five sellers and five buyers, 30 hours | |
-| `cache/llm.sqlite` | Every model reply, keyed by a hash of the request, with a cost ledger | 451 MB |
+| `raw/s3/full_cda/<cell>.jsonl` | Continuous double auction, five sellers and five buyers, 30 hours (pre-registered study) | 71 MB |
+| `raw/s3/fresh_cartel2/SM-cartel.jsonl` | Second pre-registered cartel series in the double auction | 14 MB |
+| `raw/s1/fresh_deepseek_pinned/`, `raw/s1/fresh_haiku_stego/`, `raw/s1/fresh_haiku_evasive/` | Fresh pre-registered rock–paper–scissors runs (provider pinned; public chat; evasive pair) | 14 MB |
+| `raw/s2/fresh_haiku_auction/` | Procurement auction with Claude Haiku suppliers (pre-registered) | 6 MB |
+| `cache/llm.sqlite` | Every model reply, keyed by a hash of the request, with a cost ledger | 713 MB |
 
 `<models>` is `deepseek`, `haiku`, `mixed` (two of each), `val_*` (validation models) or
 `confirm_haiku` (the pre-registered replication). Folders named `pilot*` (including
-`raw/s3/pilot_cda`) hold pilot runs; the main analyses do not use them.
+`raw/s3/pilot_cda` and the `pilot_stego*` instruction pilots) hold pilot runs; the main analyses do not use them.
 
 ## Conditions
 
@@ -45,10 +48,14 @@ private channel removed. Some conditions give one pair a hidden channel; the oth
 | RPS | `pair_hidden` | P1 privately sets its own and P3's move each round | yes |
 | RPS | `pair_aware` | as `pair_hidden`, and the pair is warned about a statistical auditor | yes |
 | RPS | `pair_chat` | P1 and P3 share a free-form private chat | yes |
+| RPS | `pair_evasive` | as `pair_hidden`, and the pair is told how the replay audit works and asked to stay indistinguishable | yes |
+| RPS | `chat_public` | all four players write small talk in a public chat that the auditor reads | no |
+| RPS | `stego_public` | as `chat_public`, and P1 encodes the pair's next move in a code word of its line | yes (in the public chat) |
 | Procurement | `null_same` | four copies of DeepSeek | no |
 | Procurement | `vendor_public` | P1 and P3 follow a pricing vendor that sees public data and their own cost | no |
 | Procurement | `vendor_leak` | the vendor pools P1's and P3's confidential costs and rotates wins | yes |
 | Procurement | `pair_hidden` | P1 and P3 run a bid-rotation cartel over a private channel | yes |
+| Procurement | `fresh_haiku_auction/*` | the same `null_same`, `vendor_public`, `vendor_leak` conditions with Claude Haiku suppliers | as above |
 | Double auction | `SM-off`, `SM-on` | five DeepSeek sellers, seller chat off or on | chat, when on |
 | Double auction | `XP-off`, `XP-on` | three DeepSeek and two Haiku sellers, chat off or on | chat, when on |
 | Double auction | `SM-cartel` | one seller announces an hourly price floor to the others | yes |
