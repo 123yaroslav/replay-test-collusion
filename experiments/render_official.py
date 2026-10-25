@@ -209,6 +209,8 @@ def add_heading(d, text, level):
 def add_body(d, text):
     p = para(d, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_runs(p, text, size=BODY_PT)
+    if text.startswith("**") and len(text) < 60:  # a run-in heading on its own line
+        p.paragraph_format.keep_with_next = True
 
 
 def add_list_item(d, marker, text, size=BODY_PT, level=1):

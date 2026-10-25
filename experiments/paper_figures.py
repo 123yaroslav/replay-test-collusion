@@ -144,7 +144,7 @@ def _rows(audits, settings, metric):
     return out
 
 
-def _dots(ax, rows, ref=None):
+def _dots(ax, rows, ref=None, min_rows=None):
     labels = list(dict.fromkeys(r[0] for r in rows))
     dets = [d for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")
             if any(r[1] == d for r in rows)]
@@ -161,12 +161,13 @@ def _dots(ax, rows, ref=None):
             ax.plot(100 * k / n, yy, "o", ms=4.6, color=C[det], mec="white", mew=0.8, zorder=3)
     if ref is not None:
         ax.axvline(ref, color=INK2, lw=0.7, ls=(0, (3, 2)))
-        ax.text(ref + 1.5, len(labels) - 0.55, r"$\alpha$ = 5%", fontsize=8, color=INK2,
-                va="bottom")
+        ax.text(ref + 1.0, -0.62, r"$\alpha$ = 5%", fontsize=8, color=INK2, va="bottom",
+                ha="left", clip_on=False)
     ax.set_yticks(range(len(labels)), labels)
-    ax.set_ylim(len(labels) - 0.5, -0.5)
+    ax.set_ylim(max(len(labels), min_rows or 0) - 0.5, -0.5)
     ax.set_xlim(0, 100)
-    ax.tick_params(axis="y", length=0)
+    ax.tick_params(axis="y", length=0, labelsize=8.5)
+    ax.tick_params(axis="x", labelsize=8.5)
     ax.xaxis.grid(True, color=GRID, lw=0.5)
     ax.set_axisbelow(True)
     return dets
@@ -218,12 +219,13 @@ def fig_roc():
         ax.plot(np.clip(100 * fpr, 0.5, None), 100 * tpr, color=C["judge"], lw=1.6,
                 drawstyle="steps-post", label=NAMES["judge"])
         xs = np.logspace(np.log10(0.5), 2, 50)
-        ax.plot(xs, xs, color=GRID, lw=0.8)
+        ax.plot(xs, xs, color="#b5b3ab", lw=0.9, label="chance")
         for x in (1, 5):
-            ax.axvline(x, color=INK2, lw=0.6, ls=(0, (2, 2)))
+            ax.axvline(x, color=INK2, lw=0.9, ls=(0, (3, 2)))
         ax.set_xscale("log")
         ax.set_xlim(0.5, 100), ax.set_ylim(0, 100)
-        ax.set_xticks([1, 5, 20, 100], ["1", "5", "20", "100"])
+        ax.set_xticks([1, 5, 20, 100], ["1%", "5%", "20", "100"])
+        ax.tick_params(labelsize=8.5)
         ax.set_xlabel("Honest games flagged (%), log scale")
         ax.text(0.6, 93, name, fontsize=8.5, fontstyle="italic", va="top")
         ax.grid(True, color=GRID, lw=0.5)
@@ -295,7 +297,7 @@ def fig_all_conditions():
                              gridspec_kw={"width_ratios": [1, 1], "wspace": 1.15})
     _dots(axes[0], rows_h, ref=5)
     axes[0].set_xlabel("Honest games flagged (%)")
-    _dots(axes[1], rows_c)
+    _dots(axes[1], rows_c, min_rows=len(set(r[0] for r in rows_h)))
     axes[1].set_xlabel("True pair named (%)")
     panel_label(axes[0], "a", x=-0.9)
     panel_label(axes[1], "b", x=-0.9)
@@ -355,8 +357,9 @@ def fig_growth():
     for ax, prior, lab in zip(axes, ("uniform", "skewed"), ("a", "b")):
         d = g[(g.prior == prior) & (g.channel == "copy")].sort_values("eps")
         ax.plot(d.eps, d.kl, color=INK2, lw=1, ls=(0, (3, 2)), label="KL ceiling")
-        for b in ("joint", "interaction", "ratio"):
-            ax.plot(d.eps, d[f"{b}_k2"], color=cols[b], lw=1.5, marker="o", ms=3, label=labels[b])
+        for b in ("joint", "ratio", "interaction"):
+            ax.plot(d.eps, d[f"{b}_k2"], color=cols[b], lw=1.5, marker="o", ms=3, label=labels[b],
+                    ls=(0, (4, 2)) if b == "interaction" else "-", zorder=3 if b == "interaction" else 2)
         ax.axhline(0, color=INK2, lw=0.6)
         ax.set_xlabel("Channel strength (share of copied moves)")
         ax.text(0.04, 0.93, "uniform priors" if prior == "uniform" else "shared skewed priors",
