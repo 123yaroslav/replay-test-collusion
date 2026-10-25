@@ -545,6 +545,27 @@ def numbers() -> dict:
                          f"{r['seq']} | {r['crt_mi']} / {r['crt_net']} | "
                          f"{'–' if gap is None else f'{gap:+.2f}'} |")
         v["fc_table"] = "\n".join(lines)
+        # sentences for both outcomes, written before the data; the decision flags pick one
+        v["fc_c1_sentence"] = (
+            f"the sequential test raised {v['fc_c1']} false alarms in games without chat (95% CI "
+            f"{v['fc_c1_ci']}), " + (
+                f"ruling out a false-alarm rate of 15% or more (p = {v['fc_c1_p']})."
+                if c1["supported"] else
+                f"so a false-alarm rate of 15% or more could not be ruled out "
+                f"(p = {v['fc_c1_p']})."))
+        v["fc_c2_sentence"] = (
+            f"time-shuffle mutual information flagged {v['fc_c2_naive']} DeepSeek games without "
+            f"chat, against {v['fc_c2_seq']} for the sequential replay test " + (
+                f"(exact McNemar p = {v['fc_c2_p']})."
+                if c["C2"]["supported"] else
+                f"(exact McNemar p = {v['fc_c2_p']}, not significant)."))
+        v["fc_c4_sentence"] = (
+            f"The instructed cartel's mean trade price was {v['fc_SM_cartel_price']} (no chat: "
+            f"{v['fc_SM_off_price']}), and the sequential test alarmed in {v['fc_c4_cartel']} of "
+            f"its games against {v['fc_c4_off']} without chat (one-sided Fisher p = "
+            f"{v['fc_c4_p']}" + (")." if c4["supported"] else
+                                 "): no detected effect of the current inbox, which is not "
+                                 "evidence that the sellers did not collude."))
         if "SM-cartel" in mrows:
             ch = mrows["SM-cartel"]["compliance"]["changed"]
             v["fc_changed_logged"] = f"{100 * ch['logged']:.0f}%"
