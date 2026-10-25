@@ -673,6 +673,38 @@ def numbers() -> dict:
             n = d[(d.stat == "gap_follower") & (d.split.isin(["same", "change"]))]
             v["floor_n_same"] = str(int(n[n.split == "same"].n_episode_hours.iloc[0])) if (n.split == "same").any() else "–"
             v["floor_n_change"] = str(int(n[n.split == "change"].n_episode_hours.iloc[0])) if (n.split == "change").any() else "–"
+    # exploratory, post hoc: replay co-departure test on all existing games (departure_llm.py)
+    dl = read("departure_llm.csv")
+    if dl is not None:
+        label = {("s1", "haiku", "null_same"): "Honest, 4 × Haiku", ("s1", "deepseek", "null_same"): "Honest, 4 × DeepSeek",
+                 ("s1", "mixed", "null_mixed"): "Honest, mixed models", ("s1", "haiku", "talk_no_action"): "Undelivered plans, Haiku",
+                 ("s1", "deepseek", "talk_no_action"): "Undelivered plans, DeepSeek", ("s1", "haiku", "told_no_channel"): "Team, no channel, Haiku",
+                 ("s1", "deepseek", "told_no_channel"): "Team, no channel, DeepSeek", ("s2", "deepseek", "null_same"): "Honest, auction",
+                 ("s2", "deepseek", "vendor_public"): "Public-data vendor", ("s1", "haiku", "pair_hidden"): "Secret plan, Haiku",
+                 ("s1", "confirm_haiku", "pair_hidden"): "Secret plan, Haiku (replication)", ("s1", "deepseek", "pair_hidden"): "Secret plan, DeepSeek",
+                 ("s1", "val_gpt-6-luna", "pair_hidden"): "Secret plan, GPT-6 Luna", ("s1", "val_gemma-3-12b-it", "pair_hidden"): "Secret plan, Gemma 3 12B",
+                 ("s1", "val_gpt-oss-20b", "pair_hidden"): "Secret plan, gpt-oss-20b", ("s2", "deepseek", "vendor_leak"): "Pooled-data vendor",
+                 ("s2", "deepseek", "pair_hidden"): "Bid-rotation cartel"}
+
+        def pc2(x):
+            return f"{100 * x:.1f}%".replace(".0%", "%")
+
+        lines = ["| Condition | Games | Flagged | True pair named | Per-agent departure flagged |",
+                 "|---|---|---|---|---|"]
+        for key, lab in label.items():
+            r = dl[(dl.exp == key[0]) & (dl.tag == key[1]) & (dl.condition == key[2])]
+            if r.empty:
+                continue
+            r = r.iloc[0]
+            lines.append(f"| {lab} | {int(r.n)} | {pc2(r.pair_flag)} | {pc2(r.pair_named) if r.colluding else '–'} | {pc2(r.agent_flag)} |")
+        v["dep_table"] = "\n".join(lines)
+        hon = dl[~dl.colluding]
+        v["dep_honest_max"] = pc2(hon.pair_flag.max())
+        for key, name in (("haiku", "haiku"), ("deepseek", "deepseek")):
+            r = dl[(dl.exp == "s1") & (dl.tag == key) & (dl.condition == "pair_hidden")].iloc[0]
+            v[f"dep_{name}_pair_named"] = pc2(r.pair_named)
+        r = dl[(dl.exp == "s2") & (dl.condition == "vendor_leak")].iloc[0]
+        v["dep_vendor_named"] = pc2(r.pair_named)
     # fresh pre-registered runs (docs/fresh_plan.md): experiments/fresh_analysis.py
     fr = SUM / "fresh_results.json"
     if fr.exists():
