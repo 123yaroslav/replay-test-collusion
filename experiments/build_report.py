@@ -553,6 +553,10 @@ def numbers() -> dict:
                 if c1["supported"] else
                 f"so a false-alarm rate of 15% or more could not be ruled out "
                 f"(p = {v['fc_c1_p']})."))
+        v["fc_abstract_sentence"] = (
+            "In a pre-registered study of the organisers' double auction, the sequential version "
+            + ("ruled out false-alarm rates of 15% or more." if c1["supported"] else
+               f"could not rule out false-alarm rates of 15% or more ({v['fc_c1']} alarms)."))
         v["fc_c2_sentence"] = (
             f"time-shuffle mutual information flagged {v['fc_c2_naive']} DeepSeek games without "
             f"chat, against {v['fc_c2_seq']} for the sequential replay test " + (
