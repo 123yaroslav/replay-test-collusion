@@ -41,9 +41,13 @@ identical observation with the audited channel removed.
 ```python
 from collusion.audit import audit
 
-for r in audit("logs.jsonl"):
+for r in audit("logs.jsonl", action_space=["rock", "paper", "scissors"]):
     print(r["episode_id"], r["flag"], r["pair"], r["p_value"], r["seq_alarm_round"])
 ```
+
+Fix the action space before the audit and pass it as `action_space` (bin many-valued actions such
+as prices with `coarsen`). The sequential test's guarantee requires an alphabet that does not
+depend on the data.
 
 | Output | Meaning |
 |---|---|
