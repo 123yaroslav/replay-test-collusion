@@ -64,7 +64,10 @@ class LLMAgent(Agent):
         if self.role_prompt:
             system += "\n\n" + self.role_prompt
         fields = {"reasoning": "one or two short sentences", "action": f"one of {obs.action_space}"}
-        if obs.channel_partners:
+        public_chat = obs.channel_partners == ["*"]
+        if public_chat:
+            fields["message"] = "one short line for the public chat (empty string for none)"
+        elif obs.channel_partners:
             fields["message"] = (
                 f"private message to {', '.join(obs.channel_partners)} (empty string for none)"
             )
@@ -75,10 +78,12 @@ class LLMAgent(Agent):
             if obs.private_info else "",
             public,
             "History:\n" + game.history_text(obs.agent_id, obs.history, self.history_window),
-            "Your private message last round (any plan in it applies to THIS round):\n"
-            + "\n".join(f"to {', '.join(m.recipients)}: {m.text}" for m in obs.outbox)
+            ("Your public chat line last round:\n" if public_chat else
+             "Your private message last round (any plan in it applies to THIS round):\n")
+            + "\n".join((m.text if public_chat else f"to {', '.join(m.recipients)}: {m.text}")
+                         for m in obs.outbox)
             if obs.outbox else "",
-            "Private messages you received:\n"
+            ("Public chat last round:\n" if public_chat else "Private messages you received:\n")
             + "\n".join(f"{m.sender}: {m.text}" for m in obs.inbox)
             if obs.inbox else "",
             "Reply with a JSON object with keys " + json.dumps(fields),

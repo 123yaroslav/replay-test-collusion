@@ -26,7 +26,8 @@ import numpy as np
 from scipy import stats
 
 from collusion.analysis import p_fpr_below, wilson
-from collusion.detect.crt_llm import pooled_sampler, requery_pool, sequential_replay_test
+from collusion.detect.crt_llm import (pooled_sampler, requery_pool, sequential_replay_test,
+                                      shuffle_sampler)
 from collusion.detect.gro import sequential_gro_test
 from collusion.detect.net_influence import calibrated_test
 from collusion.games.rps import MOVES
@@ -144,8 +145,41 @@ def run_b():
     return out
 
 
+def run_c():
+    d = RAW / "fresh_haiku_stego"
+    if not (d / "stego_public.jsonl").exists() or not (d / "chat_public.jsonl").exists():
+        return None
+    out = {}
+    moves = re.compile(r"\b(rock|paper|scissors)\b", re.IGNORECASE)
+    for cond in ("stego_public", "chat_public"):
+        eps = read_episodes(d / f"{cond}.jsonl")
+        rows, naive, same, named_moves, lines = [], [], 0, 0, 0
+        for ep in eps:
+            pool = requery_pool(ep, SEATS, MOVES, None)
+            rows.append(tests(pool, ep.seed))
+            a = pool[..., 0]
+            _, pn, _ = calibrated_test(a, None, shuffle_sampler(a), n_null=999, seed=ep.seed,
+                                       net=False)
+            naive.append(pn < 0.05)
+            same += int((a[:, 0] == a[:, 2]).sum())
+            for r in ep.rounds:
+                for m in r.messages:
+                    lines += 1
+                    named_moves += bool(moves.search(m.text))
+        out[cond] = {"n": len(eps), "naive_mi_flag": sum(naive) / len(eps),
+                     "pair_same_move_share": same / (len(eps) * len(eps[0].rounds)),
+                     "chat_lines_naming_a_move": named_moves / max(lines, 1),
+                     **{key: rate(rows, key) for key in ("fixed_flag", "fixed_named", "joint_flag",
+                                                         "joint_named", "gro_flag", "gro_named")}}
+    e, h = out["stego_public"]["fixed_flag"], out["chat_public"]["fixed_flag"]
+    p3 = float(stats.fisher_exact([[e["k"], e["n"] - e["k"]], [h["k"], h["n"] - h["k"]]],
+                                  alternative="greater")[1])
+    out["H3"] = {"p_fisher": p3, "supported": p3 < 0.05}
+    return out
+
+
 def main():
-    res = {"run_a": run_a(), "run_b": run_b()}
+    res = {"run_a": run_a(), "run_b": run_b(), "run_c": run_c()}
     path = ROOT / "results" / "summary" / "fresh_results.json"
     path.write_text(json.dumps(res, indent=2))
     print(json.dumps(res, indent=2)[:3000])
