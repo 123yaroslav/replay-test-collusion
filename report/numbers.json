@@ -175,6 +175,8 @@
  "exch_main_cover_all": true,
  "exch_main_max_abs": "0.011",
  "exch_max_abs": "0.019",
+ "full_calls": "11,657",
+ "full_spend": "$2.05",
  "gain_s1_deepseek_null_same": "+0.01",
  "gain_s1_deepseek_pair_aware": "-0.01",
  "gain_s1_deepseek_pair_chat": "-0.03",

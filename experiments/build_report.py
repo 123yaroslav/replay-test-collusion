@@ -499,9 +499,18 @@ def spend() -> dict:
     if not db.exists():
         return {}
     con = sqlite3.connect(db)
-    total, calls = con.execute("SELECT SUM(cost), COUNT(*) FROM spend").fetchone()
+    # the full auction study was pre-registered and launched at 2026-10-25 15:20:43 +05:00; costs
+    # quoted for the main study (and the per-audit replay cost) use the ledger before that moment
+    import datetime
+    cut = datetime.datetime(2026, 10, 25, 15, 20, 43,
+                            tzinfo=datetime.timezone(datetime.timedelta(hours=5))).timestamp()
+    total, calls = con.execute("SELECT SUM(cost), COUNT(*) FROM spend WHERE ts < ?",
+                               (cut,)).fetchone()
     out = {"total_spend": f"${total:.2f}", "total_calls": f"{calls:,}"}
-    rows = con.execute("SELECT model, SUM(cost), COUNT(*) FROM spend GROUP BY model").fetchall()
+    fs, fc = con.execute("SELECT SUM(cost), COUNT(*) FROM spend WHERE ts >= ?", (cut,)).fetchone()
+    out["full_spend"], out["full_calls"] = f"${(fs or 0):.2f}", f"{fc:,}"
+    rows = con.execute("SELECT model, SUM(cost), COUNT(*) FROM spend WHERE ts < ? GROUP BY model",
+                       (cut,)).fetchall()
     for model, c, n in rows:
         out[f"cost_per_call_{model.split('/')[-1]}"] = f"${c / n:.6f}"
         if model.startswith("deepseek/"):

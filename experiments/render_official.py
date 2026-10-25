@@ -10,7 +10,8 @@ Markup in content.md (deliberately small):
   | table | rows |  (first row = header; separator row of dashes is skipped)
   :::box Title  ...lines...  :::      (bulleted box)
   :::algo Title ...lines...  :::      (box, lines as written: numbered steps)
-  $$ formula                          (centred display line; ~sub~ and ^sup^ work)
+  $$ latex                            (display equation, typeset as Word math)
+  \\( latex \\) inline                 (inline equation, typeset as Word math)
   <<pagebreak>>
 
     uv run python experiments/render_official.py
@@ -25,9 +26,10 @@ import subprocess
 from pathlib import Path
 
 import build_report  # same folder
+from omml import to_omml
 import docx
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml import OxmlElement
+from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
@@ -37,7 +39,8 @@ TEMPLATE = REP / "official" / "apart_template_original.docx"
 OUT_DOCX = REP / "official" / "Apart_report.docx"
 OUT_PDF = REP / "Apart_report.pdf"
 BODY_PT = 10
-INLINE = re.compile(r"(\*\*.+?\*\*|\*.+?\*|`.+?`|\^.+?\^|~[^~\s]+?~)")
+FONT = "Old Standard TT"
+INLINE = re.compile(r"(\\\(.+?\\\)|\*\*.+?\*\*|\*.+?\*|`.+?`|\^.+?\^|~[^~\s]+?~)")
 
 
 # ---------------------------------------------------------------- inline text -----------
@@ -47,6 +50,9 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
         if not part:
             continue
         bold = italic = code = sup = sub = False
+        if part.startswith("\\(") and part.endswith("\\)"):
+            par._p.append(parse_xml(to_omml(part[2:-2])))
+            continue
         if part.startswith("**") and part.endswith("**"):
             part, bold = part[2:-2], True
         elif part.startswith("*") and part.endswith("*") and len(part) > 1:
@@ -258,6 +264,13 @@ def render(text: str, v: dict):
     d = docx.Document(str(TEMPLATE))
     normal = d.styles["normal"]
     normal.font.size = Pt(BODY_PT)
+    # the template's own text is set in Old Standard TT; use it for body, headings and captions
+    for name in ("normal", "Heading 2", "Heading 3"):
+        st = d.styles[name]
+        st.font.name = FONT
+        rfonts = st.element.get_or_add_rPr().get_or_add_rFonts()
+        for attr in ("w:ascii", "w:hAnsi", "w:cs", "w:eastAsia"):
+            rfonts.set(qn(attr), FONT)
     fill_front_matter(d, title, authors, abstract)
     strip_body(d)
     i, body = 0, lines[a1 + 1:]
@@ -295,7 +308,7 @@ def render(text: str, v: dict):
         elif ln.startswith("$$ "):
             flush()
             q = para(d, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-            add_runs(q, ln[3:].strip(), size=BODY_PT)
+            q._p.append(parse_xml(to_omml(ln[3:].strip(), display=True)))
         elif ln.startswith(":::box") or ln.startswith(":::algo"):
             flush()
             kind = "algo" if ln.startswith(":::algo") else "box"
