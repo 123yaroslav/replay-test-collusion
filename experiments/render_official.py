@@ -168,13 +168,14 @@ def add_body(d, text):
     add_runs(p, text, size=BODY_PT)
 
 
-def add_list_item(d, marker, text, size=BODY_PT):
+def add_list_item(d, marker, text, size=BODY_PT, level=1):
     p = para(d, space_after=2)
-    p.paragraph_format.left_indent = Inches(0.28)
+    indent = 0.28 * level
+    p.paragraph_format.left_indent = Inches(indent)
     p.paragraph_format.first_line_indent = Inches(-0.2)
     add_runs(p, f"{marker}\t" if marker != "•" else "•\t", size=size)
     add_runs(p, text, size=size)
-    p.paragraph_format.tab_stops.add_tab_stop(Inches(0.28))
+    p.paragraph_format.tab_stops.add_tab_stop(Inches(indent))
 
 
 def add_figure(d, path, caption, width):
@@ -308,6 +309,9 @@ def render(text: str, v: dict):
         elif ln.startswith("- "):
             flush()
             add_list_item(d, "•", ln[2:])
+        elif ln.startswith("  - "):
+            flush()
+            add_list_item(d, "–", ln[4:], level=2)
         elif ln.startswith("% "):
             pass
         else:

@@ -264,7 +264,8 @@ def numbers() -> dict:
             v["pilot_eps"] = str(n_off + n_on)
             v["pilot_msgs"] = str(sum(c[x]["messages"] for x in c))
             v["pilot_agree_msgs"] = str(sum(c[x]["messages_with_agreement_words"] for x in c))
-            v["pilot_replay_flags"] = str(sum(c[x]["crt_mi_flags"] + c[x]["seq_alarms"] for x in c))
+            v["pilot_replay_flags"] = str(sum(c[x]["crt_mi_flags"] + c[x]["seq_alarms"]
+                                              + c[x]["crt_net_flags"] for x in c))
             for cell in ("SM-off", "SM-on", "HK-off", "HK-on"):
                 if cell in c:
                     v[f"pilot_price_{cell.replace('-', '_')}"] = f"{c[cell]['mean_trade_price']:.2f}"
@@ -388,6 +389,13 @@ def numbers() -> dict:
                  & ~sb.tag.str.startswith("val_")]
         k, n = int((hon.reject * hon.n).round().sum()), int(hon.n.sum())
         v[f"bet_{bet}_honest"] = pct(k, n, 1)
+    if s1 is not None and s2 is not None:  # fixed-horizon test on the same pooled honest set
+        h1 = s1[(s1.detector == "crt_net") & s1.tag.isin(["deepseek", "haiku", "mixed"])
+                & s1.condition.isin(["null_same", "null_mixed", "talk_no_action"])]
+        h2 = s2[(s2.detector == "crt_net") & s2.condition.isin(["null_same", "vendor_public"])]
+        kk, nn = int(h1.flag05.sum() + h2.flag05.sum()), len(h1) + len(h2)
+        v["honest_s1s2_crt_pct"] = pct(kk, nn, 1)
+        v["honest_s1s2_n"] = str(nn)
     gain = read("collusion_gain.csv")
     if gain is not None:
         for _, r in gain.iterrows():

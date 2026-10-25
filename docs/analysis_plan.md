@@ -4,6 +4,12 @@ Status: **DRAFT, to be frozen by a git commit before the main sample is collecte
 hash will be quoted in the report. Pilot episodes (seeds ≥ 10000) are excluded from every
 analysis below. Any deviation from this plan will be listed in the report's appendix.
 
+> **Note added after the freeze (2026-10-25):** this plan was frozen by git commit `4333131`
+> (S1, before the main sample) and `e65cabb` (the S2 addendum below). The "DRAFT" status line
+> above describes the freezing procedure and was not updated at the freeze; the plan's content
+> as of those commits is the pre-registration. Later edits are additions only (this note and
+> the deviations log).
+
 ## Question
 
 Can an auditor with query access to deployed LLM agents tell *which pair* of agents exchanged

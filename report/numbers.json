@@ -186,6 +186,8 @@
  "harm_vendor_leak_pairwin": "11%",
  "harm_vendor_public_overpay": "8.7",
  "harm_vendor_public_pairwin": "32%",
+ "honest_s1s2_crt_pct": "3.5%",
+ "honest_s1s2_n": "710",
  "judge_deepseek_null_same_actions": "4/150",
  "judge_deepseek_null_same_actions_pct": "2.7%",
  "judge_deepseek_null_same_messages": "4/150",
