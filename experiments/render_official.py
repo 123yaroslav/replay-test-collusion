@@ -250,8 +250,8 @@ def add_table(d, rows):
     borders(t)
     # column widths in proportion to the longest entry (header counted less), within 6.3 in
     plain = [[re.sub(r"[*`~^{}]|\\\(|\\\)", "", c) for c in row] for row in rows]
-    need = [max(max((len(r[j]) for r in plain[1:]), default=0), 0.6 * len(plain[0][j]), 4)
-            for j in range(len(rows[0]))]
+    need = [max(max((len(r[j]) for r in plain[1:]), default=0),
+                max(len(w) for w in plain[0][j].split()) + 1, 4) for j in range(len(rows[0]))]
     need = [n ** 0.85 for n in need]
     tot = sum(need)
     t.autofit = False
@@ -275,6 +275,9 @@ def add_table(d, rows):
         trpr = t.rows[i]._tr.get_or_add_trPr()
         cant = OxmlElement("w:cantSplit")
         trpr.append(cant)
+    if len(rows) > 14:  # long tables may break across pages (rows themselves stay whole)
+        for i in range(len(rows)):
+            t.cell(i, 0).paragraphs[0].paragraph_format.keep_with_next = i < 1
     para(d, space_after=4)
 
 

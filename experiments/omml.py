@@ -19,7 +19,7 @@ SYMBOLS = {
     "Sigma": "Σ", "Omega": "Ω", "mid": "∣", "cdot": "⋅", "in": "∈", "notin": "∉", "le": "≤",
     "leq": "≤", "ge": "≥", "geq": "≥", "ne": "≠", "neq": "≠", "sim": "∼", "times": "×",
     "dots": "…", "ldots": "…", "cdots": "⋯", "infty": "∞", "to": "→", "forall": "∀",
-    "exists": "∃", "emptyset": "∅", "varnothing": "∅", "#": "#", "{": "{", "}": "}", "|": "‖",
+    "exists": "∃", "emptyset": "∅", "varnothing": "∅", "#": "#", "{": "{", "}": "}", "|": "∥",
     "lvert": "|", "rvert": "|", "approx": "≈", "propto": "∝", "star": "⋆", "ast": "∗",
     "setminus": "∖", "otimes": "⊗", "oplus": "⊕", "cup": "∪", "cap": "∩", "subseteq": "⊆", "Rightarrow": "⇒", "colon": ":",
     "%": "%", "_": "_", "&": "&", "langle": "⟨", "rangle": "⟩", "prime": "′",
