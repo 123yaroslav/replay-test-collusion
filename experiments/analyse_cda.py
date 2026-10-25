@@ -61,11 +61,21 @@ def agrawal_reference() -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="pilot_cda")
+    ap.add_argument("--rebin", default=None, choices=["v1", "v2"],
+                    help="re-code asks and replays from the raw prices with these bins "
+                         "(post hoc for the pilot: v2 was chosen after seeing it)")
     args = ap.parse_args()
     summary = {"tag": args.tag, "cells": {}}
     for f in sorted((ROOT / "results" / "raw" / "s3" / args.tag).glob("*.jsonl")):
         eps = read_episodes(f)
         cell = f.stem
+        if args.rebin:
+            for ep in eps:
+                ep.meta["bins"] = args.rebin
+                for r in ep.rounds:
+                    raw, rq = r.public_state["asks_raw"], r.public_state["requery_raw"]
+                    r.actions = {s: ask_bin(raw[s], args.rebin) for s in ep.agent_ids}
+                    r.requery = {s: [ask_bin(x, args.rebin) for x in rq[s]] for s in ep.agent_ids}
         cost, calls, invalid, toks = [], Counter(), Counter(), Counter()
         for ep in eps:
             pin, pout = PRICE[ep.agents[0].model]
@@ -130,7 +140,8 @@ def main():
             "crt_mi_p": [round(r["p_value"], 3) for r in res],
         }
     summary["agrawal_reference"] = agrawal_reference()
-    out = ROOT / "results" / "summary" / f"{args.tag}_summary.json"
+    sfx = f"_rebin_{args.rebin}" if args.rebin else ""
+    out = ROOT / "results" / "summary" / f"{args.tag}{sfx}_summary.json"
     out.write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
 

@@ -250,6 +250,24 @@ def numbers() -> dict:
                  & s1.condition.isin(["null_same", "null_mixed", "talk_no_action", "told_no_channel"])]
         v["seat_p13_null"] = f"{100 * (nul.top == 'P1-P3').mean():.0f}%"
         v["seat_p13_null_n"] = str(len(nul))
+    import json as _js
+    for tag, key in (("pilot_cda_summary.json", ""), ("pilot_cda_rebin_v2_summary.json", "_v2")):
+        pf = SUM / tag
+        if not pf.exists():
+            continue
+        c = _js.loads(pf.read_text())["cells"]
+        off, on = [x for x in c if x.endswith("off")], [x for x in c if x.endswith("on")]
+        n_off, n_on = sum(c[x]["episodes"] for x in off), sum(c[x]["episodes"] for x in on)
+        v[f"pilot_naive_off{key}"] = f"{sum(c[x]['naive_mi_flags'] for x in off)} of {n_off}"
+        v[f"pilot_naive_on{key}"] = f"{sum(c[x]['naive_mi_flags'] for x in on)} of {n_on}"
+        if not key:
+            v["pilot_eps"] = str(n_off + n_on)
+            v["pilot_msgs"] = str(sum(c[x]["messages"] for x in c))
+            v["pilot_agree_msgs"] = str(sum(c[x]["messages_with_agreement_words"] for x in c))
+            v["pilot_replay_flags"] = str(sum(c[x]["crt_mi_flags"] + c[x]["seq_alarms"] for x in c))
+            for cell in ("SM-off", "SM-on", "HK-off", "HK-on"):
+                if cell in c:
+                    v[f"pilot_price_{cell.replace('-', '_')}"] = f"{c[cell]['mean_trade_price']:.2f}"
     s0d = read("s0d_coalition_summary.csv")
     if s0d is not None:
         def g(setup, T, det, col="flag"):
