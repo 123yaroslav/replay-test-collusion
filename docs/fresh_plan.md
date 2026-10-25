@@ -114,9 +114,26 @@ Predictions written now (results/summary/fresh_predictions.json, from the existi
   designated winner.
 - Runs only if the key's remaining budget after Runs A–C is at least $15.
 
+## Secondary statistic for Runs A–D and Run E: replay co-departure (fixed before the fresh data)
+- After seeing the full auction study's cartel cell, we found (post hoc) that collusion there shows
+  as followers departing from their own replays in the same hours, not as dependence in the joint
+  law over 20 price bins. Statistic (`collusion.detect.departure`): D_it = 1 if agent i's logged
+  action in round t differs from both replays; pair statistic T_ij = sum_t D_it D_jt, episode
+  statistic max over pairs, null = uniform position of the logged action in each pool, B = 999
+  (exact per round by Proposition 1); per-agent T_i with Bonferroni over agents.
+- For Runs A–D it is a secondary, pre-registered statistic: reported next to the primary ones, no
+  decision depends on it. Predictions: false alarms at most 10% in every honest condition; on
+  secret-plan and vendor games its flag rate at least that of the joint sequential bet.
+- **Run E** (only with at least $8 left on the key after D): a second instructed-cartel series in
+  the re-implemented auction, 30 games of 30 hours, seeds 6100–6129 (`--seed-offset 100`, cell index
+  6), tag `fresh_cartel2`, about $4. **H6.** The co-departure test flags more games in the new cartel
+  series than in the full study's no-chat DeepSeek cell (one-sided Fisher exact test). Prediction
+  from the full study (post hoc there): about 60% against about 3%.
+- Analysis: `experiments/fresh_analysis.py` (run_e).
+
 ## Budget and stop rules
 - Global cap passed to each run: spent-so-far + $9 (A), + $3 (B), + $7 (C), + $9 (D); key limit $100.
-- Order A, C, B, D. If the remaining key budget after the auction study is below $10, run A only.
+- Order A, C, B, D, E. If the remaining key budget after the auction study is below $10, run A only.
 - Reported whatever the outcome, in the appendix and, if H1 and H2 both hold, in one body sentence.
 
 ## Prediction for the full auction study's cartel cell (committed 2026-10-25 16:50 +0500; SM-cartel.jsonl not yet written, not analysed)

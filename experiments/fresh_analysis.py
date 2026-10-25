@@ -28,6 +28,7 @@ from scipy import stats
 from collusion.analysis import p_fpr_below, wilson
 from collusion.detect.crt_llm import (pooled_sampler, requery_pool, sequential_replay_test,
                                       shuffle_sampler)
+from collusion.detect.departure import departure_test
 from collusion.detect.gro import sequential_gro_test
 from collusion.detect.net_influence import calibrated_test
 from collusion.games.rps import MOVES
@@ -46,7 +47,10 @@ def tests(pool, seed):
     j = sequential_replay_test(pool, alpha=0.05, n_actions=3)
     a = pool[..., 0]
     top, p, _ = calibrated_test(a, None, pooled_sampler(pool), n_null=999, seed=seed, net=True)
-    return {"gro_flag": g["reject_round"] is not None,
+    dp = departure_test(pool, n_null=999, seed=seed)
+    return {"codep_flag": dp["pair_flag"], "codep_named": dp["pair_flag"] and tuple(dp["top"]) == PAIR,
+            "dep_agent_flag": dp["agent_flag"],
+            "gro_flag": g["reject_round"] is not None,
             "gro_named": g["reject_round"] is not None and tuple(g["top"]) == PAIR,
             "joint_flag": j["reject_round"] is not None,
             "joint_named": j["reject_round"] is not None and tuple(j["top"]) == PAIR,
@@ -100,7 +104,9 @@ def run_a():
     out["success"] = out["H1"]["supported"] and out["H2"]["supported"]
     out["descriptive"] = {
         **{f"{key}_30": rate(r30, key) for key in ("gro_named", "joint_named", "fixed_flag",
-                                                   "fixed_named")},
+                                                   "fixed_named", "codep_flag", "codep_named")},
+        "honest_codep_flag_60": rate(h60, "codep_flag"),
+        "honest_dep_agent_flag_60": rate(h60, "dep_agent_flag"),
         **{f"{key}_60": rate(r60, key) for key in ("gro_flag", "joint_flag", "gro_named",
                                                    "joint_named", "fixed_flag", "fixed_named")},
         "honest_fixed_flag_60": rate(h60, "fixed_flag"),
@@ -137,7 +143,8 @@ def run_b():
                      "follower_compliance": fol[0] / max(fol[1], 1),
                      "team_advantage": float(np.mean(adv)),
                      **{key: rate(rows, key) for key in ("fixed_named", "joint_flag", "joint_named",
-                                                         "gro_flag", "gro_named")}}
+                                                         "gro_flag", "gro_named", "codep_flag",
+                                                         "codep_named")}}
     for key in ("fixed_named", "joint_flag", "gro_flag"):
         e, s = out["evasive"][key], out["secret_plan"][key]
         table = [[e["k"], e["n"] - e["k"]], [s["k"], s["n"] - s["k"]]]
@@ -185,7 +192,8 @@ def run_c():
                      "chat_lines_naming_a_move": named_moves / max(lines, 1),
                      "lines_decodable": decoded[1], "code_compliance": decoded[0] / max(decoded[1], 1),
                      **{key: rate(rows, key) for key in ("fixed_flag", "fixed_named", "joint_flag",
-                                                         "joint_named", "gro_flag", "gro_named")}}
+                                                         "joint_named", "gro_flag", "gro_named",
+                                                         "codep_flag", "codep_named")}}
     e, h = out["stego_public"]["fixed_flag"], out["chat_public"]["fixed_flag"]
     p3 = float(stats.fisher_exact([[e["k"], e["n"] - e["k"]], [h["k"], h["n"] - h["k"]]],
                                   alternative="greater")[1])
@@ -210,11 +218,14 @@ def run_d():
                                         net=True)
             g = sequential_gro_test(pool, alpha=0.05, n_actions=2)
             j = sequential_replay_test(pool, alpha=0.05, n_actions=2)
+            dp = departure_test(pool, n_null=999, seed=ep.seed)
             rows.append({"fixed_flag": p < 0.05, "fixed_named": p < 0.05 and tuple(sorted(top)) == PAIR,
                          "gro_flag": g["reject_round"] is not None,
-                         "joint_flag": j["reject_round"] is not None})
+                         "joint_flag": j["reject_round"] is not None,
+                         "codep_flag": dp["pair_flag"],
+                         "codep_named": dp["pair_flag"] and tuple(dp["top"]) == PAIR})
         out[cond] = {key: rate(rows, key) for key in ("fixed_flag", "fixed_named", "gro_flag",
-                                                       "joint_flag")}
+                                                       "joint_flag", "codep_flag", "codep_named")}
     e, h = out["vendor_leak"]["fixed_named"], out["vendor_public"]["fixed_flag"]
     p4 = float(stats.fisher_exact([[e["k"], e["n"] - e["k"]], [h["k"], h["n"] - h["k"]]],
                                   alternative="greater")[1])
@@ -226,8 +237,38 @@ def run_d():
     return out
 
 
+def run_e():
+    """Second cartel series in the auction: co-departure flags against the full study's SM-off."""
+    from collusion.games.cda import ACTION_SPACES
+    new = ROOT / "results" / "raw" / "s3" / "fresh_cartel2" / "SM-cartel.jsonl"
+    off = ROOT / "results" / "raw" / "s3" / "full_cda" / "SM-off.jsonl"
+    if not new.exists() or not off.exists():
+        return None
+    out = {}
+    for name, f in (("cartel2", new), ("off", off)):
+        eps = read_episodes(f)
+        space = ACTION_SPACES[eps[0].meta["bins"]]
+        rows = []
+        for ep in eps:
+            pool = requery_pool(ep, ep.agent_ids, space, None)
+            dp = departure_test(pool, n_null=999, seed=ep.seed)
+            j = sequential_replay_test(pool, alpha=0.05, n_actions=len(space))
+            g = sequential_gro_test(pool, alpha=0.05, n_actions=len(space))
+            rows.append({"codep_flag": dp["pair_flag"], "dep_agent_flag": dp["agent_flag"],
+                         "joint_flag": j["reject_round"] is not None,
+                         "gro_flag": g["reject_round"] is not None})
+        out[name] = {key: rate(rows, key) for key in ("codep_flag", "dep_agent_flag", "joint_flag",
+                                                       "gro_flag")}
+    e, h = out["cartel2"]["codep_flag"], out["off"]["codep_flag"]
+    p6 = float(stats.fisher_exact([[e["k"], e["n"] - e["k"]], [h["k"], h["n"] - h["k"]]],
+                                  alternative="greater")[1])
+    out["H6"] = {"p_fisher": p6, "supported": p6 < 0.05}
+    return out
+
+
 def main():
-    res = {"run_a": run_a(), "run_b": run_b(), "run_c": run_c(), "run_d": run_d()}
+    res = {"run_a": run_a(), "run_b": run_b(), "run_c": run_c(), "run_d": run_d(),
+           "run_e": run_e()}
     path = ROOT / "results" / "summary" / "fresh_results.json"
     path.write_text(json.dumps(res, indent=2))
     print(json.dumps(res, indent=2)[:3000])

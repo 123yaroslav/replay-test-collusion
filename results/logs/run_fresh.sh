@@ -7,8 +7,8 @@ set -o pipefail
 cd "$(dirname "$0")/../.."
 LOG=results/logs/fresh.log
 grep -q "FULL_CDA_DONE" results/logs/full_cda.log || { echo "auction study not finished"; exit 1; }
-[ -z "$(git status --porcelain docs/fresh_plan.md experiments/fresh_analysis.py experiments/s1_llm_rps.py experiments/s2_procurement.py src/collusion/detect/gro.py src/collusion/agents/llm_agent.py results/logs/run_fresh.sh)" ] || { echo "commit the plan and code first"; exit 1; }
-for d in s1/fresh_deepseek_pinned s1/fresh_haiku_stego s1/fresh_haiku_evasive s2/fresh_haiku_auction; do
+[ -z "$(git status --porcelain docs/fresh_plan.md experiments/fresh_analysis.py experiments/s1_llm_rps.py experiments/s2_procurement.py src/collusion/detect/gro.py src/collusion/agents/llm_agent.py src/collusion/detect/departure.py results/logs/run_fresh.sh)" ] || { echo "commit the plan and code first"; exit 1; }
+for d in s1/fresh_deepseek_pinned s1/fresh_haiku_stego s1/fresh_haiku_evasive s2/fresh_haiku_auction s3/fresh_cartel2; do
   [ -d results/raw/$d ] && { echo "results/raw/$d exists; refusing to overwrite"; exit 1; }
 done
 spent() { uv run python -c "import sqlite3;print(round(sqlite3.connect('results/cache/llm.sqlite').execute('select sum(cost) from spend').fetchone()[0],2))"; }
@@ -35,6 +35,15 @@ if [ "$(python3 -c "print($REMAIN >= 15)")" = "True" ]; then
   echo "D done | spent: \$$(spent)" | tee -a $LOG
 else
   echo "D skipped: \$$REMAIN left on the key" | tee -a $LOG
+fi
+# E: second cartel series in the auction, only with at least $8 left on the key
+REMAIN=$(uv run python -c "import json,urllib.request;from pathlib import Path;k=next(l.split('=',1)[1].strip().strip(chr(34)) for l in Path('.env').read_text().splitlines() if l.startswith('OPENROUTER_API_KEY'));d=json.load(urllib.request.urlopen(urllib.request.Request('https://openrouter.ai/api/v1/key',headers={'Authorization':'Bearer '+k}),timeout=30))['data'];print(round(d['limit_remaining'],2))")
+if [ "$(python3 -c "print($REMAIN >= 8)")" = "True" ]; then
+  CAP=$(python3 -c "print(round($(spent) + 6, 2))")
+  caffeinate -i uv run python experiments/s3_cda.py --cell SM-cartel --episodes 30 --hours 30 --seed-offset 100 --tag fresh_cartel2 --budget $CAP --bins v3 >> $LOG 2>&1
+  echo "E done | spent: \$$(spent)" | tee -a $LOG
+else
+  echo "E skipped: \$$REMAIN left on the key" | tee -a $LOG
 fi
 uv run python experiments/fresh_analysis.py | tee -a $LOG
 uv run python - <<'PY' | tee -a $LOG
