@@ -384,7 +384,7 @@ def fig_example():
     with open(path) as f:
         ep = json.loads(f.readline())
     rd = ep["rounds"][1]  # second round of the first game
-    fig = plt.figure(figsize=(6.6, 2.85))
+    fig = plt.figure(figsize=(6.6, 3.0))
     gs = fig.add_gridspec(1, 2, width_ratios=[1.3, 1.0], wspace=0.22)
     ax = fig.add_subplot(gs[0, 0])
     ax.set_axis_off()
@@ -399,7 +399,7 @@ def fig_example():
         cost = rd["private_info"][p]["your_cost"]
         logged, replays = rd["actions"][p], rd["requery"][p]
         departs = logged not in replays
-        h = 24 if p in msgs else 13
+        h = 27 if p in msgs else 13
         box = mpatches.FancyBboxPatch((0, y - h), 100, h, boxstyle="round,pad=0.4,rounding_size=1.2",
                                       fc=("#fff4ee" if p in msgs else "white"), ec=("#eb6834" if p in msgs else GRID), lw=0.8)
         ax.add_patch(box)
@@ -407,7 +407,7 @@ def fig_example():
         if p in msgs:
             txt = textwrap.fill("vendor, confidential: " + msgs[p].replace("Confidential (pooled client data): ", ""), 62)
             ax.text(1.5, y - 6.5, txt, fontsize=6.2, va="top", color="#b8441c", family="DejaVu Sans")
-            yy = y - 18.5
+            yy = y - 21.5
         else:
             ax.text(1.5, y - 6.5, "no message", fontsize=6.2, va="top", color=INK2, family="DejaVu Sans")
             yy = y - 10.5
