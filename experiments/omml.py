@@ -21,7 +21,7 @@ SYMBOLS = {
     "dots": "…", "ldots": "…", "cdots": "⋯", "infty": "∞", "to": "→", "forall": "∀",
     "exists": "∃", "emptyset": "∅", "varnothing": "∅", "#": "#", "{": "{", "}": "}", "|": "‖",
     "lvert": "|", "rvert": "|", "approx": "≈", "propto": "∝", "star": "⋆", "ast": "∗",
-    "setminus": "∖", "cup": "∪", "cap": "∩", "subseteq": "⊆", "Rightarrow": "⇒", "colon": ":",
+    "setminus": "∖", "otimes": "⊗", "oplus": "⊕", "cup": "∪", "cap": "∩", "subseteq": "⊆", "Rightarrow": "⇒", "colon": ":",
     "%": "%", "_": "_", "&": "&", "langle": "⟨", "rangle": "⟩", "prime": "′",
     "quad": " ", "qquad": "  ", ",": " ", ";": " ", ":": " ",
     " ": " ", "!": "",

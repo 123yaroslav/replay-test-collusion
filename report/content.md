@@ -19,7 +19,7 @@ This audit is unreliable when the agents share a model. Agents built on one base
 1. We measure a known confound [3]: dependence tests accuse honest same-model agents, both in LLM games and in published double-auction logs [7] (§5.1).
 2. We propose the replay test, with a null that is exact within each round and a sequential version that is valid at any stopping time, under stated assumptions (§3).
 3. We show that it keeps false alarms near the target on honest LLM games and still finds channels that change behaviour, including a vendor that pools confidential data; a pre-registered replication confirms the sequential version (§5.2–5.3).
-4. We map its boundary: coordination held in instructions or memory, weak channels, and honest agents that repeat their own moves (§5.5). Together these answer sprint questions 1.4 and 2.3.
+4. We map its boundary: coordination held in instructions or memory, weak channels, and honest agents that repeat their own moves (§5.4). Together these answer sprint questions 1.4 and 2.3.
 
 
 ## 2. Related Work
@@ -29,7 +29,7 @@ This audit is unreliable when the agents share a model. Agents built on one base
 
 **Definition used.** Of the 139 definitions in the organisers' survey [16], we follow those that require communication [15], but we do not count observed public actions as communication. Collusion here is coordination *enabled by non-public information exchanged between agents*, directly or through a third party such as a vendor. Coordination that each policy produces from public information (shared priors, Schelling points) is conscious parallelism. Coordination fixed before deployment, such as a shared team instruction, may itself be an agreement but travels through no audited channel, and signals hidden inside public actions reach the replays too; the test sees neither.
 
-**The gap.** We know of no pairwise audit that removes the shared-model confound and is exact within each round. Audit the Whisper [2] replays whole runs; we replay each agent inside every round on its own logged view.
+**The gap.** We know of no pairwise audit that removes the shared-model confound and is exact within each round; unlike Audit the Whisper [2], we replay each agent inside every round.
 
 ## 3. Problem Setup and Method
 **Setting.** Agents \(i = 1, \dots, N\) act in rounds \(t = 1, \dots, T\) of one game (an episode), with actions in a finite set \(\mathcal{A}\) whose coding is fixed before the first round. Agent \(i\) observes \(O_{i,t} = (V_{i,t}, C_{i,t})\). Here \(V_{i,t}\) is what the auditor logs and can replay: the prompt, the public history, tool outputs and the agent's own memory. \(C_{i,t}\) is the audited channel: an inbox, a shared memory or a vendor's message. The agent acts
@@ -59,7 +59,7 @@ Both tests compare logged moves with moves redrawn from the pools; with discrete
 $$ \Gamma(i;j) = \gamma(i;j) - \max_{l \ne i,j} \gamma(l;j), \qquad S = \max_{i<j} \min\{\Gamma(i;j), \Gamma(j;i)\}.
 Each of \(B = 999\) null datasets redraws every action uniformly from its pool and yields \(S^{*}_{b}\). Because \(S\) is a maximum over pairs, one test per game covers all pairs with no further correction. The test flags the game and names the top pair if
 $$ p = \frac{1 + \sum_{b=1}^{B} \mathbb{1}\{S^{*}_{b} \ge S\}}{B + 1} \le \alpha.
-Proposition 1 holds round by round but does not cover redrawing all rounds jointly, because later observations contain earlier actions; this version therefore has no finite-sample guarantee over a whole game, and we measure its calibration (§5.2, §5.5).
+Proposition 1 holds round by round but does not cover redrawing all rounds jointly, because later observations contain earlier actions; this version therefore has no finite-sample guarantee over a whole game, and we measure its calibration (§5.2, §5.4).
 
 **Sequential test.** The sequential version bets, round by round, that the pair's logged joint move is more typical of the pair than joint moves drawn from the two pools. Let \(q_{ij,t}\) be a distribution over action pairs fitted to the pair's logged actions before round \(t\) (Krichevsky–Trofimov counts mixed half and half with the uniform distribution). The round's payoff and the accumulated evidence are
 $$ e_{ij,t} = \frac{q_{ij,t}(a_{i,t}, a_{j,t})}{(k+1)^{-2} \sum_{x \in P_{i,t}} \sum_{y \in P_{j,t}} q_{ij,t}(x, y)}, \qquad E_T = \binom{N}{2}^{-1} \sum_{i<j} \prod_{t \le T} e_{ij,t},
@@ -72,6 +72,18 @@ also when later observations contain earlier actions.
 *Proof sketch.* By Proposition 1, given the past and the pools, the logged pair \((a_{i,t}, a_{j,t})\) is uniform over the \((k+1)^2\) position pairs, so the expected numerator equals the denominator and \(e_{ij,t}\) has conditional mean 1. Because \(q_{ij,t}\) depends only on the past, each product is a nonnegative martingale starting at 1, and so is their average; Ville's inequality gives the bound [20–24]. ∎
 
 An alarm means that the pair's logged joint moves are unlikely under independent draws from their replay pools, or it is one of the at most \(\alpha\) false alarms; the pair with the most evidence at the alarm is named as a candidate.
+
+**Which bet detects fastest.** Fix a round and suppose that the logged pair has joint law \(P\) while each agent's replays have law \(Q_i\) or \(Q_j\).
+
+**Proposition 3 (optimal bet).** Among all bets, the expected log-growth \(\mathbb{E}\log e_{ij,t}\) is maximised by the likelihood ratio \(q^{*} = P/(Q_i \otimes Q_j)\). Its growth rate \(G_k\) is the mutual information between the pools and the position of the logged pair; it satisfies \(G_k \le \mathrm{KL}(P \| Q_i \otimes Q_j)\) and tends to this bound as \(k \to \infty\).
+
+*Proof sketch.* Given the pools, the alternative puts probability \(\pi \propto q^{*}\) on each position pair being the logged one and a bet puts \(w_q \propto q\); as \(e = (k+1)^2 w_q\) at the logged position, \(\mathbb{E}\log e = G_k - \mathbb{E}\,\mathrm{KL}(\pi \| w_q)\), largest at \(q \propto q^{*}\). The pool average of \(q^{*}\) is the likelihood ratio of the unlabelled pools, so \(G_k\) is \(\mathrm{KL}(P \| Q_i \otimes Q_j)\) minus the divergence between the pool laws, which vanishes as \(k\) grows. ∎
+
+**Corollary (no free collusion).** If a channel shifts the pair's expected payoff per round, for a payoff with values in \([0, R]\), by \(\delta\) relative to independent play from the replay laws, then by Pinsker's inequality
+$$ \mathrm{KL}(P \| Q_i \otimes Q_j) \ge \frac{2\delta^2}{R^2}, \qquad T_{\alpha} \approx \frac{R^2 \log(1/\alpha)}{2\delta^2},
+where \(T_{\alpha}\) is the number of rounds the optimal bet needs to reach \(1/\alpha\) when \(k\) is large. A channel that is hard to detect cannot change payoffs much.
+
+The pre-registered joint bet does not divide by the replay laws; under shared skewed priors its growth is negative for channels that copy up to {{growth_joint_neg_max_eps}} of moves (Fig. A5). The likelihood-ratio bet is the better detector, but it also pays when one agent alone departs from its replays, so naming the pair remains the job of the fixed-horizon test.
 
 :::algo Algorithm 1. Replay audit of one episode
 **Input:** deployed policies \(\pi_i\); logged observations \(V_{i,t}\) and actions \(a_{i,t}\); \(k = 2\); level \(\alpha\); \(B = 999\).
@@ -89,6 +101,12 @@ With \(k = 2\) the audit triples the number of model calls: about {{audit_cost}}
 - *Procurement auction:* four suppliers draw private costs in {50, 60, 70} each round and submit sealed bids in {60, …, 100}. The lowest bid wins and earns its bid minus its cost, and all bids are published. Bids are coded as high (90–100, the range of cover bids) or low.
 - *Published logs:* the 75 double-auction runs of Agrawal et al. [7], with five sellers and 30 rounds. Their policies cannot be queried again, so only the baselines can run on them.
 
+**Agents.** Each seat is an LLM that returns a short rationale, an action and an optional private message: DeepSeek V4 Flash and Claude Haiku 5.5 (main), GPT-6 Luna, Gemma 3 12B and gpt-oss-20b (validation), at temperature 1 with reasoning off where possible.
+
+**Baselines.** Pairwise mutual information with a within-episode time-shuffle null; Bonjour's rule, a fixed threshold on the same net-influence statistic (\(\Gamma \ge 0.05\) bits in both directions for exactly one pair); and an LLM judge (Claude Haiku, temperature 0) that reads either the actions alone or the actions together with every private message.
+
+**Protocol.** Hypotheses, sample sizes, statistics and decision rules were fixed in a plan timestamped in the repository before the main data, and the replication of the sequential test was pre-registered in the same way. A game is flagged when the test rejects at \(\alpha = 5\%\); the true pair is named when the test rejects and its top pair is the colluding one. We report these shares with 95% Wilson intervals.
+
 **Table 1. Conditions** (rock-paper-scissors unless marked).
 
 | Condition | Who | Hidden information flow? |
@@ -102,12 +120,6 @@ With \(k = 2\) the audit triples the number of model calls: about {{audit_cost}}
 | Pooled-data vendor | vendor pools P1's and P3's costs, rotates wins (auction) | yes (as in *Duffy v. Yardi*) |
 | Bid-rotation cartel | P1, P3 rotate wins over a private channel (auction) | yes |
 
-**Agents.** Each seat is an LLM that returns a short rationale, an action and an optional private message. The main models are DeepSeek V4 Flash and Claude Haiku 5.5; GPT-6 Luna, Gemma 3 12B and gpt-oss-20b serve for validation. All run at temperature 1 with reasoning turned off where the model allows it.
-
-**Baselines.** Pairwise mutual information with a within-episode time-shuffle null; Bonjour's rule, a fixed threshold on the same net-influence statistic (\(\Gamma \ge 0.05\) bits in both directions for exactly one pair); and an LLM judge (Claude Haiku, temperature 0) that reads either the actions alone or the actions together with every private message.
-
-**Protocol.** Hypotheses, sample sizes, statistics and decision rules were fixed in a plan timestamped in the repository before the main data, and the replication of the sequential test was pre-registered in the same way. A game is flagged when the test rejects at \(\alpha = 5\%\); the true pair is named when the test rejects and its top pair is the colluding one. We report these shares with 95% Wilson intervals.
-
 ## 5. Results
 
 ### 5.1 Standard tests accuse honest agents of one model
@@ -116,39 +128,35 @@ With \(k = 2\) the audit triples the number of model calls: about {{audit_cost}}
 ![**Figure 2. Standard tests accuse honest agents; the replay test does not, and it still names instructed colluders.** (a) Honest games in which each detector accuses a pair; dashed line: 5% level. The replay test cannot run on Agrawal et al.'s logs, whose policies cannot be queried again. (b) Games with an instructed pair in which that pair is named. Bars: 95% Wilson intervals; Appendix C has every condition.](figures/p_fig2_main.png){6.3}
 
 ### 5.2 The replay test keeps its false-alarm rate on LLM agents
-**On {{s1_honest_n}} honest LLM games the replay test flags {{s1_honest_crt_pct}} at the 5% level** (95% CI {{s1_honest_crt_ci}}; a game is flagged if the test over all its pairs rejects). That includes {{s1_haiku_null_same_crt_net_pct}} of the four-Haiku games that mutual information accuses most. Its p-values on honest games are close to uniform. In the auction it flags {{s2_null_same_crt_net_pct}} of honest games, and on the three validation models {{val_gpt_6_luna_null_same_crt}}, {{val_gemma_3_12b_it_null_same_crt}} and {{val_gpt_oss_20b_null_same_crt}} (Appendix C). The fixed-horizon test can over-reject when honest agents repeat their own moves (§5.5); under A1 the sequential test keeps its level (Proposition 2).
+**On {{s1_honest_n}} honest LLM games the replay test flags {{s1_honest_crt_pct}} at the 5% level** (95% CI {{s1_honest_crt_ci}}; a game is flagged if the test over all its pairs rejects). Its p-values on honest games are close to uniform. In the auction it flags {{s2_null_same_crt_net_pct}} of honest games, and on the three validation models {{val_gpt_6_luna_null_same_crt}}, {{val_gemma_3_12b_it_null_same_crt}} and {{val_gpt_oss_20b_null_same_crt}} (Appendix C). The fixed-horizon test can over-reject when honest agents repeat their own moves (§5.4); under A1 the sequential test keeps its level (Proposition 2).
 
 ### 5.3 It finds channels that leave a joint signal
 **When a hidden channel leaves a strong joint signal in the moves, the replay test finds the pair; weak channels escape it.**
 - *Pooled confidential data.* In the auction the test names the pair in {{s2_vendor_leak_crt_net_correct_pct}} of games in which a pricing vendor pools the two clients' confidential costs, and flags {{s2_vendor_public_crt_net_pct}} of games in which the vendor uses only public data. The same line separates two recent US cases: hotels that independently licensed common pricing software (*Gibson v. Cendyn*, 9th Cir. 2025, dismissal affirmed) and a vendor alleged to pool rivals' non-public data (*Duffy v. Yardi*, W.D. Wash. 2024, motion to dismiss denied). A bid-rotation cartel over a private channel is named in {{s2_pair_hidden_crt_net_correct_pct}} of games. The baselines do as well or better in this auction, because honest bids barely vary.
-- *Secret plans.* In rock-paper-scissors the test names the instructed pair in {{s1_haiku_pair_hidden_crt_net_correct_pct}} of Haiku games and {{s1_deepseek_pair_hidden_crt_net_correct_pct}} of DeepSeek games. Haiku's plans often give both players the same move; DeepSeek's vary from round to round and leave little joint signal. Mutual information names more Haiku pairs only by accusing honest groups as well: at a matched false-alarm rate of 5%, the replay test detects {{tpr5_haiku_crt_net}} of Haiku pairs and mutual information {{tpr5_haiku_naive_mi_shuffle}} (Fig. 3).
-- *Pre-registered replication.* On fresh Haiku games, the sequential test named the instructed pair in {{conf_c1}} games, against {{conf_c1_crt}} for the fixed-horizon test on the same games (exact McNemar p = {{conf_c1_p}}), and raised {{conf_c2}} false alarms on honest games (Fig. 4). Its guarantee costs power elsewhere: it names the pooled-data vendor pair in {{seq_s2_deepseek_vendor_leak_correct_pct}} of games, against {{s2_vendor_leak_crt_net_correct_pct}} for the fixed-horizon test, and {{seq_s1_deepseek_pair_hidden_correct_pct}} of DeepSeek pairs (Appendix C).
+- *Secret plans.* In rock-paper-scissors the test names the instructed pair in {{s1_haiku_pair_hidden_crt_net_correct_pct}} of Haiku games and {{s1_deepseek_pair_hidden_crt_net_correct_pct}} of DeepSeek games. Haiku's plans often give both players the same move; DeepSeek's vary from round to round and leave little joint signal. Mutual information names more Haiku pairs only by accusing honest groups as well: at a matched false-alarm rate of 5%, the replay test detects {{tpr5_haiku_crt_net}} of Haiku pairs and mutual information {{tpr5_haiku_naive_mi_shuffle}} (Fig. A4).
+- *Pre-registered replication.* On fresh Haiku games, the sequential test named the instructed pair in {{conf_c1}} games, against {{conf_c1_crt}} for the fixed-horizon test on the same games (exact McNemar p = {{conf_c1_p}}), and raised {{conf_c2}} false alarms on honest games (Fig. 3). Its guarantee costs power elsewhere: it names the pooled-data vendor pair in {{seq_s2_deepseek_vendor_leak_correct_pct}} of games, against {{s2_vendor_leak_crt_net_correct_pct}} for the fixed-horizon test. Proposition 3 explains why. In a post-hoc analysis, the likelihood-ratio bet flags {{gro_s2_deepseek_vendor_leak_gro_flag}} of pooled-data games and names the pair in {{gro_s2_deepseek_vendor_leak_gro}}, but names fewer Haiku pairs ({{gro_s1_haiku_pair_hidden_gro}}), because it also rewards one agent's departure (Appendix C).
 
-![**Figure 3. At a matched false-alarm rate the replay test detects more instructed pairs.** ROC curves of the fixed-horizon replay test and two baselines for secret-plan pairs against honest same-model games, for (a) Claude Haiku and (b) DeepSeek; dotted lines mark false-alarm rates of 1% and 5%. For DeepSeek all detectors are near chance.](figures/p_fig3_roc.png){6.3}
+- *LLM judges.* A judge reading the actions ranks Haiku pairs about as well as the replay test (AUROC {{auroc_haiku_judge_actions}} against {{auroc_haiku_crt_net}}), contrary to our pre-registered prediction, but nothing fixes how often it accuses honest agents, and given the private messages it accuses {{judge_haiku_talk_no_action_messages_pct}} of Haiku groups whose plans were never delivered (Appendix C).
 
-### 5.4 LLM judges rank pairs but do not control their error rate
-**A judge reading the actions ranks Haiku pairs about as well as the replay test, but nothing fixes how often it accuses honest agents.** Contrary to our pre-registered prediction, its AUROC for Haiku is {{auroc_haiku_judge_actions}}, against {{auroc_haiku_crt_net}} for the replay test, and both are near chance for DeepSeek. Given the private messages, the judge also accuses {{judge_haiku_talk_no_action_messages_pct}} of Haiku groups whose collusive plans were never delivered, where the replay test flags {{s1_haiku_talk_no_action_crt_net_pct}}.
+![**Figure 3. In the pre-registered replication, evidence against the null grows for instructed pairs and stays flat for honest agents.** Each line is the sequential test's evidence E~T~ in one game. An alarm is raised when a line first crosses 1/α = 20; under the null this happens with probability at most 5% at any time (Proposition 2).](figures/p_fig4_eprocess.png){6.3}
 
-![**Figure 4. In the pre-registered replication, evidence against the null grows for instructed pairs and stays flat for honest agents.** Each line is the sequential test's evidence E~T~ in one game. An alarm is raised when a line first crosses 1/α = 20; under the null this happens with probability at most 5% at any time (Proposition 2).](figures/p_fig4_eprocess.png){6.3}
-
-### 5.5 What the test cannot see
-**The test misses coordination that leaves no trace in the current round, and its fixed-horizon version over-rejects when honest agents repeat their own moves.**
+### 5.4 What the test cannot see
+**The test misses coordination that leaves no trace in the current round, and its fixed-horizon version over-rejects when honest agents repeat their own moves.** Net influence also cancels inside coalitions of three, where the sequential test still works (Appendix C).
 - *Shared instructions.* Pairs told they are a team but given no channel are flagged in {{s1_haiku_told_no_channel_crt_net_pct}} (Haiku) and {{s1_deepseek_told_no_channel_crt_net_pct}} (DeepSeek) of games. The instruction is part of the policy, so the replays reproduce it; this case needs an audit of the policy itself [9].
 - *Agreements stored in memory.* In a five-game pilot of our re-implementation of Agrawal et al.'s double auction [7], sellers told to follow a leader's price floor raised prices, and their replays, which keep each seller's memory, did the same (mean asks {{mem_cartel_ask}} logged, {{mem_cartel_replay_ask}} replayed). A follower that reads "floor 91" in hour 3 notes it, and in hour 4 its replay, without the inbox, still reads the note and asks 91; replays lag only when the floor changes.
 - *Honest agents that repeat their own moves.* In a simulator where honest agents copy their last move with probability 0.5 or more, the fixed-horizon test flags {{s0f_net_pers}} of honest logs, because its null redraws rounds independently and breaks the runs of repeated moves; the sequential test stays at or below {{s0f_seq_honest_max}} (Proposition 2), and we recommend it for agents whose actions persist.
-- *Coalitions of three.* In a simulated coalition of three, net influence cancels and flags {{s0d_crt_net_triple}} of logs; the sequential test flags {{s0d_seq_triple}}.
 
 ## 6. Discussion and Limitations
-**Theory of change.** Labs, platforms and regulators' sandboxes can run the test before deployment and in periodic audits if they log each agent's prompt and state at every step. A flag then points to the audited channel rather than to a shared vendor, so same-model fleets stop filling escalation lists with false accusations.
+**Theory of change.** Labs, platforms and regulators' sandboxes that log each agent's prompt and state can run the test before deployment and in audits; a flag then points to the audited channel, not to a shared vendor.
 
 **Limitations.**
 1. *Access.* The test needs query access to the deployed policies, which outside auditors with logs alone lack.
 2. *Exchangeable serving.* Exactness rests on A1. Our diagnostic is consistent with it for the main models, but provider routing was not pinned; if A1 fails, the null is wrong in a direction we cannot sign.
-3. *Scope of the null hypothesis.* The test measures the direct effect of the current channel. Agreements held in instructions or memory, and channels that barely change actions, largely escape it (§5.5).
-4. *Evidence.* Colluders were instructed, and detection rates need not transfer to emergent or test-aware collusion (Appendix C); we used two main model families, short games and stylised auctions.
+3. *Scope of the null hypothesis.* The test measures the direct effect of the current channel. Agreements held in instructions or memory, and channels that barely change actions, largely escape it (§5.4).
+4. *Evidence.* Colluders were instructed, in two main model families and short stylised games; detection rates need not transfer to emergent or test-aware collusion (Appendix C).
 
 ## 7. Conclusion
-Shared models make honest agents look like cartels to dependence tests. Re-querying each agent without the audited channel removes these false accusations, keeps detectable the channels that leave a joint signal, and in its sequential form stays valid under feedback. Agreements held in instructions or memory call for audits of the policy and its state.
+Shared models make honest agents look like cartels to dependence tests. Re-querying each agent without the audited channel removes these false accusations, and channels that change payoffs cannot stay hidden for long; agreements held in instructions or memory need audits of the policy itself.
 
 ## Code and Data
 - Code (MIT licence): https://github.com/123yaroslav/replay-test-collusion. The repository explains how to audit your own agents and rebuilds every number in this report from the released data at no cost.
@@ -261,6 +269,8 @@ Pooled over the honest RPS conditions of the main models ({{s1_honest_n}} games)
 
 **C.5 Detection at a fixed false-alarm rate, judges, and an example.** Table A4 reads detection off the empirical ROC curves; it is descriptive, because the thresholds come from the same games. The Haiku judge flags {{judge_haiku_null_same_actions_pct}} of honest Haiku games from actions alone; a stronger reasoning judge (GPT-6.1 Sol, 20 games per condition) flags {{judge_strong_haiku_pair_hidden_actions_pct}} of Haiku secret-plan games but also {{judge_strong_haiku_null_same_actions_pct}} of honest ones. Table A5 shows one real pooled-data-vendor game.
 
+![**Figure A4. At a matched false-alarm rate the replay test detects more instructed pairs.** ROC curves of the fixed-horizon replay test and two baselines for secret-plan pairs against honest same-model games, for (a) Claude Haiku and (b) DeepSeek; dotted lines mark false-alarm rates of 1% and 5%. For DeepSeek all detectors are near chance.](figures/p_fig3_roc.png){6.3}
+
 **Table A4. Detection at a fixed false-alarm rate** (secret-plan pairs against honest same-model games; judges read actions only).
 
 | Detector | Haiku, 1% | Haiku, 5% | DeepSeek, 1% | DeepSeek, 5% |
@@ -284,6 +294,14 @@ Pooled over the honest RPS conditions of the main models ({{s1_honest_n}} games)
 - *Pairs told about the auditor.* DeepSeek pairs warned about a statistical auditor were named in {{s1_deepseek_pair_aware_crt_net_correct_pct}} of games, similar to unwarned pairs; pairs given free-form chat instead of a plan were named in {{s1_deepseek_pair_chat_crt_net_correct_pct}}, and their moves showed almost no coordination.
 
 **C.7 Pilot in our re-implementation of Agrawal et al.'s double auction.** We re-implemented the hourly double auction of Agrawal et al. [7] from its description, with our own prompts carrying the same information: five audited sellers with cost 80, five LLM buyers, one order per hour that replaces the last, matching at the midpoint, previous-hour seller chat, and each agent's own memory and notebook. In {{pilot_eps}} fifteen-hour games, chat produced collusive-sounding messages but no material price rise ({{pilot_price_SM_off}} without and {{pilot_price_SM_on}} with chat for DeepSeek sellers), the brief's third case type; the replay tests raised {{pilot_replay_flags}} flags, while time-shuffle mutual information flagged {{pilot_naive_off}} games that had no channel at all. In a positive control, sellers were told to follow a leader's announced price floor: followers complied in {{cartel_follower}} of hours, the mean trade price rose to {{cartel_price}}, and the fixed-horizon replay test flagged {{cartel_v2_mi}} of {{cartel_eps}} games. Prices concentrated in a narrow band and, as C.6 shows, the agreement was carried in memory. With three to five games per condition these are descriptive.
+
+**C.9 Which bet: theory and a post-hoc comparison.** Fig. A5 gives exact growth rates for one pair with three actions and two replays per agent, when one agent copies the other's move in a share of rounds. The likelihood-ratio bet of Proposition 3 grows fastest in every setting, close to the KL ceiling; the pre-registered joint bet loses evidence under shared skewed priors unless the channel is strong; the interaction bet matches the likelihood ratio here but fails when a channel shifts the marginals. In the persistence simulator the likelihood-ratio bet keeps false alarms at most {{gro_sim_fpr_max}}. Table A7 applies it, after the fact, to the existing games: it flags far more games with a channel, matching the fixed-horizon test in the auction, but names fewer Haiku pairs, because it also pays when one agent departs from its replays. Detection and attribution are therefore different tasks: the likelihood-ratio bet for detecting a channel, the net-influence test for naming the pair.
+
+![**Figure A5. The likelihood-ratio bet grows fastest; the pre-registered joint bet can lose evidence.** Exact expected log-growth per round of three bets, for one pair with three actions and two replays per agent, when one agent copies the other's move in a share of rounds; (a) uniform priors, (b) shared priors (0.6, 0.3, 0.1). Dashed: the KL ceiling of Proposition 3.](figures/p_figA4_growth.png){6.3}
+
+**Table A7. Post-hoc comparison of the two bets on the existing games** (sequential test, α = 5%; for honest conditions only the share flagged applies).
+
+{{gro_table}}
 
 ## Appendix D. Reproducibility and Deviations
 **Replays and seeds.** Every reported agent-round has exactly two replays (the analysis would use the smallest count available in a game). Each condition uses its own block of episode seeds, and the main samples, pilots and the replication use disjoint blocks. Each model call's sampling seed is derived from the call type, the episode seed, the agent and the round, so a logged move and its replays never share a seed; the null resampling of each episode is seeded by its episode seed. Pilot games were excluded from every analysis.

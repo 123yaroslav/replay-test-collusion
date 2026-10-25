@@ -184,7 +184,7 @@ def fig_main():
             ("deepseek", "pair_hidden", "DeepSeek pair, secret plan"),
             ("deepseek_s2", "vendor_leak", "Pooled-data vendor")]
     rows_c = _rows(audits, coll, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.0))
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 1.85))
     _dots(axes[0], rows_h, ref=5)
     axes[0].set_xlabel("Honest games flagged (%)")
     _dots(axes[1], rows_c)
@@ -195,7 +195,7 @@ def fig_main():
           for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")]
     fig.legend(hs, [NAMES[d] for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")],
                loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.01), handlelength=1.6)
-    fig.subplots_adjust(left=0.19, right=0.985, top=0.9, bottom=0.36, wspace=0.95)
+    fig.subplots_adjust(left=0.19, right=0.985, top=0.9, bottom=0.39, wspace=0.95)
     save(fig, "p_fig2_main")
 
 
@@ -246,7 +246,7 @@ def fig_eprocess():
             pool = requery_pool(ep, ["P1", "P2", "P3", "P4"], MOVES, None)
             out.append(sequential_replay_test(pool, alpha=0.05, n_actions=3)["e_path"])
         paths[cond] = np.array(out)
-    fig, ax = plt.subplots(figsize=(WIDTH, 1.75))
+    fig, ax = plt.subplots(figsize=(WIDTH, 1.6))
     t = np.arange(paths["null_same"].shape[1])
     for e in paths["null_same"]:
         ax.plot(t, e, color="#9a9890", lw=0.6, alpha=0.7)
@@ -265,7 +265,7 @@ def fig_eprocess():
     hs = [plt.Line2D([], [], color=C["seq"], lw=1.2), plt.Line2D([], [], color="#9a9890", lw=1.0)]
     ax.legend(hs, [f"instructed pair ({n1} games)", f"honest agents ({n0} games)"],
               loc="upper left", handlelength=1.6, bbox_to_anchor=(0.0, 1.0))
-    fig.subplots_adjust(left=0.1, right=0.985, top=0.95, bottom=0.25)
+    fig.subplots_adjust(left=0.1, right=0.985, top=0.95, bottom=0.27)
     save(fig, "p_fig4_eprocess")
 
 
@@ -344,7 +344,34 @@ def fig_power():
     save(fig, "p_figA3_power")
 
 
+def fig_growth():
+    g = load("s0g_growth.csv")
+    if g is None:
+        return
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.1), sharey=False)
+    cols = {"joint": C["seq"], "interaction": C["bonjour_alpha"], "ratio": C["crt_net"]}
+    labels = {"joint": "joint bet (pre-registered)", "interaction": "interaction bet",
+              "ratio": "likelihood-ratio bet"}
+    for ax, prior, lab in zip(axes, ("uniform", "skewed"), ("a", "b")):
+        d = g[(g.prior == prior) & (g.channel == "copy")].sort_values("eps")
+        ax.plot(d.eps, d.kl, color=INK2, lw=1, ls=(0, (3, 2)), label="KL ceiling")
+        for b in ("joint", "interaction", "ratio"):
+            ax.plot(d.eps, d[f"{b}_k2"], color=cols[b], lw=1.5, marker="o", ms=3, label=labels[b])
+        ax.axhline(0, color=INK2, lw=0.6)
+        ax.set_xlabel("Channel strength (share of copied moves)")
+        ax.text(0.04, 0.93, "uniform priors" if prior == "uniform" else "shared skewed priors",
+                transform=ax.transAxes, fontsize=8.5, fontstyle="italic", va="top")
+        ax.grid(True, color=GRID, lw=0.5)
+        panel_label(ax, lab, x=-0.12)
+    axes[0].set_ylabel("Expected log-growth\nper round")
+    hs, ls = axes[1].get_legend_handles_labels()
+    fig.legend(hs, ls, loc="lower center", ncol=4, bbox_to_anchor=(0.53, -0.01), handlelength=1.6)
+    fig.subplots_adjust(left=0.11, right=0.985, top=0.92, bottom=0.33, wspace=0.22)
+    save(fig, "p_figA4_growth")
+
+
 if __name__ == "__main__":
+    fig_growth()
     fig_method()
     fig_main()
     fig_roc()

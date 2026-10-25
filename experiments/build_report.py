@@ -577,6 +577,59 @@ def numbers() -> dict:
             v["fc_changed_replay"] = f"{100 * ch['replay']:.0f}%"
             k, n = mrows["SM-cartel"]["follower_memory_mentions_floor_or_S1"]
             v["fc_cartel_mem"] = f"{k} of {n}"
+    # exploratory, post hoc: the likelihood-ratio bet on the existing LLM data (gro_llm.py)
+    gs = read("gro_llm_summary.csv")
+    if gs is not None:
+        for _, r in gs.iterrows():
+            key = f"gro_{r.exp}_{r.tag}_{r.condition}"
+            for name in ("joint", "gro"):
+                v[f"{key}_{name}"] = f"{100 * r[name]:.1f}%".replace(".0%", "%")
+                v[f"{key}_{name}_flag"] = f"{100 * r[name + '_flag_rate']:.1f}%".replace(".0%", "%")
+        label = {("s1", "haiku", "pair_hidden"): "Secret plan, Haiku",
+                 ("s1", "confirm_haiku", "pair_hidden"): "Secret plan, Haiku (replication)",
+                 ("s1", "deepseek", "pair_hidden"): "Secret plan, DeepSeek",
+                 ("s1", "deepseek", "pair_aware"): "Secret plan, DeepSeek, warned",
+                 ("s2", "deepseek", "vendor_leak"): "Pooled-data vendor",
+                 ("s2", "deepseek", "pair_hidden"): "Bid-rotation cartel",
+                 ("s1", "val_gpt-6-luna", "pair_hidden"): "Secret plan, GPT-6 Luna",
+                 ("s1", "val_gemma-3-12b-it", "pair_hidden"): "Secret plan, Gemma 3 12B",
+                 ("s1", "val_gpt-oss-20b", "pair_hidden"): "Secret plan, gpt-oss-20b",
+                 ("s1", "deepseek", "null_same"): "Honest, 4 × DeepSeek",
+                 ("s1", "haiku", "null_same"): "Honest, 4 × Haiku",
+                 ("s1", "mixed", "null_mixed"): "Honest, mixed models",
+                 ("s1", "confirm_haiku", "null_same"): "Honest, Haiku (replication)",
+                 ("s2", "deepseek", "null_same"): "Honest, auction",
+                 ("s2", "deepseek", "vendor_public"): "Public-data vendor"}
+
+        def pc(x):
+            return f"{100 * x:.1f}%".replace(".0%", "%")
+
+        lines = ["| Condition | Games | Joint bet: flagged | Joint bet: pair named "
+                 "| Likelihood ratio: flagged | Likelihood ratio: pair named |",
+                 "|---|---|---|---|---|---|"]
+        for key, lab in label.items():
+            r = gs[(gs.exp == key[0]) & (gs.tag == key[1]) & (gs.condition == key[2])]
+            if r.empty:
+                continue
+            r = r.iloc[0]
+            named = (pc(r.joint), pc(r.gro)) if r.colluding else ("–", "–")
+            lines.append(f"| {lab} | {int(r.n)} | {pc(r.joint_flag_rate)} | {named[0]} | "
+                         f"{pc(r.gro_flag_rate)} | {named[1]} |")
+        v["gro_table"] = "\n".join(lines)
+        hon = gs[~gs.colluding & gs.tag.isin(["deepseek", "haiku", "mixed"])]
+        v["gro_honest_range"] = (f"{100 * hon.gro.min():.1f}–{100 * hon.gro.max():.1f}%"
+                                 .replace(".0–", "–").replace(".0%", "%"))
+    gsim = read("gro_sim.csv")
+    if gsim is not None:
+        h = gsim[gsim.scenario.str.startswith("honest")]
+        v["gro_sim_fpr_max"] = f"{100 * h.gro.max():.1f}%".replace(".0%", "%")
+        c = gsim[(gsim.scenario == "change_rho0.5_u0.2") & (gsim["T"] == 60)].iloc[0]
+        v["gro_sim_change_gro"] = f"{100 * c.gro:.0f}%"
+        v["gro_sim_change_joint"] = f"{100 * c.joint:.0f}%"
+    gg = read("s0g_growth.csv")
+    if gg is not None:
+        sk = gg[(gg.prior == "skewed") & (gg.channel == "copy")]
+        v["growth_joint_neg_max_eps"] = f"{sk[sk.joint_k2 < 0].eps.max():.1f}"
     # sample sizes per condition and validation-model rates as percentages (for Table A1)
     for name, exp in (("s1_audits.csv", "s1"), ("s2_audits.csv", "s2")):
         d = read(name)
