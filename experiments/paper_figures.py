@@ -405,7 +405,7 @@ def fig_example():
         ax.add_patch(box)
         ax.text(1.5, y - 1.5, f"{p}  cost {cost}", fontsize=7, fontweight="bold", va="top", color=INK)
         if p in msgs:
-            txt = textwrap.fill("vendor: " + msgs[p], 66)
+            txt = textwrap.fill("vendor, confidential: " + msgs[p].replace("Confidential (pooled client data): ", ""), 72)
             ax.text(1.5, y - 6.5, txt, fontsize=6.2, va="top", color="#b8441c", family="DejaVu Sans")
             yy = y - 18.5
         else:
