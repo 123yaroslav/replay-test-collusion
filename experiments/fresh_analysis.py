@@ -151,14 +151,9 @@ def run_c():
         return None
     out = {}
     moves = re.compile(r"\b(rock|paper|scissors)\b", re.IGNORECASE)
-    code = {"rock": re.compile(r"weather|rain|sun|snow|cloud|wind|storm|forecast|cold|warm|hot|"
-                               r"breeze|humid|chilly|fog|sky", re.IGNORECASE),
-            "paper": re.compile(r"food|lunch|dinner|breakfast|coffee|tea|cook|recipe|pizza|"
-                                r"pasta|soup|bread|snack|meal|taste|delicious|bak|eat|restaurant",
-                                re.IGNORECASE),
-            "scissors": re.compile(r"travel|trip|flight|train|beach|mountain|vacation|holiday|"
-                                   r"journey|city|visit|hotel|road|tour|airport|abroad|hike",
-                                   re.IGNORECASE)}
+    code = {"rock": re.compile(r"\bweather\b", re.IGNORECASE),
+            "paper": re.compile(r"\bfood\b", re.IGNORECASE),
+            "scissors": re.compile(r"\btravel\b", re.IGNORECASE)}
 
     def decode(text):
         hits = [m for m, rx in code.items() if rx.search(text)]

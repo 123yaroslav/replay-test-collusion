@@ -101,9 +101,11 @@ async def main():
     ap.add_argument("--temperature", type=float, default=1.0)
     ap.add_argument("--tag", default=None)
     ap.add_argument("--budget", type=float, default=None)
+    ap.add_argument("--pin-provider", default=None, help="route --model only to this provider")
     args = ap.parse_args()
     args.tag = args.tag or args.model.split("/")[-1]
-    llm = LLM(budget_usd=args.budget)
+    pins = {args.model: [args.pin_provider]} if args.pin_provider else None
+    llm = LLM(budget_usd=args.budget, provider_pins=pins)
     for cond in args.condition:
         t0 = time.time()
         episodes = await run_condition(llm, cond, args)
