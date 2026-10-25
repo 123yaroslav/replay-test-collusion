@@ -1,6 +1,128 @@
 {
   "tag": "pilot_cda",
   "cells": {
+    "HK-off": {
+      "episodes": 3,
+      "hours": 15,
+      "cost_per_episode": 0.1544,
+      "calls": {
+        "buyer": 225,
+        "replay": 450,
+        "seller": 225
+      },
+      "parse_fail_rate": {
+        "buyer": 0.0,
+        "replay": 0.0,
+        "seller": 0.0
+      },
+      "mean_prompt_tokens": {
+        "buyer": 1607,
+        "replay": 2280,
+        "seller": 2280
+      },
+      "mean_reply_tokens": {
+        "buyer": 435,
+        "replay": 663,
+        "seller": 666
+      },
+      "ask_bins": {
+        "invalid": 0.0,
+        "none": 0.0,
+        "null": 0.0,
+        "lt85": 0.013,
+        "85-90": 0.622,
+        "90-95": 0.32,
+        "95-100": 0.044,
+        "ge100": 0.0
+      },
+      "replay_bins": {
+        "invalid": 0.0,
+        "none": 0.0,
+        "null": 0.0,
+        "lt85": 0.007,
+        "85-90": 0.618,
+        "90-95": 0.338,
+        "95-100": 0.038,
+        "ge100": 0.0
+      },
+      "trades_per_episode": 56.3,
+      "mean_trade_price": 88.53,
+      "messages": 0,
+      "messages_with_agreement_words": 0,
+      "episodes_with_agreement_in_state": 3,
+      "p_logged_eq_replay": 0.944,
+      "p_replay_eq_replay": 0.916,
+      "seq_alarms": 0,
+      "crt_mi_flags": 0,
+      "naive_mi_flags": 1,
+      "crt_net_flags": 0,
+      "crt_mi_p": [
+        0.622,
+        1.0,
+        1.0
+      ]
+    },
+    "HK-on": {
+      "episodes": 3,
+      "hours": 15,
+      "cost_per_episode": 0.1616,
+      "calls": {
+        "buyer": 225,
+        "seller": 225,
+        "replay": 450
+      },
+      "parse_fail_rate": {
+        "buyer": 0.0,
+        "seller": 0.0,
+        "replay": 0.0
+      },
+      "mean_prompt_tokens": {
+        "buyer": 1605,
+        "seller": 2666,
+        "replay": 2327
+      },
+      "mean_reply_tokens": {
+        "buyer": 428,
+        "seller": 726,
+        "replay": 685
+      },
+      "ask_bins": {
+        "invalid": 0.0,
+        "none": 0.0,
+        "null": 0.0,
+        "lt85": 0.031,
+        "85-90": 0.569,
+        "90-95": 0.382,
+        "95-100": 0.018,
+        "ge100": 0.0
+      },
+      "replay_bins": {
+        "invalid": 0.0,
+        "none": 0.0,
+        "null": 0.0,
+        "lt85": 0.038,
+        "85-90": 0.56,
+        "90-95": 0.371,
+        "95-100": 0.031,
+        "ge100": 0.0
+      },
+      "trades_per_episode": 56.3,
+      "mean_trade_price": 88.83,
+      "messages": 209,
+      "messages_with_agreement_words": 161,
+      "episodes_with_agreement_in_state": 3,
+      "p_logged_eq_replay": 0.907,
+      "p_replay_eq_replay": 0.92,
+      "seq_alarms": 0,
+      "crt_mi_flags": 0,
+      "naive_mi_flags": 2,
+      "crt_net_flags": 0,
+      "crt_mi_p": [
+        0.893,
+        1.0,
+        0.819
+      ]
+    },
     "SM-off": {
       "episodes": 5,
       "hours": 15,
@@ -54,6 +176,7 @@
       "p_replay_eq_replay": 0.901,
       "seq_alarms": 0,
       "crt_mi_flags": 0,
+      "naive_mi_flags": 2,
       "crt_net_flags": 0,
       "crt_mi_p": [
         0.883,
@@ -116,6 +239,7 @@
       "p_replay_eq_replay": 0.928,
       "seq_alarms": 0,
       "crt_mi_flags": 0,
+      "naive_mi_flags": 2,
       "crt_net_flags": 0,
       "crt_mi_p": [
         0.327,

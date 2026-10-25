@@ -18,6 +18,8 @@ from pathlib import Path
 import numpy as np
 
 from collusion.audit import audit
+from collusion.detect.crt_llm import action_matrix, shuffle_sampler
+from collusion.detect.net_influence import calibrated_test
 from collusion.games.cda import ACTION_SPACE, ask_bin
 from collusion.trajectory import read_episodes
 
@@ -94,6 +96,12 @@ def main():
                     lr += ((a == r1) + (a == r2)) / 2
                     rr += r1 == r2
                     n += 1
+        naive = []
+        for ep in eps:  # monoculture check: naive MI with a within-episode time-shuffle null
+            a_mat = action_matrix(ep, ep.agent_ids, ACTION_SPACE)
+            _, p_naive, _ = calibrated_test(a_mat, None, shuffle_sampler(a_mat), n_null=999,
+                                            seed=ep.seed, net=False)
+            naive.append(p_naive)
         res = audit(eps, action_space=ACTION_SPACE, statistic="mi")
         res_net = audit(eps, action_space=ACTION_SPACE, statistic="net", sequential=False)
         summary["cells"][cell] = {
@@ -116,6 +124,7 @@ def main():
             "p_replay_eq_replay": round(rr / max(n, 1), 3),
             "seq_alarms": sum(r["seq_alarm_round"] is not None for r in res),
             "crt_mi_flags": sum(r["flag"] for r in res),
+            "naive_mi_flags": sum(p < 0.05 for p in naive),
             "crt_net_flags": sum(r["flag"] for r in res_net),
             "crt_mi_p": [round(r["p_value"], 3) for r in res],
         }
