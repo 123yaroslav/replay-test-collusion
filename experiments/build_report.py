@@ -495,6 +495,60 @@ def numbers() -> dict:
         v["s0f_silent_replay_seq"] = rng_(sil.replay_seq)
         v["s0f_silent_twin_seq"] = rng_(sil.twin_seq)
         v["s0f_iters"] = str(int(s0f.n.iloc[0]))
+    # full study in the re-implemented double auction (pre-registered at launch; decision script
+    # results/summary/full_cda_confirm.json, memory analysis memory_cartel_full_cda.json)
+    fc = SUM / "full_cda_confirm.json"
+    if fc.exists():
+        c = json.loads(fc.read_text())
+        assert not c.get("dry_run"), "a dry run must never feed the report"
+        cells = c["cells"]
+
+        def kn(k, n):
+            return f"{k}/{n}"
+
+        v["fc_mode"] = c["mode"]
+        c1 = c["C1"]
+        v["fc_c1"] = kn(c1["alarms"], c1["n"])
+        v["fc_c1_ci"] = f"{100 * c1['wilson'][0]:.0f}–{100 * c1['wilson'][1]:.0f}%"
+        v["fc_c1_p"] = f"{c1['p_fpr_ge_15']:.3f}"
+        v["fc_c1_verdict"] = "supported" if c1["supported"] else "not supported"
+        v["fc_c2_naive"] = kn(cells["SM-off"]["naive"], cells["SM-off"]["n"])
+        v["fc_c2_seq"] = kn(cells["SM-off"]["seq"], cells["SM-off"]["n"])
+        v["fc_c2_p"] = f"{c['C2']['p_mcnemar']:.3f}"
+        v["fc_c2_verdict"] = "supported" if c["C2"]["supported"] else "not supported"
+        c4 = c["C4"]
+        v["fc_c4_cartel"] = kn(c4["cartel_alarms"], c4["cartel_n"])
+        v["fc_c4_off"] = kn(c4["off_alarms"], c4["off_n"])
+        v["fc_c4_p"] = f"{c4['p_fisher']:.3f}"
+        v["fc_c4_verdict"] = "supported" if c4["supported"] else "not supported"
+        names = {"SM-off": "DeepSeek, no chat", "SM-on": "DeepSeek, chat",
+                 "SM-cartel": "DeepSeek, instructed cartel", "XP-off": "DeepSeek + Haiku, no chat",
+                 "XP-on": "DeepSeek + Haiku, chat"}
+        for cell, r in cells.items():
+            key = cell.replace("-", "_")
+            v[f"fc_{key}_price"] = f"{r['mean_price']:.2f}"
+            v[f"fc_{key}_seq"] = kn(r["seq"], r["n"])
+            v[f"fc_{key}_naive"] = kn(r["naive"], r["n"])
+        mem = SUM / "memory_cartel_full_cda.json"
+        mrows = json.loads(mem.read_text()) if mem.exists() else {}
+        lines = ["| Cell | Games | Mean trade price | Time-shuffle MI | Replay, sequential "
+                 "| Replay, fixed (MI / net) | Logged − replayed ask |",
+                 "|---|---|---|---|---|---|---|"]
+        for cell in ("SM-off", "XP-off", "SM-on", "XP-on", "SM-cartel"):
+            if cell not in cells:
+                continue
+            r = cells[cell]
+            gap = mrows.get(cell, {}).get("mean_logged_minus_replay")
+            lines.append(f"| {names[cell]} | {r['n']} | {r['mean_price']:.2f} | {r['naive']} | "
+                         f"{r['seq']} | {r['crt_mi']} / {r['crt_net']} | "
+                         f"{'–' if gap is None else f'{gap:+.2f}'} |")
+        v["fc_table"] = "\n".join(lines)
+        if "SM-cartel" in mrows:
+            ch = mrows["SM-cartel"]["compliance"]["changed"]
+            v["fc_changed_logged"] = f"{100 * ch['logged']:.0f}%"
+            v["fc_changed_replay"] = f"{100 * ch['replay']:.0f}%"
+            k, n = mrows["SM-cartel"]["follower_memory_mentions_floor_or_S1"]
+            v["fc_cartel_mem"] = f"{k} of {n}"
     # p-values for text: below 1e-10 print a bound instead of a long exponent
     for key in [k for k in v if k.endswith(("_p_above5", "_p_below10"))]:
         x = float(v[key])

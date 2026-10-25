@@ -13,7 +13,7 @@ size_categories:
 
 # Replay audit of LLM agent collusion
 
-Episode logs and the LLM response cache behind the report *Monoculture Looks Like Collusion: A Replay Test for Hidden Information Flow Between LLM Agents* (Apart AI Collusion Research Sprint, October 2026). Code: [repository link].
+Episode logs and the LLM response cache behind the report *Monoculture Looks Like Collusion: A Replay Test for Hidden Information Flow Between LLM Agents* (Apart AI Collusion Research Sprint, October 2026). Code: https://github.com/123yaroslav/replay-test-collusion (MIT).
 
 ## Contents
 
