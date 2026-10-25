@@ -63,7 +63,7 @@ def panel_label(ax, s, x=-0.02, y=1.04):
 
 # ------------------------------------------------------------------ Fig. 1: the method --------
 def fig_method():
-    fig = plt.figure(figsize=(WIDTH, 1.62))
+    fig = plt.figure(figsize=(WIDTH, 1.9))
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 127), ax.set_ylim(4.5, 38.5)
     ax.axis("off")
@@ -80,36 +80,36 @@ def fig_method():
     for x, h in heads:
         ax.text(x, 35.5, h, fontsize=9, fontweight="bold", va="center")
     # 1. deployment: agent i acts on its logged view V and on the hidden channel C
-    ax.text(1.5, 26, r"$V_{i,t}$", fontsize=9.5, va="center")
-    ax.text(1.5, 17, r"$C_{i,t}$", fontsize=9.5, va="center", color=C["channel"])
-    box(16, 18.5, 7.5, 6, r"$\pi_i$", size=9.5)
+    ax.text(1.5, 26, "view", fontsize=8.5, va="center")
+    ax.text(0.5, 17, "channel", fontsize=8.5, va="center", color=C["channel"])
+    box(16, 18.5, 7.5, 6, "agent", size=8)
     arrow(7.2, 26, 15.4, 23.6)
     arrow(7.2, 17, 15.4, 19.4, color=C["channel"], ls=(0, (3, 2)))
     arrow(24.2, 21.5, 31.5, 21.5)
-    ax.text(27.8, 23.2, r"$a_{i,t}$", fontsize=9.5, ha="center")
-    ax.text(1, 8.2, "acts on the logged view $V$\nand the hidden channel $C$", fontsize=7.6,
+    ax.text(27.8, 23.2, "move", fontsize=8.5, ha="center")
+    ax.text(1, 8.2, "acts on the logged view\nand the hidden channel", fontsize=7.6,
             color=INK2, va="center", linespacing=1.3)
     # 2. replay: the same policy on V alone, k = 2 draws
-    ax.text(35.5, 26, r"$V_{i,t}$", fontsize=9.5, va="center")
-    ax.text(35.5, 17, r"$C_{i,t}$", fontsize=9.5, va="center", color=C["channel"])
+    ax.text(35.5, 26, "view", fontsize=8.5, va="center")
+    ax.text(34.5, 17, "channel", fontsize=8.5, va="center", color=C["channel"])
     ax.plot([35.0, 41.2], [15.3, 18.8], color=C["channel"], lw=1.0)
-    box(46, 18.5, 7.5, 6, r"$\pi_i$", size=9.5)
+    box(46, 18.5, 7.5, 6, "agent", size=8)
     arrow(41.2, 26, 45.4, 23.6)
     arrow(54.2, 23.3, 57.6, 26.0)
     arrow(54.2, 19.7, 57.6, 17.0)
-    ax.text(58.2, 26.6, r"$\tilde a^{(1)}_{i,t}$", fontsize=9.5, va="center")
-    ax.text(58.2, 16.2, r"$\tilde a^{(2)}_{i,t}$", fontsize=9.5, va="center")
-    ax.text(35, 8.2, "asked again on $V$ alone,\ntwice", fontsize=7.6, color=INK2,
+    ax.text(58.2, 26.6, "replay 1", fontsize=8.5, va="center")
+    ax.text(58.2, 16.2, "replay 2", fontsize=8.5, va="center")
+    ax.text(35, 8.2, "asked again on the view alone,\ntwice", fontsize=7.6, color=INK2,
             va="center", linespacing=1.3)
     # 3. pool: the logged move and its replays
-    for j, (lab, logged) in enumerate(((r"$a_{i,t}$", True), (r"$\tilde a^{(1)}_{i,t}$", False),
-                                       (r"$\tilde a^{(2)}_{i,t}$", False))):
+    for j, (lab, logged) in enumerate((("logged", True), ("replay 1", False),
+                                       ("replay 2", False))):
         x = 66.5 + 7.0 * j
         ax.add_patch(Rectangle((x, 18.5), 6.2, 6, fc="#eaf2fc" if logged else "white",
                                ec=C["crt_net"] if logged else INK2, lw=1.3 if logged else 0.8))
-        ax.text(x + 3.1, 21.5, lab, ha="center", va="center", fontsize=8.5)
-    ax.text(76.6, 27.6, r"pool $P_{i,t}$", ha="center", fontsize=9)
-    ax.text(66, 8.2, "under $H_0$ the logged move\nis uniform in its pool", fontsize=7.6,
+        ax.text(x + 3.1, 21.5, lab, ha="center", va="center", fontsize=6.8)
+    ax.text(76.6, 27.6, "pool", ha="center", fontsize=9)
+    ax.text(66, 8.2, "under the null the logged move\nis a random member of its pool", fontsize=7.6,
             color=INK2, va="center", linespacing=1.3)
     arrow(87.6, 21.5, 90.8, 21.5)
     # 4. test: null distribution with the observed statistic, and an e-process
@@ -118,15 +118,15 @@ def fig_method():
     for x, h in zip(np.linspace(92.5, 103, 16), hist):
         ax.add_patch(Rectangle((x, 15), 0.6, 9 * h / hist.max(), fc="#c9c7c1", ec="none"))
     ax.plot([101.6, 101.6], [15, 25.5], color=C["crt_net"], lw=1.2)
-    ax.text(101.6, 26.4, r"$S$", ha="center", fontsize=9, color=C["crt_net"])
+    ax.text(101.6, 26.4, "observed", ha="center", fontsize=7, color=C["crt_net"])
     ax.text(98, 8.2, "fixed test:\n$p$-value", ha="center", va="center", fontsize=7.6,
             color=INK2, linespacing=1.3)
     tt = np.linspace(0, 1, 50)
     path = 15 + 11 * (np.exp(2.4 * tt) - 1) / (np.exp(2.4) - 1) + 0.7 * np.sin(13 * tt) * tt
     ax.plot(109 + 16 * tt, path, color=C["seq"], lw=1.1)
     ax.plot([109, 125], [22, 22], color=INK2, lw=0.7, ls=(0, (3, 2)))
-    ax.text(109.2, 22.7, r"$1/\alpha$", fontsize=8.5, ha="left", va="bottom", color=INK2)
-    ax.text(116.5, 8.2, "sequential test:\nalarm at $E_T \\geq 1/\\alpha$", ha="center",
+    ax.text(109.2, 22.7, "alarm line", fontsize=7.5, ha="left", va="bottom", color=INK2)
+    ax.text(116.5, 8.2, "sequential test:\nevidence crosses the line", ha="center",
             va="center", fontsize=7.6, color=INK2, linespacing=1.3)
     save(fig, "p_fig1_method")
 
@@ -405,11 +405,11 @@ def fig_example():
         ax.add_patch(box)
         ax.text(1.5, y - 1.5, f"{p}  cost {cost}", fontsize=7, fontweight="bold", va="top", color=INK)
         if p in msgs:
-            txt = textwrap.fill("vendor: " + msgs[p], 60)
-            ax.text(1.5, y - 6.5, txt, fontsize=5.6, va="top", color="#b8441c", family="DejaVu Sans")
+            txt = textwrap.fill("vendor: " + msgs[p], 66)
+            ax.text(1.5, y - 6.5, txt, fontsize=6.2, va="top", color="#b8441c", family="DejaVu Sans")
             yy = y - 18.5
         else:
-            ax.text(1.5, y - 6.5, "no message", fontsize=5.6, va="top", color=INK2, family="DejaVu Sans")
+            ax.text(1.5, y - 6.5, "no message", fontsize=6.2, va="top", color=INK2, family="DejaVu Sans")
             yy = y - 10.5
         ax.text(1.5, yy, f"logged bid {logged}", fontsize=6.5, va="top", color=C["crt_net"], fontweight="bold")
         ax.text(30, yy, f"replays without the message: {replays[0]}, {replays[1]}", fontsize=6.5, va="top", color=INK)
