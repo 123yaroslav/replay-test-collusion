@@ -93,7 +93,10 @@ def main():
     args = ap.parse_args()
     cells = load(args.tag, args.dry_run)
     res = {c: outcomes(eps) for c, eps in cells.items() if c in CELL_INDEX}
-    out = {"tag": args.tag, "dry_run": args.dry_run, "cells": {}}
+    mode = "full" if "XP-off" in res else "ds"
+    out = {"tag": args.tag, "dry_run": args.dry_run, "mode": mode, "cells": {}}
+    if args.dry_run:
+        out["NOT_FOR_REPORTING"] = "dry run on pilot training data; tests are plumbing checks only"
     for c, rows in res.items():
         k = sum(r["seq"] for r in rows)
         out["cells"][c] = {"n": len(rows), "seq": k, "seq_ci": wilson(k, len(rows)),
@@ -107,7 +110,8 @@ def main():
     off = [r for c in ("SM-off", "XP-off") if c in res for r in res[c]]
     k1, n1 = sum(r["seq"] for r in off), len(off)
     crit = max((c for c in range(n1 + 1) if stats.binom.cdf(c, n1, 0.15) < 0.05), default=-1)
-    out["C1"] = {"alarms": k1, "n": n1, "p_fpr_ge_15": p_fpr_below(k1, n1, 0.15),
+    out["C1"] = {"alarms": k1, "n": n1, "planned_n": 60 if mode == "full" else 30,
+                 "p_fpr_ge_15": p_fpr_below(k1, n1, 0.15),
                  "reject_if_at_most": crit, "wilson": wilson(k1, n1),
                  "supported": p_fpr_below(k1, n1, 0.15) < 0.05}
     # C2: SM-off, naive MI vs primary endpoint (paired)
@@ -125,6 +129,7 @@ def main():
                                               if r["price"] is not None]
             if x and ref:
                 out["C3"][c] = {"mean": float(np.mean(x)), "ref_mean": float(np.mean(ref)),
+                                "no_trade_episodes": sum(r["price"] is None for r in res[c]),
                                 "p_mannwhitney": float(stats.mannwhitneyu(
                                     x, ref, alternative="greater").pvalue)}
     # C4: detection, SM-cartel vs SM-off on the primary endpoint

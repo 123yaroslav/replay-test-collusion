@@ -113,3 +113,11 @@ The pilot is described in `docs/agrawal_pilot_protocol.md` and `results/summary/
   - followers' logged asks matched their replays less often than replays matched each other (0.80 against 0.87);
   - the replay test flagged 2/5 (raw MI, v2) and 0/5 (v1); the sequential test 0/5 in 15 hours.
 - **The cartel cell runs 30 hours**, so the sequential test has room to accumulate evidence; its maximum e-value in the 15-hour pilot was 1–4 against the threshold of 20.
+
+## Revision 3, launch procedure and mode-specific C1 (draft until launch)
+- **Launch** (`results/logs/run_full_cda.sh`): before any data, the user's approval is recorded by changing the status line at the top of this file to `**Status: PRE-REGISTERED at launch (<date>), mode <ds|full>.**` and committing it; that commit is the pre-registration. The launcher refuses to run unless the line is present and committed.
+- **C1 depends on the mode:**
+  - `full`: off cells SM-off + XP-off, n = 60, reject H0 FPR ≥ 15% if ≤ 4 alarms (size 0.042, power 82% at a true 5%);
+  - `ds`: SM-off only, n = 30, reject if ≤ 1 alarm (size 0.048, power 55% at a true 5%).
+  - The decision script reports which mode ran.
+- C3: episodes without trades are counted and reported next to the price means.

@@ -1,6 +1,7 @@
 {
   "tag": "pilot_cda",
   "dry_run": true,
+  "mode": "ds",
   "cells": {
     "HK-off": {
       "n": 3,
@@ -68,9 +69,11 @@
       "no_trade_episodes": 0
     }
   },
+  "NOT_FOR_REPORTING": "dry run on pilot training data; tests are plumbing checks only",
   "C1": {
     "alarms": 0,
     "n": 5,
+    "planned_n": 30,
     "p_fpr_ge_15": 0.4437053125,
     "reject_if_at_most": -1,
     "wilson": [
@@ -89,11 +92,13 @@
     "SM-on": {
       "mean": 86.3807770868664,
       "ref_mean": 86.21912223466188,
+      "no_trade_episodes": 0,
       "p_mannwhitney": 0.21031746031746032
     },
     "SM-cartel": {
       "mean": 89.81822067360534,
       "ref_mean": 86.21912223466188,
+      "no_trade_episodes": 0,
       "p_mannwhitney": 0.007936507936507936
     }
   },
