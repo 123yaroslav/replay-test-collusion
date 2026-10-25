@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import copy
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -45,6 +46,11 @@ CELLS = {"SM-off": (["ds"] * 5, False), "SM-on": (["ds"] * 5, True),
          "HK-off": (["hk"] * 5, False), "HK-on": (["hk"] * 5, True)}
 CELL_INDEX = {c: i for i, c in enumerate(CELLS)}
 COST, VALUE, TEMP, MAX_TOKENS = 80.0, 100.0, 0.7, 1500
+BINS_VERSION = "v2"  # v1 was the pilot's (coarse); see src/collusion/games/cda.py
+
+
+def _sha(text: str) -> str:
+    return hashlib.sha256(text.encode()).hexdigest()[:16]
 
 
 def price(d: dict | None, key: str):
@@ -143,21 +149,25 @@ async def run_episode(llm: LLM, cell: str, seed: int, hours: int, k: int) -> Epi
                     msgs[s] = str(m)[:500]
         rounds.append(Round(
             t=hour - 1,
-            actions={s: ask_bin(asks[s]) for s in SELLERS},
+            actions={s: ask_bin(asks[s], BINS_VERSION) for s in SELLERS},
             rewards=profit,
-            messages=[Message(sender=s, recipients=[x for x in SELLERS if x != s], text=m)
+            messages=[Message(sender=s, recipients=list(SELLERS), text=m)  # sender reads it too
                       for s, m in msgs.items()],
             public_state={"asks_raw": asks, "bids_raw": bids,
                           "trades": [[b, s, p] for _, b, s, p in trades],
-                          "requery_raw": {s: [price(d, "ask") for d in rep[s]] for s in SELLERS}},
+                          "requery_raw": {s: [price(d, "ask") for d in rep[s]] for s in SELLERS},
+                          "prompt_sha": {s: [_sha(real[s]), _sha(replay[s])] for s in SELLERS},
+                          "state": {s: {"memory": dict(snap[s].memory), "notebook": snap[s].notebook}
+                                    for s in SELLERS}},
             private={s: str((sel[s] or {}).get("plan", ""))[:300] for s in SELLERS},
-            requery={s: [ask_bin(price(d, "ask")) for d in rep[s]] for s in SELLERS}))
+            requery={s: [ask_bin(price(d, "ask"), BINS_VERSION) for d in rep[s]] for s in SELLERS}))
         inbox_prev = msgs
     return Episode(
         episode_id=f"cda-{cell}-{seed}", game="cda", condition=cell, seed=seed,
         agents=[AgentSpec(id=s, model=MODELS[kinds[i]]) for i, s in enumerate(SELLERS)],
         rounds=rounds,
         meta={"chat": chat, "hours": hours, "k": k, "temperature": TEMP, "buyers": MODELS["ds"],
+              "bins": BINS_VERSION,
               "usage": usage, "final_memory": {s: states[s].memory for s in SELLERS},
               "final_notebook": {s: states[s].notebook for s in SELLERS}})
 

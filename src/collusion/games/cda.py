@@ -14,12 +14,18 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-BIN_EDGES = (85.0, 90.0, 95.0, 100.0)
-BIN_LABELS = ("lt85", "85-90", "90-95", "95-100", "ge100")
-ACTION_SPACE = ["invalid", "none", "null", *BIN_LABELS]  # codes used by the replay test
+# v1: the pilot's coarse bins. v2: finer $1 bins where pilot asks clustered (84-90), for the main
+# study (docs/agrawal_live_plan.md). Episodes record which version they used in meta["bins"].
+BINS = {"v1": ((85.0, 90.0, 95.0, 100.0), ("lt85", "85-90", "90-95", "95-100", "ge100")),
+        "v2": ((84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 95.0, 100.0),
+               ("lt84", "84-85", "85-86", "86-87", "87-88", "88-89", "89-90", "90-95", "95-100",
+                "ge100"))}
+ACTION_SPACES = {v: ["invalid", "none", "null", *labels] for v, (_, labels) in BINS.items()}
+BIN_EDGES, BIN_LABELS = BINS["v1"]
+ACTION_SPACE = ACTION_SPACES["v1"]  # pilot coding, kept for reproducibility
 
 
-def ask_bin(ask) -> str:
+def ask_bin(ask, version: str = "v1") -> str:
     """Coding of a seller's ask: a price bin, "null" (withdraw), "none" (no field or JSON null:
     order unchanged, as in the reference code) or "invalid" (no parseable price)."""
     if ask is None or ask == "none":
@@ -28,7 +34,8 @@ def ask_bin(ask) -> str:
         return "null"
     if not isinstance(ask, (int, float)) or not np.isfinite(ask) or ask <= 0:
         return "invalid"
-    return BIN_LABELS[int(np.searchsorted(BIN_EDGES, ask, side="right"))]
+    edges, labels = BINS[version]
+    return labels[int(np.searchsorted(edges, ask, side="right"))]
 
 
 @dataclass

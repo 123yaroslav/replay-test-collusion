@@ -20,7 +20,7 @@ import numpy as np
 from collusion.audit import audit
 from collusion.detect.crt_llm import action_matrix, shuffle_sampler
 from collusion.detect.net_influence import calibrated_test
-from collusion.games.cda import ACTION_SPACE, ask_bin
+from collusion.games.cda import ACTION_SPACE, ACTION_SPACES, ask_bin
 from collusion.trajectory import read_episodes
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,6 +77,7 @@ def main():
                 toks[kind + "_in"] += ti
                 toks[kind + "_out"] += to
             cost.append(c)
+        space = ACTION_SPACES[eps[0].meta.get("bins", "v1")] if eps else ACTION_SPACE
         acts = Counter(a for ep in eps for r in ep.rounds for a in r.actions.values())
         reps = Counter(a for ep in eps for r in ep.rounds for v in r.requery.values() for a in v)
         trades = [[t[2] for r in ep.rounds for t in r.public_state["trades"]] for ep in eps]
@@ -98,12 +99,12 @@ def main():
                     n += 1
         naive = []
         for ep in eps:  # monoculture check: naive MI with a within-episode time-shuffle null
-            a_mat = action_matrix(ep, ep.agent_ids, ACTION_SPACE)
+            a_mat = action_matrix(ep, ep.agent_ids, space)
             _, p_naive, _ = calibrated_test(a_mat, None, shuffle_sampler(a_mat), n_null=999,
                                             seed=ep.seed, net=False)
             naive.append(p_naive)
-        res = audit(eps, action_space=ACTION_SPACE, statistic="mi")
-        res_net = audit(eps, action_space=ACTION_SPACE, statistic="net", sequential=False)
+        res = audit(eps, action_space=space, statistic="mi")
+        res_net = audit(eps, action_space=space, statistic="net", sequential=False)
         summary["cells"][cell] = {
             "episodes": len(eps), "hours": eps[0].meta["hours"] if eps else None,
             "cost_per_episode": round(float(np.mean(cost)), 4) if cost else None,
@@ -112,9 +113,9 @@ def main():
             "mean_prompt_tokens": {k: round(toks[k + "_in"] / max(calls[k], 1)) for k in calls},
             "mean_reply_tokens": {k: round(toks[k + "_out"] / max(calls[k], 1)) for k in calls},
             "ask_bins": {k: round(acts.get(k, 0) / max(sum(acts.values()), 1), 3)
-                         for k in ACTION_SPACE},
+                         for k in space},
             "replay_bins": {k: round(reps.get(k, 0) / max(sum(reps.values()), 1), 3)
-                            for k in ACTION_SPACE},
+                            for k in space},
             "trades_per_episode": round(float(np.mean([len(t) for t in trades])), 1),
             "mean_trade_price": round(float(np.mean([p for t in trades for p in t])), 2)
             if any(trades) else None,

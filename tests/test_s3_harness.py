@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
 import s3_cda
 
 from collusion.audit import audit
-from collusion.games.cda import ACTION_SPACE
+from collusion.games.cda import ACTION_SPACES
 from collusion.llm import ChatResult
 
 
@@ -63,5 +63,5 @@ def test_on_cell_replay_has_empty_inbox():
 def test_episode_is_auditable():
     _, ep = _run("XP-on", hours=6)
     assert all(len(r.requery[s]) == 2 for r in ep.rounds for s in ep.agent_ids)
-    res = audit([ep], action_space=ACTION_SPACE, statistic="mi", n_null=99)
+    res = audit([ep], action_space=ACTION_SPACES[ep.meta["bins"]], statistic="mi", n_null=99)
     assert 0 < res[0]["p_value"] <= 1
