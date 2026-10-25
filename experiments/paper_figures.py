@@ -446,7 +446,7 @@ def fig_example():
         ax.text(99, yy, "departs" if departs else "matches", fontsize=6.5, va="top", ha="right",
                 color=("#b8441c" if departs else "#1d9a6c"), fontweight="bold")
         y -= h + 2.5
-    ax.text(0, y - 1, "Under H0 the logged bid is one of the three pool entries at random;\nP1 and P3 leave their pools, P2 and P4 do not.",
+    ax.text(0, y - 1, "Under the null the logged bid is one of the three pool entries at random.\nP1 and P3 leave their pools, P2 and P4 do not.",
             fontsize=6.3, va="top", color=INK2, style="italic")
     panel_label(ax, "a", x=-0.02, y=1.0)
     # panel b: the whole game
