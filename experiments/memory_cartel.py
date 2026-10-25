@@ -10,12 +10,13 @@ compliance with the floor S1 announced the hour before, for logged and replayed 
 whether the floor changed; how often a follower's memory before the call mentions the floor
 or S1, and the same for its per-round plan (which replays do not see).
 
-    uv run python experiments/memory_cartel.py
-Writes results/summary/memory_cartel.json.
+    uv run python experiments/memory_cartel.py [--tag pilot_cda|full_cda]
+Writes results/summary/memory_cartel.json (pilot) or memory_cartel_<tag>.json.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -38,8 +39,11 @@ def follows(a, floor):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag", default="pilot_cda")
+    args = ap.parse_args()
     out = {}
-    for f in sorted((ROOT / "results" / "raw" / "s3" / "pilot_cda").glob("SM-*.jsonl")):
+    for f in sorted((ROOT / "results" / "raw" / "s3" / args.tag).glob("*.jsonl")):
         eps = read_episodes(f)
         logged, replay, gap = [], [], []
         comp = {"same": [0, 0, 0], "changed": [0, 0, 0]}  # n, logged follows, replay follows
@@ -93,7 +97,8 @@ def main():
                                "replay": round(c[2] / c[0], 3) if c[0] else None}
                            for k, c in comp.items()},
         }
-    path = ROOT / "results" / "summary" / "memory_cartel.json"
+    name = "memory_cartel.json" if args.tag == "pilot_cda" else f"memory_cartel_{args.tag}.json"
+    path = ROOT / "results" / "summary" / name
     path.write_text(json.dumps(out, indent=2))
     print(json.dumps(out, indent=2))
 

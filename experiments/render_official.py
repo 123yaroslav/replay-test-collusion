@@ -389,6 +389,11 @@ end timeout'''
         print(f"Pages export attempt {attempt + 1} failed: {r.stderr.strip()[:200]}")
     else:
         raise RuntimeError("Pages export failed three times")
+    # Pages takes only bitmaps from a .docx: swap the 600-dpi figures for their vector versions
+    vec = subprocess.run(["uv", "run", "--with", "pikepdf", "python",
+                          str(ROOT / "experiments" / "vectorize_pdf.py")],
+                         capture_output=True, text=True, check=False, cwd=ROOT)
+    print(vec.stdout.strip() if vec.returncode == 0 else f"VECTORIZE FAILED: {vec.stderr[-400:]}")
     info = subprocess.run(["pdfinfo", str(OUT_PDF)], capture_output=True, text=True, check=False)
     pages = re.search(r"Pages:\s+(\d+)", info.stdout)
     print(f"pages: {pages.group(1) if pages else '?'}  -> {OUT_PDF}")
