@@ -8,9 +8,11 @@ cd "$(dirname "$0")/../.."
 LOG=results/logs/fresh.log
 grep -q "FULL_CDA_DONE" results/logs/full_cda.log || { echo "auction study not finished"; exit 1; }
 [ -z "$(git status --porcelain docs/fresh_plan.md experiments/fresh_analysis.py experiments/s1_llm_rps.py experiments/s2_procurement.py src/collusion/detect/gro.py src/collusion/agents/llm_agent.py src/collusion/detect/departure.py results/logs/run_fresh.sh)" ] || { echo "commit the plan and code first"; exit 1; }
-for d in s1/fresh_deepseek_pinned s1/fresh_haiku_stego s1/fresh_haiku_evasive s2/fresh_haiku_auction s3/fresh_cartel2; do
-  [ -d results/raw/$d ] && { echo "results/raw/$d exists; refusing to overwrite"; exit 1; }
-done
+if [ -z "$RESUME" ]; then  # RESUME=1 reruns from the cache (finished games cost nothing)
+  for d in s1/fresh_deepseek_pinned s1/fresh_haiku_stego s1/fresh_haiku_evasive s2/fresh_haiku_auction s3/fresh_cartel2; do
+    [ -d results/raw/$d ] && { echo "results/raw/$d exists; refusing to overwrite (RESUME=1 to continue)"; exit 1; }
+  done
+fi
 spent() { uv run python -c "import sqlite3;print(round(sqlite3.connect('results/cache/llm.sqlite').execute('select sum(cost) from spend').fetchone()[0],2))"; }
 echo "plan commit: $(git log -1 --format='%h %ad' --date=iso -- docs/fresh_plan.md) | spent: \$$(spent)" | tee -a $LOG
 export COLLUSION_MAX_CONCURRENCY=40
