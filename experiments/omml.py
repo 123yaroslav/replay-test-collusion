@@ -137,6 +137,10 @@ class _Parser:
             if name in ("frac", "tfrac", "dfrac"):
                 num, den = self.arg(), self.arg()
                 return self.scripts(f"<m:f><m:num>{num}</m:num><m:den>{den}</m:den></m:f>")
+            if name == "sqrt":
+                body = self.arg()
+                return self.scripts(f'<m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg/>'
+                                    f"<m:e>{body}</m:e></m:rad>")
             if name == "binom":
                 n, k = self.arg(), self.arg()
                 f = (f'<m:f><m:fPr><m:type m:val="noBar"/></m:fPr><m:num>{n}</m:num>'
