@@ -6,7 +6,7 @@ Yaroslav Rogoza · Apart Research AI Collusion Research Sprint, October 2026
 
 [Paper (PDF)](report/Apart_report.pdf) · [Data](https://huggingface.co/datasets/123yaroslav/replay-test-collusion)
 
-<p align="center"><img src="report/figures/fig0_method.png" width="90%" alt="The replay test"></p>
+<p align="center"><img src="report/figures/p_fig1_method.png" width="90%" alt="The replay test"></p>
 
 Agents built on one base model share priors, so their actions are correlated even when they never
 communicate. Collusion tests that flag pairs whose actions depend on each other therefore accuse
