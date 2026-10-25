@@ -1,82 +1,102 @@
-# Monoculture looks like collusion: a replay test for hidden information flow between LLM agents
+# Monoculture Looks Like Collusion
 
-Code for our submission to the [Apart Research AI Collusion Research Sprint](https://apartresearch.com/sprints/ai-collusion-research-sprint-2026-10-23-to-2026-10-25)
-(Oct 23–25, 2026).
+**A replay test for hidden information flow between LLM agents**
 
-**Question.** Given logs of several LLM agents and query access to their deployed policies, can
-an auditor tell *which pair* exchanged non-public information, without accusing honest agents
-that merely run the same model?
+Yaroslav Rogoza · Apart Research AI Collusion Research Sprint, October 2026
 
-**Method.** For every round, the auditor re-queries each agent on exactly what it saw, with the
-private channel removed. A pair is flagged only if their real moves depend on each other more
-than their own replays do. This is a conditional randomization test (CRT) with an exact
-per-cell null (logged action pooled with its re-queries), one audit per episode, family-wise
-over pairs.
+[Paper (PDF)](report/Apart_report.pdf) · [Data](https://huggingface.co/datasets/123yaroslav/replay-test-collusion)
 
-## What was done before the sprint (pre-existing) vs during the sprint
+<p align="center"><img src="report/figures/fig0_method.png" width="90%" alt="The replay test"></p>
 
-The sprint rules require pre-existing work to be marked. The full dated list is in
-[`PRE_SPRINT_LOG.md`](PRE_SPRINT_LOG.md); the git history shows the boundary.
+Agents built on one base model share priors, so their actions are correlated even when they never
+communicate. Collusion tests that flag pairs whose actions depend on each other therefore accuse
+honest agents. The replay test removes this confound. The auditor asks each agent again on its
+logged observation with the suspected channel removed, and flags a pair only if the pair's logged
+actions depend on each other more than its replays do.
 
-| Pre-existing (before Oct 23; commit `98f00dc` on `main`) | Sprint work (Oct 24–26; branch `sprint`) |
+## Results
+
+- **False accusations.** Mutual information flags 69% of games among four honest Claude Haiku
+  agents. The replay test flags 4.2% of 550 honest LLM games at a 5% level.
+- **Detection.** In a procurement auction between LLM suppliers, it names the pair in 92.5% of 40
+  games where a pricing vendor pools two clients' confidential costs, and flags 1.7% of games where
+  the vendor uses public data only.
+- **Sequential version.** In a pre-registered replication, an anytime-valid variant named an
+  instructed pair in 18 of 20 fresh games, against 11 of 20 for the fixed-length test.
+- **Scope.** The test detects information that reaches an agent through the audited channel.
+  Coordination written into shared instructions, or already stored in an agent's memory, is
+  outside its null hypothesis.
+
+## Audit your own agents
+
+In every round, log each agent's action and k ≥ 1 replays: the same deployed policy queried on the
+identical observation with the audited channel removed.
+
+```json
+{"episode_id": "run-1",
+ "rounds": [{"actions": {"A": "rock", "B": "paper", "C": "rock"},
+             "requery": {"A": ["rock", "scissors"], "B": ["paper", "paper"], "C": ["rock", "paper"]}}]}
+```
+
+```python
+from collusion.audit import audit
+
+for r in audit("logs.jsonl"):
+    print(r["episode_id"], r["flag"], r["pair"], r["p_value"], r["seq_alarm_round"])
+```
+
+| Output | Meaning |
 |---|---|
-| Repo skeleton, OpenRouter client with cache and per-process cap, trajectory schema | Global spend ledger, reasoning control, seeds, 429 handling (`llm.py`) |
-| Information-theory estimators and tests (`detect/infotheory.py`) | In-round CRT re-queries, undelivered talk, vendor messages (`runner.py`) |
-| Bonjour et al. γ/Γ, Bonjour rule, family-wise resampling test (`detect/net_influence.py`) | Pooled exchangeable CRT and per-episode audit (`detect/crt_llm.py`) |
-| Scripted RPS simulator, S0 replication of Bonjour Table 2, and the S0 finding that only the (non-pooled) CRT keeps the nominal false-alarm rate on shared-prior decoys (`games/rps.py`, `experiments/s0_scripted_validation.py`) | S0b validity and power with estimated references (`experiments/s0b_crt_validity.py`) |
-| Agrawal et al. adapter and pooled TE/MI pilot, which already found significant dependence (p = 0.005) in the no-chat condition (`adapters/agrawal.py`, `experiments/pilot_agrawal_te.py`) | Per-run Agrawal panel (`experiments/agrawal_panel.py`) |
-| Replay-test idea and first implementation: CRT via post-hoc LLM policy re-querying (k = 8, reference distribution, not pooled with the logged action) and the first LLM RPS script; both run only with fake replies | All LLM experiments: S1 RPS, S2 procurement auction, LLM judge, analysis, figures |
-| Generic N-agent game runner; research briefing and answers to every sprint question, literature notes, reading list, analysis of past winners with a submission checklist, question selection, plan (`docs/answers.md`, `docs/plan.md`, `docs/literature/`, `docs/reading.md`, `docs/winning_rules.md`) | Pre-registered analysis plan (`docs/analysis_plan.md`, frozen in commits `4333131` and `e65cabb`), report |
+| `flag`, `pair`, `p_value` | Fixed-length test over the episode, level `alpha` (default 0.05). |
+| `seq_alarm_round`, `seq_pair` | Sequential test: the round at which it stopped and the pair it named, or `None`. |
 
-## Audit your own agents in 3 steps
+The fixed-length test uses net influence by default, which can cancel inside a coalition. When a
+coalition of three or more agents is possible, or actions persist from round to round, use the
+sequential result: it keeps its level under feedback, provided replays are served like the
+original calls. A flag means the pair's actions carry information that its replays lack. It is a
+reason to investigate, not proof of intent.
 
-1. **Log replays.** In every round, keep each agent's action. Then ask the same deployed policy
-   again, k times, on the identical observation with the audited channel removed (same prompt
-   byte for byte, minus the inbox and the agent's own outgoing private message). Store the
-   answers under `requery`. We used k = 2; for the fixed-horizon test k = 1 lost little in our
-   data at half the cost, while the sequential test benefits from k = 2.
-   ```json
-   {"episode_id": "run-1", "rounds": [
-     {"actions": {"A": "rock", "B": "paper", "C": "rock"},
-      "requery": {"A": ["rock", "scissors"], "B": ["paper", "paper"], "C": ["rock", "paper"]}}]}
-   ```
-2. **Run the audit.**
-   ```bash
-   uv run python examples/audit_your_logs.py my_logs.jsonl   # no argument: a toy log with a planted pair
-   ```
-   or in Python: `from collusion.audit import audit; audit("my_logs.jsonl", statistic="net")`.
-   Use `coarsen={...}` to bin many-valued actions such as prices. If a coalition of three or more
-   agents is possible (net influence cancels inside a coalition) or the agents' actions persist from
-   round to round, rely on the sequential test (`seq_alarm_round`): it keeps its level under
-   feedback, while the fixed-horizon statistics were calibrated only on our games.
-3. **Read the result.** `flag=True` means the named pair's actions depend on each other more than
-   their own replays, given what you logged, plausibly allow at level α (default 5%). It is a
-   screening signal and a plus factor, not proof of intent. `seq_alarm_round` is the round at
-   which the anytime-valid version would have stopped. Coordination written into the agents'
-   shared instructions is invisible to the test by design, so pair it with a policy audit.
+`uv run python examples/audit_your_logs.py` audits a toy log with a planted pair.
 
-## Reproduce
+## Reproduce the paper
 
-All numbers, figures and the report come from one script and the released cache, at $0:
-`./results/logs/run_analysis.sh`. Details, timing and the from-scratch route: [`REPRODUCE.md`](REPRODUCE.md).
-
-## Layout
-
-```
-src/collusion/
-  llm.py               OpenRouter client: cache, global spend ledger, reasoning control
-  runner.py            repeated N-player game loop: private channels, in-round CRT re-queries
-  trajectory.py        Episode/Round schema; for_detector() hides labels and condition
-  agents/llm_agent.py  LLM agent (same procedure for logged move and re-query)
-  games/rps.py         4-player rock-paper-scissors (Bonjour et al. 2022) + scripted simulator
-  games/procurement.py sealed-bid procurement auction with pricing-vendor arms
-  detect/              net influence, information theory, per-episode CRT audit
-  analysis.py          Wilson intervals, binomial tests, AUROC
-experiments/           one rerunnable script per experiment
-results/summary/       small outputs used by the report (raw logs and cache are gitignored)
-docs/analysis_plan.md  pre-registered analysis plan
+```bash
+uv sync
+huggingface-cli download 123yaroslav/replay-test-collusion --repo-type dataset --local-dir results
+git clone --depth 1 https://github.com/andyjliu/llm-agent-collusion third_party/llm-agent-collusion
+./results/logs/run_analysis.sh   # every number and figure; about 13 min
+uv run pytest -q
 ```
 
-## Licence
+The download includes the cache of every model reply, so the analysis makes no API calls. Running
+the LLM experiments from scratch needs an OpenRouter key; see [REPRODUCE.md](REPRODUCE.md).
+The analysis plans in [`docs/`](docs/) were committed before the data they analyse were collected.
 
-Code: MIT (see `LICENSE`). Episode logs and the LLM cache (released on Hugging Face): CC-BY-4.0.
+## Repository
+
+```
+src/collusion/     replay test, baseline detectors, games, LLM client
+experiments/       one script per experiment
+results/summary/   outputs behind every number in the paper
+docs/              pre-registered analysis plans
+report/            paper source, figures and PDF
+examples/          audit your own logs
+```
+
+## Citation
+
+```bibtex
+@misc{rogoza2026monoculture,
+  title  = {Monoculture Looks Like Collusion: A Replay Test for Hidden Information Flow
+            Between {LLM} Agents},
+  author = {Rogoza, Yaroslav},
+  year   = {2026},
+  note   = {Apart Research AI Collusion Research Sprint},
+  url    = {https://github.com/123yaroslav/replay-test-collusion}
+}
+```
+
+## License
+
+Code: MIT. Data: CC-BY-4.0. Code written before the sprint is listed in
+[PRE_SPRINT_LOG.md](PRE_SPRINT_LOG.md).
