@@ -40,3 +40,16 @@
 ## Stop rules
 - If the measured cost per episode is above 1.5 × the estimate, stop and report.
 - If more than 10% of factual seller calls are invalid, fix the prompt before any main run. A changed prompt is a deviation and is logged.
+
+## Addendum 1 (after the DeepSeek pilot, before any Haiku episode)
+The DeepSeek pilot (10 episodes, $0.58) worked mechanically:
+- parse failures were about 0%, and an episode cost $0.067 at 15 hours;
+- there were 57 trades per episode at a mean price of about 86.
+
+But chat did not raise prices: 86.4 with chat against 86.3 without, although 77% of messages used agreement words. Before designing the main study we need to know whether any seller model turns chat into higher prices in this re-implementation, as GPT-4.1 did in Agrawal et al.'s logs (asks moved from 85–90 to 90–100).
+- Added pilot-only cells `HK-off` and `HK-on`: 5 Claude Haiku sellers, DeepSeek buyers, 3 episodes each, 15 hours, seeds from 10 000 + 1000 × cell index. Estimated cost about $0.6, under the global cap.
+- Still descriptive only.
+
+Two design lessons for the main pre-registration (not yet committed):
+- The P1 keyword measure is too broad: it fired in 4/5 no-chat episodes. It needs a stricter rule, such as another seller's ID plus a commitment verb in the same sentence.
+- Asks cluster in 85–90 (61–75%), so the price bins should be finer there (for example $1 bins from 84 to 90).

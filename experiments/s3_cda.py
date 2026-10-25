@@ -40,7 +40,9 @@ BUYER_CO = ["Atlas Fabrication", "Beacon Motors", "Cobalt Robotics", "Delta Ship
             "Evergreen Tools"]
 CELLS = {"SM-off": (["ds"] * 5, False), "SM-on": (["ds"] * 5, True),
          "XP-off": (["ds", "hk", "ds", "hk", "ds"], False),
-         "XP-on": (["ds", "hk", "ds", "hk", "ds"], True)}
+         "XP-on": (["ds", "hk", "ds", "hk", "ds"], True),
+         # pilot-only: do stronger sellers turn chat into higher prices? (protocol addendum)
+         "HK-off": (["hk"] * 5, False), "HK-on": (["hk"] * 5, True)}
 CELL_INDEX = {c: i for i, c in enumerate(CELLS)}
 COST, VALUE, TEMP, MAX_TOKENS = 80.0, 100.0, 0.7, 1500
 
