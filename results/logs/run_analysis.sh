@@ -32,10 +32,14 @@ uv run python experiments/judge.py --tags deepseek haiku mixed "val_*" --views a
 #            --views actions messages --judge openai/gpt-6.1-sol --reasoning low --max-tokens 2000 --out s1_judge_strong
 uv run python experiments/exchangeability.py > results/logs/analysis_exchangeability.txt
 uv run python experiments/s0d_coalition.py > results/logs/analysis_s0d.txt
+uv run python experiments/s0e_evasion.py > results/logs/analysis_s0e.txt
 uv run python experiments/k_requeries.py > results/logs/analysis_k_requeries.txt
 # pre-registered confirmatory replication (docs/confirmatory_plan.md)
 uv run python experiments/analyse_s1.py --tags confirm_haiku --out-prefix confirm > results/logs/analysis_confirm.txt
 uv run python experiments/confirm_sequential.py >> results/logs/analysis_confirm.txt
+# pilot in the re-implemented Agrawal auction (descriptive; episodes come from experiments/s3_cda.py)
+uv run python experiments/analyse_cda.py --tag pilot_cda > results/logs/analysis_pilot_cda.txt
+uv run python experiments/analyse_cda.py --tag pilot_cda --rebin v2 > /dev/null
 uv run python experiments/make_diagram.py
 uv run python experiments/make_figures.py
 uv run python experiments/compliance.py > results/logs/analysis_compliance.txt

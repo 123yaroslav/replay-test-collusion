@@ -269,6 +269,27 @@ def numbers() -> dict:
             for cell in ("SM-off", "SM-on", "HK-off", "HK-on"):
                 if cell in c:
                     v[f"pilot_price_{cell.replace('-', '_')}"] = f"{c[cell]['mean_trade_price']:.2f}"
+    ev = read("s0e_evasion_summary.csv")
+    if ev is not None:
+        def e(strategy, T, col):
+            r = ev[(ev.strategy == strategy) & (ev["T"] == T)]
+            return float(r[col].iloc[0])
+        full30 = e("rotation_0.0", 30, "gain_overpay")
+        v["s0e_harm_full30"] = f"{full30:.2f}"
+        v["s0e_harm_half30"] = f"{e('rotation_0.5', 30, 'gain_overpay'):.2f}"
+        v["s0e_harm_frac_half30"] = f"{100 * e('rotation_0.5', 30, 'gain_overpay') / full30:.0f}%"
+        v["s0e_seq_full30"] = f"{100 * e('rotation_0.0', 30, 'seq'):.0f}%"
+        v["s0e_seq_half30"] = f"{100 * e('rotation_0.5', 30, 'seq'):.0f}%"
+        v["s0e_seq_half60"] = f"{100 * e('rotation_0.5', 60, 'seq'):.0f}%"
+        v["s0e_seq_q60"] = f"{100 * e('rotation_0.75', 60, 'seq'):.0f}%"
+        v["s0e_harm_frac_q60"] = f"{100 * e('rotation_0.75', 60, 'gain_overpay') / e('rotation_0.0', 60, 'gain_overpay'):.0f}%"
+        v["s0e_const_harm"] = f"{e('constant', 30, 'gain_overpay'):.1f}"
+        v["s0e_const_seq"] = f"{100 * min(e('constant', 30, 'seq'), e('constant', 60, 'seq')):.0f}%"
+        v["s0e_const_dev"] = f"{100 * e('constant', 30, 'deviation'):.0f}–{100 * e('constant', 60, 'deviation'):.0f}%"
+        v["s0e_const_dep"] = f"{100 * min(e('constant', T, d) for T in (30, 60) for d in ('crt_net', 'crt_mi')):.1f}–{100 * max(e('constant', T, d) for T in (30, 60) for d in ('crt_net', 'crt_mi')):.0f}%"
+        hon = ev[ev.strategy == "honest"]
+        v["s0e_honest_range"] = f"{100 * hon[['crt_net', 'crt_mi', 'seq', 'deviation']].min().min():.1f}–{100 * hon[['crt_net', 'crt_mi', 'seq', 'deviation']].max().max():.0f}%"
+        v["s0e_iters"] = str(int(ev.n.iloc[0]))
     s0d = read("s0d_coalition_summary.csv")
     if s0d is not None:
         def g(setup, T, det, col="flag"):
