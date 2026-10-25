@@ -512,11 +512,17 @@ def numbers() -> dict:
         c1 = c["C1"]
         v["fc_c1"] = kn(c1["alarms"], c1["n"])
         v["fc_c1_ci"] = f"{100 * c1['wilson'][0]:.0f}–{100 * c1['wilson'][1]:.0f}%"
-        v["fc_c1_p"] = f"{c1['p_fpr_ge_15']:.3f}" if c1["p_fpr_ge_15"] >= 0.001 else "< 0.001"
+        def ptxt(x):
+            if x >= 0.001:
+                return f"= {x:.3f}"
+            import math
+            return f"< 10^−{-math.floor(math.log10(x))}^" if x > 0 else "< 10^−6^"
+
+        v["fc_c1_p"] = ptxt(c1["p_fpr_ge_15"])
         v["fc_c1_verdict"] = "supported" if c1["supported"] else "not supported"
         v["fc_c2_naive"] = kn(cells["SM-off"]["naive"], cells["SM-off"]["n"])
         v["fc_c2_seq"] = kn(cells["SM-off"]["seq"], cells["SM-off"]["n"])
-        v["fc_c2_p"] = f"{c['C2']['p_mcnemar']:.3f}" if c["C2"]["p_mcnemar"] >= 0.001 else "< 0.001"
+        v["fc_c2_p"] = ptxt(c["C2"]["p_mcnemar"])
         v["fc_c2_verdict"] = "supported" if c["C2"]["supported"] else "not supported"
         c4 = c["C4"]
         v["fc_c4_cartel"] = kn(c4["cartel_alarms"], c4["cartel_n"])
