@@ -360,14 +360,16 @@ def numbers() -> dict:
         names = {"deepseek": "DeepSeek", "haiku": "Claude Haiku", "mixed": "Mixed",
                  "val_gpt-6-luna": "GPT-6 Luna", "val_gemma-3-12b-it": "Gemma 3 12B",
                  "val_gpt-oss-20b": "gpt-oss-20b"}
-        lines = ["| Model | Game | Seats | Agent-rounds | Logged = replay | Replay = replay "
-                 "| Difference [95% CI] |", "|---|---|---|---|---|---|---|"]
+        def sg(x):
+            return f"{x:+.3f}".replace("-", "−")
+
+        lines = ["| Model | Game | Seats | Agent-rounds | Difference | 95% CI |",
+                 "|---|---|---|---|---|---|"]
         for _, r in ex.iterrows():
             lines.append(
                 f"| {names.get(r.tag, r.tag)} | {'RPS' if r.exp == 's1' else 'Auction'} | "
-                f"{'all, honest games' if r.group == 'honest' else 'outside the pair'} | "
-                f"{int(r.cells):,} | {r.p_log_rep:.3f} | {r.p_rep_rep:.3f} | "
-                f"{r['diff']:+.3f} [{r.diff_lo:+.3f}, {r.diff_hi:+.3f}] |")
+                f"{'all (honest games)' if r.group == 'honest' else 'outside the pair'} | "
+                f"{int(r.cells):,} | {sg(r['diff'])} | {sg(r.diff_lo)} to {sg(r.diff_hi)} |")
         v["exch_table"] = "\n".join(lines)
         main = ex[ex.tag.isin(["deepseek", "haiku", "mixed"])]
         v["exch_main_max_abs"] = f"{main['diff'].abs().max():.3f}"
@@ -549,6 +551,21 @@ def numbers() -> dict:
             v["fc_changed_replay"] = f"{100 * ch['replay']:.0f}%"
             k, n = mrows["SM-cartel"]["follower_memory_mentions_floor_or_S1"]
             v["fc_cartel_mem"] = f"{k} of {n}"
+    # sample sizes per condition and validation-model rates as percentages (for Table A1)
+    for name, exp in (("s1_audits.csv", "s1"), ("s2_audits.csv", "s2")):
+        d = read(name)
+        if d is not None:
+            for (tag, cond), g in d[d.detector == "crt_net"].groupby(["tag", "condition"]):
+                key = f"n_{exp}_{tag}_{cond}" if exp == "s1" else f"n_s2_{cond}"
+                v[key] = str(len(g))
+    for key in [k for k in list(v) if k.startswith("val_") and k.endswith("_crt")]:
+        kk, nn = (int(x) for x in str(v[key]).split("/"))
+        v[key + "_pct"] = pct(kk, nn, 1)
+    pw = read("s0b_power.csv")
+    if pw is not None:
+        h = pw[pw.cp == 0].groupby("T").flag.mean()
+        v["s0b_power_honest_range"] = f"{100 * h.min():.0f}–{100 * h.max():.0f}%"
+        v["s0b_power_n_per_T"] = str(int(pw[pw.cp == 0].groupby("T").size().iloc[0]))
     # p-values for text: below 1e-10 print a bound instead of a long exponent
     for key in [k for k in v if k.endswith(("_p_above5", "_p_below10"))]:
         x = float(v[key])

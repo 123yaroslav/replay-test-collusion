@@ -40,6 +40,7 @@ OUT_DOCX = REP / "official" / "Apart_report.docx"
 OUT_PDF = REP / "Apart_report.pdf"
 BODY_PT = 10
 FONT = "Old Standard TT"
+GREEK = re.compile(r"([\u0370-\u03ff]+)")
 INLINE = re.compile(r"(\\\(.+?\\\)|\*\*.+?\*\*|\*.+?\*|`.+?`|\^.+?\^|~[^~\s]+?~)")
 
 
@@ -63,6 +64,23 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
             part, sup = part[1:-1], True
         elif part.startswith("~") and part.endswith("~") and len(part) > 2:
             part, sub = part[1:-1], True
+        # Old Standard TT has no Greek: set Greek letters in Times New Roman (same metrics)
+        if not code and GREEK.search(part):
+            for piece in GREEK.split(part):
+                if piece:
+                    rr = par.add_run(piece)
+                    rr.bold, rr.italic = bold or None, (italic or italic_all) or None
+                    if sup:
+                        rr.font.superscript = True
+                    if sub:
+                        rr.font.subscript = True
+                    if size:
+                        rr.font.size = Pt(size)
+                    if color is not None:
+                        rr.font.color.rgb = color
+                    if GREEK.fullmatch(piece):
+                        rr.font.name = "Times New Roman"
+            continue
         run = par.add_run(part)
         run.bold = bold or None
         run.italic = (italic or italic_all) or None
@@ -120,6 +138,17 @@ def fill_front_matter(d, title: str, authors: list[tuple[str, str]], abstract: s
                 p.getparent().remove(p)
             continue
         name, aff = authors[k]
+        for p in (pn, pa):  # centre the remaining author block
+            ppr = p.find(qn("w:pPr"))
+            if ppr is None:
+                ppr = OxmlElement("w:pPr")
+                p.insert(0, ppr)
+            for tag in ("w:jc", "w:ind"):
+                for el in ppr.findall(qn(tag)):
+                    ppr.remove(el)
+            jc = OxmlElement("w:jc")
+            jc.set(qn("w:val"), "center")
+            ppr.append(jc)
         for p, txt in ((pn, name), (pa, aff)):
             ts = list(p.iter(qn("w:t")))
             if ts:
@@ -160,7 +189,7 @@ def strip_body(d):
 
 
 # ---------------------------------------------------------------- body blocks -----------
-def para(d, style="normal", align=None, space_after=4):
+def para(d, style="normal", align=None, space_after=3):
     p = d.add_paragraph(style=style)
     p.paragraph_format.space_after = Pt(space_after)
     p.paragraph_format.space_before = Pt(0)
@@ -172,7 +201,7 @@ def para(d, style="normal", align=None, space_after=4):
 def add_heading(d, text, level):
     p = d.add_paragraph(style="Heading 2" if level == 2 else "Heading 3")
     add_runs(p, text)
-    p.paragraph_format.space_before = Pt(10 if level == 2 else 6)
+    p.paragraph_format.space_before = Pt(8 if level == 2 else 5)
     p.paragraph_format.space_after = Pt(3)
     p.paragraph_format.keep_with_next = True
 
@@ -197,7 +226,7 @@ def add_figure(d, path, caption, width):
     p = para(d, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
     p.paragraph_format.keep_with_next = True
     p.add_run().add_picture(str(REP / path), width=Inches(width))
-    c = para(d, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8)
+    c = para(d, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=6)
     add_runs(c, caption, size=8.5, color=RGBColor(0x40, 0x40, 0x40))
 
 
@@ -219,6 +248,22 @@ def add_table(d, rows):
         d.paragraphs[-1].paragraph_format.keep_with_next = True
     t = d.add_table(rows=len(rows), cols=len(rows[0]))
     borders(t)
+    # column widths in proportion to the longest entry (header counted less), within 6.3 in
+    plain = [[re.sub(r"[*`~^{}]|\\\(|\\\)", "", c) for c in row] for row in rows]
+    need = [max(max((len(r[j]) for r in plain[1:]), default=0), 0.6 * len(plain[0][j]), 4)
+            for j in range(len(rows[0]))]
+    need = [n ** 0.85 for n in need]
+    tot = sum(need)
+    t.autofit = False
+    for j, n in enumerate(need):
+        w = Inches(6.3 * n / tot)
+        t.columns[j].width = w
+        for row in t.rows:
+            row.cells[j].width = w
+    tblpr = t._element.tblPr
+    lay = OxmlElement("w:tblLayout")
+    lay.set(qn("w:type"), "fixed")
+    tblpr.append(lay)
     for i, r in enumerate(rows):
         for j, cell_text in enumerate(r):
             cell = t.cell(i, j)

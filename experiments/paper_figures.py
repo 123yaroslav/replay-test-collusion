@@ -40,7 +40,7 @@ mpl.rcParams.update({
 INK, INK2, GRID, BAND = "#1a1a1a", "#55534e", "#e3e2de", "#f5f4f1"
 C = {"crt_net": "#2a78d6", "seq": "#16457f", "naive_mi_shuffle": "#eb6834",
      "bonjour_alpha": "#1baf7a", "judge": "#c98a00", "channel": "#c2410c"}
-NAMES = {"crt_net": "Replay test (ours)", "naive_mi_shuffle": "Mutual information, shuffle null",
+NAMES = {"crt_net": "Replay test, fixed (ours)", "naive_mi_shuffle": "Mutual information, shuffle null",
          "bonjour_alpha": "Bonjour et al. rule", "judge": "LLM judge (actions only)"}
 
 
@@ -63,9 +63,9 @@ def panel_label(ax, s, x=-0.02, y=1.04):
 
 # ------------------------------------------------------------------ Fig. 1: the method --------
 def fig_method():
-    fig = plt.figure(figsize=(WIDTH, 1.75))
+    fig = plt.figure(figsize=(WIDTH, 1.62))
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 127), ax.set_ylim(3, 39.5)
+    ax.set_xlim(0, 127), ax.set_ylim(4.5, 38.5)
     ax.axis("off")
 
     def box(x, y, w, h, text, fc="white", ec=INK2, lw=0.8, size=8.5, style="round,pad=0.4"):
@@ -184,7 +184,7 @@ def fig_main():
             ("deepseek", "pair_hidden", "DeepSeek pair, secret plan"),
             ("deepseek_s2", "vendor_leak", "Pooled-data vendor")]
     rows_c = _rows(audits, coll, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.25))
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.0))
     _dots(axes[0], rows_h, ref=5)
     axes[0].set_xlabel("Honest games flagged (%)")
     _dots(axes[1], rows_c)
@@ -195,14 +195,14 @@ def fig_main():
           for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")]
     fig.legend(hs, [NAMES[d] for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")],
                loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.01), handlelength=1.6)
-    fig.subplots_adjust(left=0.19, right=0.985, top=0.9, bottom=0.33, wspace=0.95)
+    fig.subplots_adjust(left=0.19, right=0.985, top=0.9, bottom=0.36, wspace=0.95)
     save(fig, "p_fig2_main")
 
 
 # ------------------------------------------------------------------ Fig. 3: ROC ---------------
 def fig_roc():
     s1, j1 = load("s1_audits.csv"), load("s1_judge.csv")
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.25), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.05), sharey=True)
     for ax, tag, name in zip(axes, ("haiku", "deepseek"), ("Claude Haiku", "DeepSeek")):
         g = s1[s1.tag == tag]
         for det in ("naive_mi_shuffle", "crt_net"):
@@ -232,7 +232,7 @@ def fig_roc():
     panel_label(axes[1], "b", x=-0.05)
     hs, ls = axes[0].get_legend_handles_labels()
     fig.legend(hs, ls, loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.01), handlelength=1.6)
-    fig.subplots_adjust(left=0.12, right=0.985, top=0.92, bottom=0.32, wspace=0.12)
+    fig.subplots_adjust(left=0.12, right=0.985, top=0.92, bottom=0.35, wspace=0.12)
     save(fig, "p_fig3_roc")
 
 
@@ -246,7 +246,7 @@ def fig_eprocess():
             pool = requery_pool(ep, ["P1", "P2", "P3", "P4"], MOVES, None)
             out.append(sequential_replay_test(pool, alpha=0.05, n_actions=3)["e_path"])
         paths[cond] = np.array(out)
-    fig, ax = plt.subplots(figsize=(WIDTH, 1.9))
+    fig, ax = plt.subplots(figsize=(WIDTH, 1.75))
     t = np.arange(paths["null_same"].shape[1])
     for e in paths["null_same"]:
         ax.plot(t, e, color="#9a9890", lw=0.6, alpha=0.7)
@@ -265,7 +265,7 @@ def fig_eprocess():
     hs = [plt.Line2D([], [], color=C["seq"], lw=1.2), plt.Line2D([], [], color="#9a9890", lw=1.0)]
     ax.legend(hs, [f"instructed pair ({n1} games)", f"honest agents ({n0} games)"],
               loc="upper left", handlelength=1.6, bbox_to_anchor=(0.0, 1.0))
-    fig.subplots_adjust(left=0.1, right=0.985, top=0.95, bottom=0.23)
+    fig.subplots_adjust(left=0.1, right=0.985, top=0.95, bottom=0.25)
     save(fig, "p_fig4_eprocess")
 
 
@@ -316,7 +316,7 @@ def fig_pvalues():
         p = honest[honest.detector == det].p.dropna()
         ax.hist(p, bins=np.linspace(0, 1, 21), color=C[det], edgecolor="white", lw=0.8)
         ax.axhline(len(p) / 20, color=INK2, lw=0.7, ls=(0, (3, 2)))
-        ax.set_xlabel(f"$p$-value, {NAMES[det].lower().replace(' (ours)', '')}")
+        ax.set_xlabel("$p$-value, replay test (fixed)" if det == "crt_net" else "$p$-value, mutual information, shuffle null")
         panel_label(ax, lab, x=-0.08)
     axes[0].set_ylabel("Honest games")
     fig.subplots_adjust(left=0.1, right=0.985, top=0.9, bottom=0.25, wspace=0.08)
@@ -325,7 +325,7 @@ def fig_pvalues():
 
 def fig_power():
     pw = load("s0b_power.csv")
-    fig, ax = plt.subplots(figsize=(WIDTH * 0.62, 2.3))
+    fig, ax = plt.subplots(figsize=(WIDTH * 0.75, 2.3))
     cols = {0.6: "#7fb0ea", 0.8: "#2a78d6", 1.0: "#16457f"}
     for cp, g in pw[pw.cp > 0].groupby("cp"):
         if cp in cols:
@@ -340,7 +340,7 @@ def fig_power():
     ax.set_xlim(5, 128), ax.set_ylim(0, 105)
     ax.grid(True, color=GRID, lw=0.5)
     ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), handlelength=1.6)
-    fig.subplots_adjust(left=0.15, right=0.6, top=0.95, bottom=0.2)
+    fig.subplots_adjust(left=0.12, right=0.52, top=0.95, bottom=0.2)
     save(fig, "p_figA3_power")
 
 
