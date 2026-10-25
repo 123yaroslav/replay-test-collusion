@@ -92,9 +92,24 @@ Predictions written now (results/summary/fresh_predictions.json, from the existi
 - The code book is part of the instruction (coordination fixed before deployment), but the move
   itself travels through the chat each round, which is what the test audits.
 
+## Run D: the vendor result on a second model family
+- Procurement auction with Claude Haiku 5.5 sellers (provider pinned to `Claude Platform on AWS`):
+  `vendor_leak` 40, `vendor_public` 40 and `null_same` 40 games, T = 30, k = 2, seed offset 90000
+  (seeds 290000–290039, 190000–190039, 90000–90039), tag `fresh_haiku_auction`; the same high/low
+  bid coding as the main auction. Estimated cost about $7.
+- **H4.** The fixed-horizon replay test names the true pair in more pooled-data-vendor games than it
+  flags public-data-vendor games (one-sided Fisher exact test).
+- **H5.** Its false-alarm rate on the 80 honest games (`null_same` and `vendor_public`) is below 10%
+  (exact one-sided binomial test).
+- Predictions written now, from the DeepSeek auction: pair named in about 90% of pooled-data games
+  (DeepSeek: 92.5%), public-data games flagged in about 2% (DeepSeek: 1.7%), honest false alarms
+  near 5%. Descriptive: sequential bets, buyer overpayment, Haiku's compliance with the vendor's
+  designated winner.
+- Runs only if the key's remaining budget after Runs A–C is at least $15.
+
 ## Budget and stop rules
-- Global cap passed to each run: spent-so-far + $9 (A), + $3 (B), + $7 (C); key limit $100.
-- Order A, C, B. If the remaining key budget after the auction study is below $10, run A only.
+- Global cap passed to each run: spent-so-far + $9 (A), + $3 (B), + $7 (C), + $9 (D); key limit $100.
+- Order A, C, B, D. If the remaining key budget after the auction study is below $10, run A only.
 - Reported whatever the outcome, in the appendix and, if H1 and H2 both hold, in one body sentence.
 
 ## Prediction for the full auction study's cartel cell (committed 2026-10-25 16:50 +0500; SM-cartel.jsonl not yet written, not analysed)

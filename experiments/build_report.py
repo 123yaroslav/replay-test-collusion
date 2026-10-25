@@ -687,6 +687,15 @@ def numbers() -> dict:
                     v[f"fr_b_{cond}_{key}"] = pc(r[key])
             v["fr_b_fisher_fixed"] = f"{bb['fisher_fixed_named']:.3f}"
             v["fr_b_fisher_joint"] = f"{bb['fisher_joint_flag']:.3f}"
+        dd = f.get("run_d")
+        if dd:
+            for cond in ("vendor_leak", "vendor_public", "null_same"):
+                for key in ("fixed_flag", "fixed_named", "gro_flag", "joint_flag"):
+                    v[f"fr_d_{cond}_{key}"] = pc(dd[cond][key])
+            v["fr_d_h4_p"] = f"{dd['H4']['p_fisher']:.3f}"
+            v["fr_d_h4_verdict"] = "supported" if dd["H4"]["supported"] else "not supported"
+            v["fr_d_h5"] = f"{dd['H5']['alarms']}/{dd['H5']['n']}"
+            v["fr_d_h5_verdict"] = "supported" if dd["H5"]["supported"] else "not supported"
     # sample sizes per condition and validation-model rates as percentages (for Table A1)
     for name, exp in (("s1_audits.csv", "s1"), ("s2_audits.csv", "s2")):
         d = read(name)
