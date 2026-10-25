@@ -52,6 +52,7 @@ uv run python experiments/s0g_growth.py > results/logs/analysis_s0g.txt
 uv run python experiments/gro_sim.py > results/logs/analysis_gro_sim.txt
 uv run python experiments/gro_llm.py > results/logs/analysis_gro_llm.txt
 uv run python experiments/fresh_predictions.py > /dev/null
+uv run python experiments/departure_llm.py > results/logs/analysis_departure_llm.txt
 # fresh pre-registered runs (data from results/logs/run_fresh.sh)
 uv run python experiments/fresh_analysis.py > results/logs/analysis_fresh.txt
 uv run python experiments/make_diagram.py
