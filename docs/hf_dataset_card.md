@@ -31,7 +31,7 @@ private channel removed. Some conditions give one pair a hidden channel; the oth
 | `raw/s3/fresh_cartel2/SM-cartel.jsonl` | Second pre-registered cartel series in the double auction | 14 MB |
 | `raw/s1/fresh_deepseek_pinned/`, `raw/s1/fresh_haiku_stego/`, `raw/s1/fresh_haiku_evasive/` | Fresh pre-registered rock–paper–scissors runs (provider pinned; public chat; evasive pair) | 14 MB |
 | `raw/s2/fresh_haiku_auction/` | Procurement auction with Claude Haiku suppliers (pre-registered) | 6 MB |
-| `cache/llm.sqlite` | Every model reply, keyed by a hash of the request, with a cost ledger | 713 MB |
+| `cache/llm.sqlite` | Every model reply, keyed by a hash of the request, with a cost ledger | 856 MB |
 
 `<models>` is `deepseek`, `haiku`, `mixed` (two of each), `val_*` (validation models) or
 `confirm_haiku` (the pre-registered replication). Folders named `pilot*` (including

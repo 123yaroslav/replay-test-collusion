@@ -87,7 +87,11 @@ uv run pytest -q
 
 The download includes the cache of every model reply, so the analysis makes no API calls. Running
 the LLM experiments from scratch needs an OpenRouter key; see [REPRODUCE.md](REPRODUCE.md).
-The analysis plans in [`docs/`](docs/) were committed before the data they analyse were collected.
+
+The analysis plans in [`docs/`](docs/) were committed before the data they analyse were collected;
+`git log --follow docs/<plan>.md` shows when. The public history was cleaned of internal notes
+before release with commit dates kept; [COMMIT_MAP.md](COMMIT_MAP.md) maps the original hashes
+quoted inside the plans to the published ones.
 
 ## Repository
 
