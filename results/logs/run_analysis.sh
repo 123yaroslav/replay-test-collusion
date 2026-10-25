@@ -40,6 +40,20 @@ uv run python experiments/confirm_sequential.py >> results/logs/analysis_confirm
 # pilot in the re-implemented Agrawal auction (descriptive; episodes come from experiments/s3_cda.py)
 uv run python experiments/analyse_cda.py --tag pilot_cda > results/logs/analysis_pilot_cda.txt
 uv run python experiments/analyse_cda.py --tag pilot_cda --rebin v2 > /dev/null
+# full pre-registered auction study (data from results/logs/run_full_cda.sh), then exploratory follow-ups
+if [ -d results/raw/s3/full_cda ]; then
+  uv run python experiments/confirm_cda.py --tag full_cda > results/logs/analysis_full_cda_confirm.txt
+  uv run python experiments/analyse_cda.py --tag full_cda > results/logs/analysis_full_cda.txt
+  uv run python experiments/memory_cartel.py --tag full_cda > /dev/null
+  uv run python experiments/gro_cda.py --tag full_cda > /dev/null
+fi
+# exploratory theory and post-hoc analyses of the likelihood-ratio bet ($0)
+uv run python experiments/s0g_growth.py > results/logs/analysis_s0g.txt
+uv run python experiments/gro_sim.py > results/logs/analysis_gro_sim.txt
+uv run python experiments/gro_llm.py > results/logs/analysis_gro_llm.txt
+uv run python experiments/fresh_predictions.py > /dev/null
+# fresh pre-registered runs (data from results/logs/run_fresh.sh)
+uv run python experiments/fresh_analysis.py > results/logs/analysis_fresh.txt
 uv run python experiments/make_diagram.py
 uv run python experiments/make_figures.py
 uv run python experiments/paper_figures.py
