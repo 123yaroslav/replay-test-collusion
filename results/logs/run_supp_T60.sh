@@ -1,7 +1,7 @@
 #!/bin/zsh
 # EXPLORATORY supplement (not pre-registered): longer logs, T = 60, to place real-LLM points on the
 # detectability frontier beyond T = 30. Separate tags so the frozen main analysis is unaffected.
-cd "/Users/yaroslav/Desktop/apart research/AI Collusion Research Sprint"
+cd "$(dirname "$0")/../.."
 export COLLUSION_MAX_CONCURRENCY=40
 HK=anthropic/claude-haiku-5.5; DS=deepseek/deepseek-v4-flash-0731
 run() { uv run python experiments/s1_llm_rps.py --rounds 60 --k 2 --budget 45 --seed-offset 50000 "$@"; }

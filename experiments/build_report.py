@@ -451,6 +451,42 @@ def numbers() -> dict:
             v[f"comp_{r.tag}_leader"] = f"{100 * r.leader_follows:.0f}%"
             v[f"comp_{r.tag}_follower"] = f"{100 * r.follower_follows:.0f}%"
             v[f"comp_{r.tag}_same"] = f"{100 * r.plans_same_move:.0f}%"
+    # exploratory, after the pilot: where the instructed cartel's agreement lives (memory_cartel.py)
+    mc = SUM / "memory_cartel.json"
+    if mc.exists():
+        m = json.loads(mc.read_text())
+        for cell, key in (("SM-cartel", "cartel"), ("SM-on", "on"), ("SM-off", "off")):
+            k, n = m[cell]["follower_memory_mentions_floor_or_S1"]
+            v[f"mem_{key}_mem"] = f"{k} of {n}"
+        c = m["SM-cartel"]
+        v["mem_cartel_ask"] = f"{c['mean_logged_ask']:.2f}"
+        v["mem_cartel_replay_ask"] = f"{c['mean_replay_ask']:.2f}"
+        v["mem_changed_logged"] = f"{100 * c['compliance']['changed']['logged']:.0f}%"
+        v["mem_changed_replay"] = f"{100 * c['compliance']['changed']['replay']:.0f}%"
+    # exploratory simulator: memory cartel and honest agents that repeat their own moves (s0f)
+    s0f = read("s0f_memory_cartel_summary.csv")
+    if s0f is not None:
+        hon = s0f[s0f.scenario.str.startswith("honest")]
+        pers = hon[hon.scenario.isin(["honest_rho0.5", "honest_rho0.8"])]
+
+        def rng_(x):
+            lo, hi = 100 * x.min(), 100 * x.max()
+            f = lambda y: f"{y:.1f}".removesuffix(".0")  # noqa: E731
+            return f"{f(lo)}–{f(hi)}%" if f(lo) != f(hi) else f"{f(lo)}%"
+
+        v["s0f_net_pers"] = rng_(pers.replay_crt_net)
+        v["s0f_mi_pers60"] = rng_(pers[pers['T'] == 60].replay_crt_mi)
+        v["s0f_seq_honest_max"] = f"{100 * hon.replay_seq.max():.1f}%".replace(".0%", "%")
+        v["s0f_net_rho0"] = rng_(hon[hon.scenario == "honest_rho0.0"].replay_crt_net)
+        v["s0f_twin_seq_pers"] = rng_(pers.twin_seq)
+        sil = s0f[s0f.scenario.str.startswith("silent")]
+        v["s0f_silent_replay_seq"] = rng_(sil.replay_seq)
+        v["s0f_silent_twin_seq"] = rng_(sil.twin_seq)
+        v["s0f_iters"] = str(int(s0f.n.iloc[0]))
+    # p-values for text: below 1e-10 print a bound instead of a long exponent
+    for key in [k for k in v if k.endswith(("_p_above5", "_p_below10"))]:
+        x = float(v[key])
+        v[key + "_txt"] = "p < 10^−10^" if x < 1e-10 else f"p = {v[key]}"
     led = spend()
     v.update(led)
     return v

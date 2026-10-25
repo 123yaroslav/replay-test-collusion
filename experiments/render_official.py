@@ -8,7 +8,9 @@ Markup in content.md (deliberately small):
   "1. " numbered and "- " bulleted lines
   ![Figure caption with **bold** lead](figures/file.png){6.3}   (width in inches)
   | table | rows |  (first row = header; separator row of dashes is skipped)
-  :::box Title  ...lines...  :::
+  :::box Title  ...lines...  :::      (bulleted box)
+  :::algo Title ...lines...  :::      (box, lines as written: numbered steps)
+  $$ formula                          (centred display line; ~sub~ and ^sup^ work)
   <<pagebreak>>
 
     uv run python experiments/render_official.py
@@ -216,7 +218,7 @@ def add_table(d, rows):
     para(d, space_after=4)
 
 
-def add_box(d, title, lines):
+def add_box(d, title, lines, bullets=True):
     t = d.add_table(rows=1, cols=1)
     cell = t.cell(0, 0)
     tcpr = cell._element.get_or_add_tcPr()
@@ -232,7 +234,7 @@ def add_box(d, title, lines):
         q.paragraph_format.space_after = Pt(1)
         q.paragraph_format.left_indent = Inches(0.15)
         q.paragraph_format.first_line_indent = Inches(-0.12)
-        add_runs(q, "• " + ln.lstrip("- ").strip(), size=8.5)
+        add_runs(q, ("• " + ln.lstrip("- ").strip()) if bullets else ln.strip(), size=8.5)
     para(d, space_after=4)
 
 
@@ -290,15 +292,20 @@ def render(text: str, v: dict):
                 i += 1
             add_table(d, rows)
             continue
-        elif ln.startswith(":::box"):
+        elif ln.startswith("$$ "):
             flush()
-            title_b, items = ln[len(":::box"):].strip(), []
+            q = para(d, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
+            add_runs(q, ln[3:].strip(), size=BODY_PT)
+        elif ln.startswith(":::box") or ln.startswith(":::algo"):
+            flush()
+            kind = "algo" if ln.startswith(":::algo") else "box"
+            title_b, items = ln[len(":::" + kind):].strip(), []
             i += 1
             while not body[i].startswith(":::"):
                 if body[i].strip():
                     items.append(body[i])
                 i += 1
-            add_box(d, title_b, items)
+            add_box(d, title_b, items, bullets=kind == "box")
         elif ln.strip() == "<<pagebreak>>":
             flush()
             page_break(d)

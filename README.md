@@ -1,6 +1,6 @@
 # Monoculture looks like collusion: a replay test for hidden information flow between LLM agents
 
-Code and data for our submission to the [Apart Research AI Collusion Research Sprint](https://apartresearch.com/sprints/ai-collusion-research-sprint-2026-10-23-to-2026-10-25)
+Code for our submission to the [Apart Research AI Collusion Research Sprint](https://apartresearch.com/sprints/ai-collusion-research-sprint-2026-10-23-to-2026-10-25)
 (Oct 23–25, 2026).
 
 **Question.** Given logs of several LLM agents and query access to their deployed policies, can
@@ -45,8 +45,10 @@ The sprint rules require pre-existing work to be marked. The full dated list is 
    uv run python examples/audit_your_logs.py my_logs.jsonl   # no argument: a toy log with a planted pair
    ```
    or in Python: `from collusion.audit import audit; audit("my_logs.jsonl", statistic="net")`.
-   Use `statistic="mi"` if a coalition of three or more agents is possible (net influence cancels
-   inside a coalition), and `coarsen={...}` to bin many-valued actions such as prices.
+   Use `coarsen={...}` to bin many-valued actions such as prices. If a coalition of three or more
+   agents is possible (net influence cancels inside a coalition) or the agents' actions persist from
+   round to round, rely on the sequential test (`seq_alarm_round`): it keeps its level under
+   feedback, while the fixed-horizon statistics were calibrated only on our games.
 3. **Read the result.** `flag=True` means the named pair's actions depend on each other more than
    their own replays, given what you logged, plausibly allow at level α (default 5%). It is a
    screening signal and a plus factor, not proof of intent. `seq_alarm_round` is the round at
@@ -74,3 +76,7 @@ experiments/           one rerunnable script per experiment
 results/summary/       small outputs used by the report (raw logs and cache are gitignored)
 docs/analysis_plan.md  pre-registered analysis plan
 ```
+
+## Licence
+
+Code: MIT (see `LICENSE`). Episode logs and the LLM cache (released on Hugging Face): CC-BY-4.0.

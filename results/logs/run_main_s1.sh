@@ -2,7 +2,7 @@
 # MAIN S1 sample (frozen in docs/analysis_plan.md). Seeds from 0, disjoint blocks per condition.
 # 3 processes x 40 concurrent calls (450 concurrent connections caused connection errors).
 # All calls are cached, so restarts are free and resume where they stopped.
-cd "/Users/yaroslav/Desktop/apart research/AI Collusion Research Sprint"
+cd "$(dirname "$0")/../.."
 export COLLUSION_MAX_CONCURRENCY=40
 DS=deepseek/deepseek-v4-flash-0731; HK=anthropic/claude-haiku-5.5
 run() { uv run python experiments/s1_llm_rps.py --rounds 30 --k 2 --budget 45 "$@"; }

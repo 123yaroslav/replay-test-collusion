@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Pilot v3 (seeds >= 30000, excluded): clarified leader prompt (RPS) + first auction pilot
-cd "/Users/yaroslav/Desktop/apart research/AI Collusion Research Sprint"
+cd "$(dirname "$0")/../.."
 export COLLUSION_MAX_CONCURRENCY=24
 for m in deepseek/deepseek-v4-flash-0731 mistralai/mistral-small-24b-instruct-2501 anthropic/claude-haiku-5.5; do
   t="${m##*/}"

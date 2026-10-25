@@ -1,5 +1,5 @@
 #!/bin/zsh
-cd "/Users/yaroslav/Desktop/apart research/AI Collusion Research Sprint"
+cd "$(dirname "$0")/../.."
 export COLLUSION_MAX_CONCURRENCY=32
 DS=deepseek/deepseek-v4-flash-0731
 run() { uv run python experiments/s2_procurement.py --model $DS --tag deepseek --rounds 30 --k 2 --budget 45 "$@"; }

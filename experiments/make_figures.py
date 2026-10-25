@@ -137,6 +137,40 @@ def fig1():
     save(fig, "fig1_false_accusations")
 
 
+def fig1_compact():
+    """Body version of Fig. 2: three honest settings and three colluding ones, no judge."""
+    s1, s2 = load("s1_audits.csv"), load("s2_audits.csv")
+    ag = load("agrawal_panel_runs.csv")
+    if s1 is None or s2 is None:
+        return
+    audits = pd.concat([s1, s2.assign(tag=s2.tag + "_s2")], ignore_index=True)
+    honest = [("haiku", "null_same", "RPS · 4× Haiku"),
+              ("deepseek", "null_same", "RPS · 4× DeepSeek")]
+    colluding = [("haiku", "pair_hidden", "RPS · Haiku pair"),
+                 ("deepseek", "pair_hidden", "RPS · DeepSeek pair"),
+                 ("deepseek_s2", "vendor_leak", "Auction · pooled vendor")]
+    rows_h = rate_rows(audits, None, honest, "flag")
+    if ag is not None:
+        b = ag[ag.condition == "base"]
+        lab = "Agrawal logs, no chat"
+        rows_h += [(lab, "naive_mi_shuffle", int(b.naive_mi_shuffle.sum()), len(b)),
+                   (lab, "bonjour_alpha", int(b.bonjour_alpha.sum()), len(b))]
+    rows_c = rate_rows(audits, None, colluding, "correct")
+    fig, axes = plt.subplots(1, 2, figsize=(6.4, 2.35),
+                             gridspec_kw={"width_ratios": [1.0, 1.0], "wspace": 0.75})
+    d1 = dot_panel(axes[0], rows_h, "A  Honest agents: episodes flagged", ref=5)
+    axes[0].set_xlabel("Flagged (%), 95% Wilson interval", fontsize=8)
+    d2 = dot_panel(axes[1], rows_c, "B  Instructed colluders: pair named")
+    axes[1].set_xlabel("True pair named (%)", fontsize=8)
+    dets = [d for d in C if d in set(d1) | set(d2)]
+    handles = [plt.Line2D([], [], color=C[d], marker="o", lw=1.6, ms=5.5, mec="white")
+               for d in dets]
+    fig.legend(handles, [NAMES[d] for d in dets], loc="lower center", ncol=3,
+               fontsize=7.6, bbox_to_anchor=(0.5, -0.04))
+    fig.subplots_adjust(left=0.2, right=0.985, top=0.86, bottom=0.30)
+    save(fig, "fig1_main")
+
+
 def fig2(axes=None):
     s1, j1 = load("s1_audits.csv"), load("s1_judge.csv")
     if s1 is None:
@@ -292,6 +326,7 @@ def save(fig, name):
 
 if __name__ == "__main__":
     fig1()
+    fig1_compact()
     fig2()
     fig3()
     fig23()
