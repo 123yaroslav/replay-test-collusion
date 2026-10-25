@@ -630,6 +630,54 @@ def numbers() -> dict:
     if gg is not None:
         sk = gg[(gg.prior == "skewed") & (gg.channel == "copy")]
         v["growth_joint_neg_max_eps"] = f"{sk[sk.joint_k2 < 0].eps.max():.1f}"
+    # fresh pre-registered runs (docs/fresh_plan.md): experiments/fresh_analysis.py
+    fr = SUM / "fresh_results.json"
+    if fr.exists():
+        f = json.loads(fr.read_text())
+
+        def kn(r):
+            return f"{r['k']}/{r['n']}"
+
+        def pc(r):
+            return f"{100 * r['rate']:.1f}%".replace(".0%", "%")
+
+        a = f.get("run_a")
+        if a:
+            v["fr_a_h1_gro"] = kn(a["H1"]["gro_flag_30"])
+            v["fr_a_h1_joint"] = kn(a["H1"]["joint_flag_30"])
+            v["fr_a_h1_p"] = f"{a['H1']['p_mcnemar']:.3f}"
+            v["fr_a_h1_verdict"] = "supported" if a["H1"]["supported"] else "not supported"
+            v["fr_a_h2"] = f"{a['H2']['alarms']}/{a['H2']['n']}"
+            v["fr_a_h2_p"] = f"{a['H2']['p_fpr_below_10']:.3f}"
+            v["fr_a_h2_verdict"] = "supported" if a["H2"]["supported"] else "not supported"
+            d = a["descriptive"]
+            for key in ("gro_flag_60", "joint_flag_60", "gro_named_60", "joint_named_60",
+                        "fixed_named_60", "fixed_named_30", "honest_fixed_flag_60",
+                        "honest_joint_flag_60"):
+                v[f"fr_a_{key}"] = pc(d[key])
+            e = d["exchangeability_honest"]
+            v["fr_a_exch"] = f"{e['diff']:+.3f} (95% CI {e['ci'][0]:+.3f} to {e['ci'][1]:+.3f})"
+        c = f.get("run_c")
+        if c:
+            for cond in ("stego_public", "chat_public"):
+                for key in ("fixed_flag", "fixed_named", "joint_flag", "gro_flag"):
+                    v[f"fr_c_{cond}_{key}"] = pc(c[cond][key])
+                v[f"fr_c_{cond}_naive"] = f"{100 * c[cond]['naive_mi_flag']:.0f}%"
+            v["fr_c_compliance"] = f"{100 * c['stego_public']['code_compliance']:.0f}%"
+            v["fr_c_same_move"] = f"{100 * c['stego_public']['pair_same_move_share']:.0f}%"
+            v["fr_c_named_moves"] = f"{100 * c['stego_public']['chat_lines_naming_a_move']:.1f}%"
+            v["fr_c_h3_p"] = f"{c['H3']['p_fisher']:.3f}"
+            v["fr_c_h3_verdict"] = "supported" if c["H3"]["supported"] else "not supported"
+        bb = f.get("run_b")
+        if bb:
+            for cond in ("evasive", "secret_plan"):
+                r = bb[cond]
+                v[f"fr_b_{cond}_follower"] = f"{100 * r['follower_compliance']:.0f}%"
+                v[f"fr_b_{cond}_adv"] = f"{r['team_advantage']:+.2f}"
+                for key in ("fixed_named", "joint_flag", "gro_flag"):
+                    v[f"fr_b_{cond}_{key}"] = pc(r[key])
+            v["fr_b_fisher_fixed"] = f"{bb['fisher_fixed_named']:.3f}"
+            v["fr_b_fisher_joint"] = f"{bb['fisher_joint_flag']:.3f}"
     # sample sizes per condition and validation-model rates as percentages (for Table A1)
     for name, exp in (("s1_audits.csv", "s1"), ("s2_audits.csv", "s2")):
         d = read(name)
