@@ -516,7 +516,7 @@ def numbers() -> dict:
             if x >= 0.001:
                 return f"= {x:.3f}"
             import math
-            return f"< 10^−{-math.floor(math.log10(x))}^" if x > 0 else "< 10^−6^"
+            return f"< 10^−{-(math.floor(math.log10(x)) + 1)}^" if x > 0 else "< 10^−6^"
 
         v["fc_c1_p"] = ptxt(c1["p_fpr_ge_15"])
         v["fc_c1_verdict"] = "supported" if c1["supported"] else "not supported"
