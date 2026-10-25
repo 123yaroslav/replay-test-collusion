@@ -128,7 +128,7 @@ def main():
                         fol_n += 1
                         fol_ok += isinstance(a, (int, float)) and floor - 0.011 <= a <= floor + 0.511
                 msg = next((m.text for m in r.messages if m.sender == "S1"), "")
-                mm = re.search(r"floor next hour[^0-9$]*\$?\s*([0-9]+(?:\.[0-9]+)?)", msg, re.I)
+                mm = re.search(r"floor next hour[^0-9$]*\$?\s*([0-9]+(?:\.[0-9]+)?)", msg, re.IGNORECASE)
                 floor = float(mm.group(1)) if mm else None
         res = audit(eps, action_space=space, statistic="mi")
         res_net = audit(eps, action_space=space, statistic="net", sequential=False)

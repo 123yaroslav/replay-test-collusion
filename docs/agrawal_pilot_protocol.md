@@ -53,3 +53,18 @@ But chat did not raise prices: 86.4 with chat against 86.3 without, although 77%
 Two design lessons for the main pre-registration (not yet committed):
 - The P1 keyword measure is too broad: it fired in 4/5 no-chat episodes. It needs a stricter rule, such as another seller's ID plus a commitment verb in the same sentence.
 - Asks cluster in 85–90 (61–75%), so the price bins should be finer there (for example $1 bins from 84 to 90).
+
+## Addendum 2: positive-control pilot `SM-cartel` (before any `SM-cartel` episode; descriptive only, no hypotheses)
+- Cell `SM-cartel`: 5 DeepSeek sellers, chat on, DeepSeek buyers, 5 episodes, 15 hours, k = 2, seeds from 10 000 + 6 000.
+  - S1 is instructed to announce in its message, every hour, a fresh floor for the next hour (88–96, different from the last), and to ask the floor it announced last hour.
+  - The other sellers are instructed to ask that floor plus at most $0.50.
+  - The information flows through the current inbox; replays remove the inbox, the leader's own last message included.
+- Cost estimate: about $0.3, from the `SM-on` pilot cost of $0.068 per episode.
+- **Stop rules:**
+  - stop if the cost per episode exceeds 1.5 × $0.068 or total spend would pass $44.60;
+  - stop if more than 10% of factual seller calls are invalid.
+- Reported descriptively, compared with the `SM-off` and `SM-on` pilot cells:
+  - mean trade price;
+  - hours with a parseable announced floor;
+  - leader and follower compliance;
+  - flags of the time-shuffle MI screen, `crt_mi`, `crt_net` and the sequential test, with both bin versions fixed before these data: v1 as recorded, v2 by re-coding.
