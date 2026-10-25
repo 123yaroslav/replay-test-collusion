@@ -357,6 +357,18 @@ def numbers() -> dict:
         v["exch_exceptions"] = "; ".join(
             f"{r.tag.replace('val_', '')} ({r.group.replace('_', ' ')}, {r.exp.upper()}): {r['diff']:+.3f}, "
             f"CI {r.diff_lo:+.3f} to {r.diff_hi:+.3f}" for _, r in out_.iterrows()) or "none"
+        names = {"deepseek": "DeepSeek", "haiku": "Claude Haiku", "mixed": "Mixed",
+                 "val_gpt-6-luna": "GPT-6 Luna", "val_gemma-3-12b-it": "Gemma 3 12B",
+                 "val_gpt-oss-20b": "gpt-oss-20b"}
+        lines = ["| Model | Game | Seats | Agent-rounds | Logged = replay | Replay = replay "
+                 "| Difference [95% CI] |", "|---|---|---|---|---|---|---|"]
+        for _, r in ex.iterrows():
+            lines.append(
+                f"| {names.get(r.tag, r.tag)} | {'RPS' if r.exp == 's1' else 'Auction'} | "
+                f"{'all, honest games' if r.group == 'honest' else 'outside the pair'} | "
+                f"{int(r.cells):,} | {r.p_log_rep:.3f} | {r.p_rep_rep:.3f} | "
+                f"{r['diff']:+.3f} [{r.diff_lo:+.3f}, {r.diff_hi:+.3f}] |")
+        v["exch_table"] = "\n".join(lines)
         main = ex[ex.tag.isin(["deepseek", "haiku", "mixed"])]
         v["exch_main_max_abs"] = f"{main['diff'].abs().max():.3f}"
         v["exch_main_cover_all"] = bool(((main.diff_lo <= 0) & (main.diff_hi >= 0)).all())

@@ -42,11 +42,10 @@ uv run python experiments/analyse_cda.py --tag pilot_cda > results/logs/analysis
 uv run python experiments/analyse_cda.py --tag pilot_cda --rebin v2 > /dev/null
 uv run python experiments/make_diagram.py
 uv run python experiments/make_figures.py
+uv run python experiments/paper_figures.py
 uv run python experiments/compliance.py > results/logs/analysis_compliance.txt
 uv run python experiments/example_episode.py > results/logs/analysis_example.txt
 uv run python experiments/build_report.py
 uv run python experiments/render_official.py
-uv run python experiments/make_work_figures.py
-uv run python experiments/build_summary.py
 uv run python experiments/check_numbers.py
 echo ANALYSIS_DONE

@@ -126,6 +126,12 @@ def fill_front_matter(d, title: str, authors: list[tuple[str, str]], abstract: s
                 ts[0].text = txt
                 for t in ts[1:]:
                     t.text = ""
+    # nested author tables left empty by the removed slots only add vertical space: drop them
+    for tbl in list(t0._element.iter(qn("w:tbl")))[::-1]:
+        if tbl is t0._element:
+            continue
+        if not "".join(x.text or "" for x in tbl.iter(qn("w:t"))).strip():
+            tbl.getparent().remove(tbl)
     # abstract: nested 1x1 table whose text starts with "Summarize your project"
     for tbl in t0._element.iter(qn("w:tbl")):
         txt = "".join(t.text or "" for t in tbl.iter(qn("w:t")))
@@ -178,9 +184,10 @@ def add_body(d, text):
 
 def add_list_item(d, marker, text, size=BODY_PT, level=1):
     p = para(d, space_after=2)
-    indent = 0.28 * level
+    numbered = marker[:-1].isdigit()
+    indent = 0.3 if numbered and level == 1 else 0.28 * level
     p.paragraph_format.left_indent = Inches(indent)
-    p.paragraph_format.first_line_indent = Inches(-0.2)
+    p.paragraph_format.first_line_indent = Inches(-0.3 if numbered and level == 1 else -0.2)
     add_runs(p, f"{marker}\t" if marker != "•" else "•\t", size=size)
     add_runs(p, text, size=size)
     p.paragraph_format.tab_stops.add_tab_stop(Inches(indent))
@@ -208,6 +215,8 @@ def borders(table, color="BBBBBB"):
 
 
 def add_table(d, rows):
+    if d.paragraphs:  # keep a table's caption on the same page as the table
+        d.paragraphs[-1].paragraph_format.keep_with_next = True
     t = d.add_table(rows=len(rows), cols=len(rows[0]))
     borders(t)
     for i, r in enumerate(rows):

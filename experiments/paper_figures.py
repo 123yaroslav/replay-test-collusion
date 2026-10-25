@@ -186,7 +186,7 @@ def fig_main():
     rows_c = _rows(audits, coll, "correct")
     fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.25))
     _dots(axes[0], rows_h, ref=5)
-    axes[0].set_xlabel("Honest episodes flagged (%)")
+    axes[0].set_xlabel("Honest games flagged (%)")
     _dots(axes[1], rows_c)
     axes[1].set_xlabel("True pair named (%)")
     panel_label(axes[0], "a", x=-0.62)
@@ -202,7 +202,7 @@ def fig_main():
 # ------------------------------------------------------------------ Fig. 3: ROC ---------------
 def fig_roc():
     s1, j1 = load("s1_audits.csv"), load("s1_judge.csv")
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.45), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.25), sharey=True)
     for ax, tag, name in zip(axes, ("haiku", "deepseek"), ("Claude Haiku", "DeepSeek")):
         g = s1[s1.tag == tag]
         for det in ("naive_mi_shuffle", "crt_net"):
@@ -224,15 +224,15 @@ def fig_roc():
         ax.set_xscale("log")
         ax.set_xlim(0.5, 100), ax.set_ylim(0, 100)
         ax.set_xticks([1, 5, 20, 100], ["1", "5", "20", "100"])
-        ax.set_xlabel("Honest episodes flagged (%), log scale")
+        ax.set_xlabel("Honest games flagged (%), log scale")
         ax.text(0.6, 93, name, fontsize=8.5, fontstyle="italic", va="top")
         ax.grid(True, color=GRID, lw=0.5)
-    axes[0].set_ylabel("Colluding episodes\ndetected (%)")
+    axes[0].set_ylabel("Colluding games\ndetected (%)")
     panel_label(axes[0], "a", x=-0.2)
     panel_label(axes[1], "b", x=-0.05)
     hs, ls = axes[0].get_legend_handles_labels()
     fig.legend(hs, ls, loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.01), handlelength=1.6)
-    fig.subplots_adjust(left=0.12, right=0.985, top=0.92, bottom=0.3, wspace=0.12)
+    fig.subplots_adjust(left=0.12, right=0.985, top=0.92, bottom=0.32, wspace=0.12)
     save(fig, "p_fig3_roc")
 
 
@@ -246,7 +246,7 @@ def fig_eprocess():
             pool = requery_pool(ep, ["P1", "P2", "P3", "P4"], MOVES, None)
             out.append(sequential_replay_test(pool, alpha=0.05, n_actions=3)["e_path"])
         paths[cond] = np.array(out)
-    fig, ax = plt.subplots(figsize=(WIDTH, 2.1))
+    fig, ax = plt.subplots(figsize=(WIDTH, 1.9))
     t = np.arange(paths["null_same"].shape[1])
     for e in paths["null_same"]:
         ax.plot(t, e, color="#9a9890", lw=0.6, alpha=0.7)
@@ -265,7 +265,7 @@ def fig_eprocess():
     hs = [plt.Line2D([], [], color=C["seq"], lw=1.2), plt.Line2D([], [], color="#9a9890", lw=1.0)]
     ax.legend(hs, [f"instructed pair ({n1} games)", f"honest agents ({n0} games)"],
               loc="upper left", handlelength=1.6, bbox_to_anchor=(0.0, 1.0))
-    fig.subplots_adjust(left=0.1, right=0.985, top=0.95, bottom=0.21)
+    fig.subplots_adjust(left=0.1, right=0.985, top=0.95, bottom=0.23)
     save(fig, "p_fig4_eprocess")
 
 
@@ -294,7 +294,7 @@ def fig_all_conditions():
     fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 3.6),
                              gridspec_kw={"width_ratios": [1, 1], "wspace": 1.15})
     _dots(axes[0], rows_h, ref=5)
-    axes[0].set_xlabel("Honest episodes flagged (%)")
+    axes[0].set_xlabel("Honest games flagged (%)")
     _dots(axes[1], rows_c)
     axes[1].set_xlabel("True pair named (%)")
     panel_label(axes[0], "a", x=-0.9)
@@ -303,7 +303,7 @@ def fig_all_conditions():
           for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")]
     fig.legend(hs, [NAMES[d] for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")],
                loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.01), handlelength=1.6)
-    fig.subplots_adjust(left=0.3, right=0.985, top=0.95, bottom=0.2)
+    fig.subplots_adjust(left=0.3, right=0.985, top=0.9, bottom=0.2)
     save(fig, "p_figA1_all")
 
 
@@ -318,7 +318,7 @@ def fig_pvalues():
         ax.axhline(len(p) / 20, color=INK2, lw=0.7, ls=(0, (3, 2)))
         ax.set_xlabel(f"$p$-value, {NAMES[det].lower().replace(' (ours)', '')}")
         panel_label(ax, lab, x=-0.08)
-    axes[0].set_ylabel("Honest episodes")
+    axes[0].set_ylabel("Honest games")
     fig.subplots_adjust(left=0.1, right=0.985, top=0.9, bottom=0.25, wspace=0.08)
     save(fig, "p_figA2_pvalues")
 
