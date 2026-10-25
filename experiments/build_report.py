@@ -747,7 +747,7 @@ def numbers() -> dict:
                         "honest_joint_flag_60"):
                 v[f"fr_a_{key}"] = pc(d[key])
             e = d["exchangeability_honest"]
-            v["fr_a_exch"] = f"{e['diff']:+.3f} (95% CI {e['ci'][0]:+.3f} to {e['ci'][1]:+.3f})"
+            v["fr_a_exch"] = f"{e['diff']:+.3f}, 95% CI {e['ci'][0]:+.3f} to {e['ci'][1]:+.3f}"
         c = f.get("run_c")
         if c:
             for cond in ("stego_public", "chat_public"):
@@ -771,8 +771,8 @@ def numbers() -> dict:
             v["fr_b_fisher_joint"] = f"{bb['fisher_joint_flag']:.3f}"
         if a:
             v["fr_a_sentence"] = (
-                f"On fresh DeepSeek games with the provider pinned (direct check of A1: logged-minus-replay "
-                f"match-rate difference {v['fr_a_exch']}), the likelihood-ratio bet flagged "
+                f"On fresh DeepSeek games with the provider pinned (a direct check of A1: the match-rate "
+                f"difference of C.2 was {v['fr_a_exch']}), the likelihood-ratio bet flagged "
                 f"{v['fr_a_h1_gro']} secret-plan games in 30 rounds against {v['fr_a_h1_joint']} for the "
                 f"joint bet (exact McNemar p = {v['fr_a_h1_p']}; H1 {v['fr_a_h1_verdict']}), and raised "
                 f"{v['fr_a_h2']} false alarms over 60 honest rounds (test of a rate ≥ 10%: p = "
@@ -785,7 +785,7 @@ def numbers() -> dict:
                 f"With a public chat, the fixed-horizon test flagged {v['fr_c_stego_public_fixed_flag']} of "
                 f"games in which a pair hid a code word in small talk (true pair named "
                 f"{v['fr_c_stego_public_fixed_named']}; code followed in {v['fr_c_compliance']} of decodable "
-                f"rounds; {v['fr_c_named_moves']} of chat lines named a move) against "
+                f"rounds; " + ("no chat line named a move" if c["stego_public"]["chat_lines_naming_a_move"] == 0 else f"{v['fr_c_named_moves']} of chat lines named a move") + ") against "
                 f"{v['fr_c_chat_public_fixed_flag']} of honest small-talk games (one-sided Fisher p = "
                 f"{v['fr_c_h3_p']}; H3 {v['fr_c_h3_verdict']}). " + (
                     "Honest small talk stayed within the expected 10%."
