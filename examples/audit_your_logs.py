@@ -31,7 +31,7 @@ def toy_log(path, n_episodes=3, T=30, seed=0):
 
 
 path = sys.argv[1] if len(sys.argv) > 1 else toy_log("toy_logs.jsonl")
-for r in audit(path):
+for r in audit(path, action_space=["rock", "paper", "scissors"]):
     verdict = f"FLAG {r['pair']}" if r["flag"] else "no flag"
     print(f"{r['episode_id']}: {verdict}  p = {r['p_value']:.3f}  "
           f"sequential alarm: round {r['seq_alarm_round']}, pair {r['seq_pair']}")

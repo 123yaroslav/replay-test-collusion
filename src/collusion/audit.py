@@ -23,6 +23,8 @@ intent. Coordination written into the policy itself (shared instructions) is inv
 
 from __future__ import annotations
 
+import warnings
+
 import hashlib
 import json
 from collections.abc import Iterable
@@ -84,6 +86,10 @@ def audit(logs: str | Path | Iterable[Episode], *, action_space: list | None = N
     out = []
     for ep in episodes:
         seats = ep.agent_ids
+        if action_space is None:
+            warnings.warn("audit(): no action_space given, so the alphabet is inferred from the "
+                          "whole log; the sequential alarm is then not strictly predictable. Pass "
+                          "the action space fixed before the first round.", stacklevel=2)
         space = action_space or sorted(
             {r.actions[s] for r in ep.rounds for s in seats}
             | {a for r in ep.rounds for s in seats for a in r.requery.get(s, [])}, key=str)
