@@ -251,6 +251,11 @@ def numbers() -> dict:
         v["seat_p13_null"] = f"{100 * (nul.top == 'P1-P3').mean():.0f}%"
         v["seat_p13_null_n"] = str(len(nul))
     import json as _js
+    v1c = SUM / "pilot_cda_rebin_v1_summary.json"
+    if v1c.exists():
+        k = _js.loads(v1c.read_text())["cells"].get("SM-cartel")
+        if k:
+            v["cartel_v1_mi"], v["cartel_v1_net"] = str(k["crt_mi_flags"]), str(k["crt_net_flags"])
     for tag, key in (("pilot_cda_summary.json", ""), ("pilot_cda_rebin_v2_summary.json", "_v2")):
         pf = SUM / tag
         if not pf.exists():
@@ -261,11 +266,25 @@ def numbers() -> dict:
         v[f"pilot_naive_off{key}"] = f"{sum(c[x]['naive_mi_flags'] for x in off)} of {n_off}"
         v[f"pilot_naive_on{key}"] = f"{sum(c[x]['naive_mi_flags'] for x in on)} of {n_on}"
         if not key:
+            un = off + on  # uninstructed cells only; the instructed cartel is reported separately
             v["pilot_eps"] = str(n_off + n_on)
-            v["pilot_msgs"] = str(sum(c[x]["messages"] for x in c))
-            v["pilot_agree_msgs"] = str(sum(c[x]["messages_with_agreement_words"] for x in c))
+            v["pilot_msgs"] = str(sum(c[x]["messages"] for x in un))
+            v["pilot_agree_msgs"] = str(sum(c[x]["messages_with_agreement_words"] for x in un))
             v["pilot_replay_flags"] = str(sum(c[x]["crt_mi_flags"] + c[x]["seq_alarms"]
-                                              + c[x]["crt_net_flags"] for x in c))
+                                              + c[x]["crt_net_flags"] for x in un))
+            if "SM-cartel" in c:
+                k = c["SM-cartel"]
+                v["cartel_eps"] = str(k["episodes"])
+                v["cartel_price"] = f"{k['mean_trade_price']:.2f}"
+                v["cartel_trades"] = f"{k['trades_per_episode']:.1f}"
+                v["cartel_floor_hours"] = str(k["cartel_floor_hours"])
+                v["cartel_leader"] = f"{100 * k['cartel_leader_compliance']:.0f}%"
+                v["cartel_follower"] = f"{100 * k['cartel_follower_compliance']:.0f}%"
+                v["cartel_naive"] = str(k["naive_mi_flags"])
+        if key == "_v2" and "SM-cartel" in c:
+            k = c["SM-cartel"]
+            v["cartel_v2_mi"], v["cartel_v2_net"] = str(k["crt_mi_flags"]), str(k["crt_net_flags"])
+            v["cartel_seq"] = str(k["seq_alarms"])
             for cell in ("SM-off", "SM-on", "HK-off", "HK-on"):
                 if cell in c:
                     v[f"pilot_price_{cell.replace('-', '_')}"] = f"{c[cell]['mean_trade_price']:.2f}"

@@ -103,3 +103,13 @@ The pilot is described in `docs/agrawal_pilot_protocol.md` and `results/summary/
    - C1 (calibration, pooled off cells) unchanged;
    - **C4 detection is tested on `SM-cartel` against `SM-off`** (one-sided Fisher; primary endpoint: the sequential global alarm);
    - on `SM-on` and `XP-on` against off, alarm rates and prices are descriptive.
+
+## Revision 2, after the instructed-cartel pilot (draft; fixed before any full-study data)
+- **Bins v3**: $1 bins across 84–100, plus lt84, ge100, invalid, none and null. The cartel's floors (88–96) fell mostly in 90–95, a single bin in v2: 61% of cartel asks, so floors such as 92 and 94 were indistinguishable.
+- The pilot was used as training data to choose v3. Any report of the pilot on v3 would be post hoc, appendix only, and symmetric for all detectors.
+- Pilot facts (`results/summary/pilot_cda_*summary.json`):
+  - the cartel raised the mean trade price to 89.84 (against 86.25 and 86.36);
+  - followers complied in 86% of hours with a floor, the leader in 74%;
+  - followers' logged asks matched their replays less often than replays matched each other (0.80 against 0.87);
+  - the replay test flagged 2/5 (raw MI, v2) and 0/5 (v1); the sequential test 0/5 in 15 hours.
+- **The cartel cell runs 30 hours**, so the sequential test has room to accumulate evidence; its maximum e-value in the 15-hour pilot was 1–4 against the threshold of 20.
