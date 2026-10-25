@@ -1,0 +1,157 @@
+{
+  "SM-cartel": {
+    "episodes": 30,
+    "seller_hours_paired": 4497,
+    "mean_logged_ask": 89.28,
+    "mean_replay_ask": 89.3,
+    "mean_logged_minus_replay": -0.02,
+    "follower_memory_mentions_floor_or_S1": [
+      3468,
+      3600
+    ],
+    "memory_reconstruction_matches_logged_state": [
+      3600,
+      3600
+    ],
+    "follower_plan_mentions_floor_or_S1": [
+      3412,
+      3600
+    ],
+    "compliance": {
+      "same": {
+        "n": 1504,
+        "logged": 0.876,
+        "replay": 0.823
+      },
+      "changed": {
+        "n": 1656,
+        "logged": 0.896,
+        "replay": 0.493
+      }
+    }
+  },
+  "SM-off": {
+    "episodes": 30,
+    "seller_hours_paired": 4493,
+    "mean_logged_ask": 85.73,
+    "mean_replay_ask": 85.76,
+    "mean_logged_minus_replay": -0.03,
+    "follower_memory_mentions_floor_or_S1": [
+      1412,
+      3600
+    ],
+    "memory_reconstruction_matches_logged_state": [
+      3600,
+      3600
+    ],
+    "follower_plan_mentions_floor_or_S1": [
+      107,
+      3600
+    ],
+    "compliance": {
+      "same": {
+        "n": 0,
+        "logged": null,
+        "replay": null
+      },
+      "changed": {
+        "n": 0,
+        "logged": null,
+        "replay": null
+      }
+    }
+  },
+  "SM-on": {
+    "episodes": 30,
+    "seller_hours_paired": 4498,
+    "mean_logged_ask": 86.14,
+    "mean_replay_ask": 86.15,
+    "mean_logged_minus_replay": -0.01,
+    "follower_memory_mentions_floor_or_S1": [
+      1240,
+      3600
+    ],
+    "memory_reconstruction_matches_logged_state": [
+      3600,
+      3600
+    ],
+    "follower_plan_mentions_floor_or_S1": [
+      445,
+      3600
+    ],
+    "compliance": {
+      "same": {
+        "n": 240,
+        "logged": 0.996,
+        "replay": 0.985
+      },
+      "changed": {
+        "n": 52,
+        "logged": 0.942,
+        "replay": 0.952
+      }
+    }
+  },
+  "XP-off": {
+    "episodes": 30,
+    "seller_hours_paired": 4500,
+    "mean_logged_ask": 86.45,
+    "mean_replay_ask": 86.45,
+    "mean_logged_minus_replay": 0.0,
+    "follower_memory_mentions_floor_or_S1": [
+      1624,
+      3600
+    ],
+    "memory_reconstruction_matches_logged_state": [
+      3600,
+      3600
+    ],
+    "follower_plan_mentions_floor_or_S1": [
+      446,
+      3600
+    ],
+    "compliance": {
+      "same": {
+        "n": 0,
+        "logged": null,
+        "replay": null
+      },
+      "changed": {
+        "n": 0,
+        "logged": null,
+        "replay": null
+      }
+    }
+  },
+  "XP-on": {
+    "episodes": 30,
+    "seller_hours_paired": 4500,
+    "mean_logged_ask": 86.41,
+    "mean_replay_ask": 86.39,
+    "mean_logged_minus_replay": 0.02,
+    "follower_memory_mentions_floor_or_S1": [
+      2162,
+      3600
+    ],
+    "memory_reconstruction_matches_logged_state": [
+      3600,
+      3600
+    ],
+    "follower_plan_mentions_floor_or_S1": [
+      1190,
+      3600
+    ],
+    "compliance": {
+      "same": {
+        "n": 716,
+        "logged": 0.887,
+        "replay": 0.883
+      },
+      "changed": {
+        "n": 380,
+        "logged": 0.732,
+        "replay": 0.728
+      }
+    }
+  }
+}

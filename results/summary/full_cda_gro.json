@@ -1,0 +1,1717 @@
+{
+  "tag": "full_cda",
+  "cells": {
+    "SM-cartel": {
+      "n": 30,
+      "bins": "v3",
+      "joint": 2,
+      "gro": 2,
+      "gro_wilson": [
+        0.01847663532769335,
+        0.21323817721072091
+      ],
+      "rows": [
+        {
+          "seed": 6000,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 3.489751183038113
+        },
+        {
+          "seed": 6001,
+          "joint": false,
+          "gro": true,
+          "gro_round": 21,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 6.247297841860793
+        },
+        {
+          "seed": 6002,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 5.543456419249918
+        },
+        {
+          "seed": 6003,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 7.129741736118591
+        },
+        {
+          "seed": 6004,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 1.355977644546028
+        },
+        {
+          "seed": 6005,
+          "joint": true,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 4.553801089382467
+        },
+        {
+          "seed": 6006,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 0.02388025031612842
+        },
+        {
+          "seed": 6007,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 2.113155147631404
+        },
+        {
+          "seed": 6008,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 3.336580705528153
+        },
+        {
+          "seed": 6009,
+          "joint": false,
+          "gro": true,
+          "gro_round": 7,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 12.158347186269204
+        },
+        {
+          "seed": 6010,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.6513942366106923
+        },
+        {
+          "seed": 6011,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 5.036530178017756
+        },
+        {
+          "seed": 6012,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": -0.17734230413663438
+        },
+        {
+          "seed": 6013,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 2.2352927518384225
+        },
+        {
+          "seed": 6014,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 4.1511148789178804
+        },
+        {
+          "seed": 6015,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 2.578950446544662
+        },
+        {
+          "seed": 6016,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.39600553066604394
+        },
+        {
+          "seed": 6017,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 4.734473072060332
+        },
+        {
+          "seed": 6018,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": -0.8176122050063617
+        },
+        {
+          "seed": 6019,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 2.0138407415356507
+        },
+        {
+          "seed": 6020,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 2.020733587891748
+        },
+        {
+          "seed": 6021,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 6.634366980302918
+        },
+        {
+          "seed": 6022,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 1.8959700645851165
+        },
+        {
+          "seed": 6023,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 2.164249297526305
+        },
+        {
+          "seed": 6024,
+          "joint": true,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 0.2966037903748103
+        },
+        {
+          "seed": 6025,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": -0.08156588337248528
+        },
+        {
+          "seed": 6026,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 2.426094395142627
+        },
+        {
+          "seed": 6027,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 0.07247195168008054
+        },
+        {
+          "seed": 6028,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 2.079105582441452
+        },
+        {
+          "seed": 6029,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.8306482505647318
+        }
+      ]
+    },
+    "SM-off": {
+      "n": 30,
+      "bins": "v3",
+      "joint": 0,
+      "gro": 0,
+      "gro_wilson": [
+        0.0,
+        0.113517091390478
+      ],
+      "rows": [
+        {
+          "seed": 0,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 1.601822283400889e-16
+        },
+        {
+          "seed": 1,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 0.42854267192747053
+        },
+        {
+          "seed": 2,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 0.4474894363062189
+        },
+        {
+          "seed": 3,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 1.073094987716372
+        },
+        {
+          "seed": 4,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": -1.5137884602609704
+        },
+        {
+          "seed": 5,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.6981632578841663
+        },
+        {
+          "seed": 6,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 1.5173580075770996
+        },
+        {
+          "seed": 7,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 1.298954927861548
+        },
+        {
+          "seed": 8,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 2.467315884414997
+        },
+        {
+          "seed": 9,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 2.281455374631917
+        },
+        {
+          "seed": 10,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 2.118551406667257
+        },
+        {
+          "seed": 11,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 5.103729820178491
+        },
+        {
+          "seed": 12,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": -1.016010700831814
+        },
+        {
+          "seed": 13,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.48356114631259045
+        },
+        {
+          "seed": 14,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 2.5186677414869103
+        },
+        {
+          "seed": 15,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 0.5305508297869249
+        },
+        {
+          "seed": 16,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 1.897868477027073
+        },
+        {
+          "seed": 17,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 1.1726789566666451
+        },
+        {
+          "seed": 18,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 2.468532769421939
+        },
+        {
+          "seed": 19,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 1.05451956217399
+        },
+        {
+          "seed": 20,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 1.5568485973360493
+        },
+        {
+          "seed": 21,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.2064649309488865
+        },
+        {
+          "seed": 22,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 4.805466850202667e-16
+        },
+        {
+          "seed": 23,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 1.347835148352766
+        },
+        {
+          "seed": 24,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.36259476018021397
+        },
+        {
+          "seed": 25,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.657157860912285
+        },
+        {
+          "seed": 26,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 2.5291546400457747
+        },
+        {
+          "seed": 27,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 4.805466850202667e-16
+        },
+        {
+          "seed": 28,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 3.203644566801778e-16
+        },
+        {
+          "seed": 29,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.23134129285121838
+        }
+      ]
+    },
+    "SM-on": {
+      "n": 30,
+      "bins": "v3",
+      "joint": 0,
+      "gro": 0,
+      "gro_wilson": [
+        0.0,
+        0.113517091390478
+      ],
+      "rows": [
+        {
+          "seed": 1000,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 1.251606994164768
+        },
+        {
+          "seed": 1001,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 1.1858252275528895
+        },
+        {
+          "seed": 1002,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.7270228030057245
+        },
+        {
+          "seed": 1003,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 1.4850097831968108
+        },
+        {
+          "seed": 1004,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 1.6450564637213272
+        },
+        {
+          "seed": 1005,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 1.1010950793725494
+        },
+        {
+          "seed": 1006,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": -1.6389212773773676
+        },
+        {
+          "seed": 1007,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 3.5948529348855933
+        },
+        {
+          "seed": 1008,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 2.5846452854046205
+        },
+        {
+          "seed": 1009,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": -0.1805845375184042
+        },
+        {
+          "seed": 1010,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": -0.8570738799607641
+        },
+        {
+          "seed": 1011,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 4.805466850202667e-16
+        },
+        {
+          "seed": 1012,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 2.7922628822196662
+        },
+        {
+          "seed": 1013,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 9.610933700405334e-16
+        },
+        {
+          "seed": 1014,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 0.20586889119157997
+        },
+        {
+          "seed": 1015,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": -0.2605293496060279
+        },
+        {
+          "seed": 1016,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 1.50017571583491
+        },
+        {
+          "seed": 1017,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 1.5470999572222426
+        },
+        {
+          "seed": 1018,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 0.618033368884745
+        },
+        {
+          "seed": 1019,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 3.7288785808894347
+        },
+        {
+          "seed": 1020,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": -1.3294764590388068
+        },
+        {
+          "seed": 1021,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 2.015624991818932
+        },
+        {
+          "seed": 1022,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": -0.05217651379415892
+        },
+        {
+          "seed": 1023,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 1.0634257216128598
+        },
+        {
+          "seed": 1024,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.0
+        },
+        {
+          "seed": 1025,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 0.2907197843412754
+        },
+        {
+          "seed": 1026,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 4.805466850202667e-16
+        },
+        {
+          "seed": 1027,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 0.4995140240999885
+        },
+        {
+          "seed": 1028,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": -0.2008892773906968
+        },
+        {
+          "seed": 1029,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 2.153526214399509
+        }
+      ]
+    },
+    "XP-off": {
+      "n": 30,
+      "bins": "v3",
+      "joint": 0,
+      "gro": 0,
+      "gro_wilson": [
+        0.0,
+        0.113517091390478
+      ],
+      "rows": [
+        {
+          "seed": 2000,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 1.1273574000501867
+        },
+        {
+          "seed": 2001,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 4.805466850202667e-16
+        },
+        {
+          "seed": 2002,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": 2.003237488652175
+        },
+        {
+          "seed": 2003,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 1.2774628350871562
+        },
+        {
+          "seed": 2004,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": -0.5637963847532415
+        },
+        {
+          "seed": 2005,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 1.0462136744160828
+        },
+        {
+          "seed": 2006,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 3.2251224616559333
+        },
+        {
+          "seed": 2007,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 3.203644566801778e-16
+        },
+        {
+          "seed": 2008,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.49484006772335104
+        },
+        {
+          "seed": 2009,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 0.23134129285121843
+        },
+        {
+          "seed": 2010,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 0.6165001134293687
+        },
+        {
+          "seed": 2011,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": -0.08179356101975065
+        },
+        {
+          "seed": 2012,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 0.26090703977967755
+        },
+        {
+          "seed": 2013,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.8870514172414342
+        },
+        {
+          "seed": 2014,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.36259476018021336
+        },
+        {
+          "seed": 2015,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 1.887813390630643
+        },
+        {
+          "seed": 2016,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": 0.8359645899169135
+        },
+        {
+          "seed": 2017,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            2
+          ],
+          "gro_bits": -0.5116529788325369
+        },
+        {
+          "seed": 2018,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.2668837316676034
+        },
+        {
+          "seed": 2019,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 0.5037307942882783
+        },
+        {
+          "seed": 2020,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.8841668878654658
+        },
+        {
+          "seed": 2021,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.869589258575667
+        },
+        {
+          "seed": 2022,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 3.5735091842298683
+        },
+        {
+          "seed": 2023,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 0.07030578997748146
+        },
+        {
+          "seed": 2024,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": -0.4941579727331824
+        },
+        {
+          "seed": 2025,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 0.7231426418504521
+        },
+        {
+          "seed": 2026,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 2.352949217162629
+        },
+        {
+          "seed": 2027,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 1.210649391405317
+        },
+        {
+          "seed": 2028,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": -0.9487726302875535
+        },
+        {
+          "seed": 2029,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 1.6961092624502063
+        }
+      ]
+    },
+    "XP-on": {
+      "n": 30,
+      "bins": "v3",
+      "joint": 0,
+      "gro": 0,
+      "gro_wilson": [
+        0.0,
+        0.113517091390478
+      ],
+      "rows": [
+        {
+          "seed": 3000,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": -0.7327996199554541
+        },
+        {
+          "seed": 3001,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 1.3069891904943924
+        },
+        {
+          "seed": 3002,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 1.458413549846395
+        },
+        {
+          "seed": 3003,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 2.6778153652654066
+        },
+        {
+          "seed": 3004,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            1
+          ],
+          "gro_bits": 0.8480546312251034
+        },
+        {
+          "seed": 3005,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": -2.5797738687120555
+        },
+        {
+          "seed": 3006,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.3625947601802135
+        },
+        {
+          "seed": 3007,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 1.47752395304897
+        },
+        {
+          "seed": 3008,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": -2.2354470547122474
+        },
+        {
+          "seed": 3009,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": -0.5440034915911935
+        },
+        {
+          "seed": 3010,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 2.3567284502639687
+        },
+        {
+          "seed": 3011,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 0.04956227792159808
+        },
+        {
+          "seed": 3012,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 0.3625947601802135
+        },
+        {
+          "seed": 3013,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 2.3951545884473466
+        },
+        {
+          "seed": 3014,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            3
+          ],
+          "gro_bits": 0.8100841964864312
+        },
+        {
+          "seed": 3015,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 3.3832929341636357
+        },
+        {
+          "seed": 3016,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            3
+          ],
+          "gro_bits": 1.601822283400889e-16
+        },
+        {
+          "seed": 3017,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.6674700937066986
+        },
+        {
+          "seed": 3018,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 1.2955440675313208
+        },
+        {
+          "seed": 3019,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            3,
+            4
+          ],
+          "gro_bits": -0.11209028933768009
+        },
+        {
+          "seed": 3020,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 4.805466850202667e-16
+        },
+        {
+          "seed": 3021,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 1.4301576551424824
+        },
+        {
+          "seed": 3022,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": 0.5820534601486107
+        },
+        {
+          "seed": 3023,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            2,
+            4
+          ],
+          "gro_bits": 0.6800985616183929
+        },
+        {
+          "seed": 3024,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            4
+          ],
+          "gro_bits": 0.7251895203604276
+        },
+        {
+          "seed": 3025,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            4
+          ],
+          "gro_bits": -0.48056192612083765
+        },
+        {
+          "seed": 3026,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            0,
+            2
+          ],
+          "gro_bits": 0.6674700937066984
+        },
+        {
+          "seed": 3027,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 0.5376933852044057
+        },
+        {
+          "seed": 3028,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 0.8100841964864312
+        },
+        {
+          "seed": 3029,
+          "joint": false,
+          "gro": false,
+          "gro_round": null,
+          "gro_top": [
+            1,
+            3
+          ],
+          "gro_bits": 0.691924801993776
+        }
+      ]
+    }
+  },
+  "fisher_cartel_vs_off_joint": 0.2457627118644068,
+  "fisher_cartel_vs_off_gro": 0.2457627118644068
+}
