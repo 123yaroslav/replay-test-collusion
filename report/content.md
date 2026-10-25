@@ -140,7 +140,7 @@ also when later observations contain earlier actions. Appendix C.9 proves it, gi
 4. *Evidence.* Colluders were instructed, in two main model families and short stylised games; detection rates need not transfer to emergent or test-aware collusion (Appendix C).
 
 ## 7. Conclusion
-Shared models make honest agents look like cartels to dependence tests. Re-querying each agent without the audited channel removes these false accusations, and, in theory, the growth-optimal bet finds a channel whose current messages shift payoffs at a speed set by the size of the shift (Appendix C.9); agreements already held in instructions or memory escape this test and need audits of the policy and its state.
+Shared models make honest agents look like cartels to dependence tests. Re-querying each agent without the audited channel brings these false accusations down to the target rate, and, in theory, the growth-optimal bet finds a channel whose current messages shift payoffs at a speed set by the size of the shift (Appendix C.9); agreements already held in instructions or memory escape this test and need audits of the policy and its state.
 
 ## Code and Data
 - Code (MIT licence): https://github.com/123yaroslav/replay-test-collusion. The repository explains how to audit your own agents and rebuilds every number in this report from the released data at no cost.
