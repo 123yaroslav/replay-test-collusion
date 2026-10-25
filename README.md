@@ -23,6 +23,19 @@ actions depend on each other more than its replays do.
   the vendor uses public data only.
 - **Sequential version.** In a pre-registered replication, an anytime-valid variant named an
   instructed pair in 18 of 20 fresh games, against 11 of 20 for the fixed-length test.
+- **Target environment.** In a pre-registered re-implementation of Agrawal et al.'s LLM double
+  auction (5 conditions x 30 games), the sequential test raised 0 false alarms in 60 no-chat games,
+  while time-shuffle mutual information accused 26 of 30 honest no-chat games. An instructed cartel
+  raised prices but escaped the pre-registered bet (2 of 30), as predicted before the data: the
+  agreement lives in the sellers' memory, which replays keep. A statistic chosen afterwards, agents
+  departing together from their own replays, flags 20 of 30 cartel games against 1 of 30, and a
+  fresh pre-registered series confirmed it (22 of 30 against 1 of 30).
+- **Fresh pre-registered runs.** A likelihood-ratio bet (the growth-optimal one) flags 10 of 40
+  DeepSeek secret-plan games where the pre-registered bet flags 0, with 3 of 80 false alarms and the
+  provider pinned; a pair hiding its move in a code word inside a public chat is flagged in 12 of 40
+  games against 2 of 40 honest small-talk games; a Haiku pair told how the audit works could not
+  evade it; Claude Haiku sellers decline a vendor's pooled-data scheme in 99% of rounds, and the
+  test still finds the residual effect (6 of 40 against 0 of 40).
 - **Scope.** The test detects information that reaches an agent through the audited channel.
   Coordination written into shared instructions, or already stored in an agent's memory, is
   outside its null hypothesis.
