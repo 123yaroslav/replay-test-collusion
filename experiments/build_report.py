@@ -639,6 +639,40 @@ def numbers() -> dict:
             v[f"fc_gro_{key}"] = f"{r['gro']}/{r['n']}"
             v[f"fc_joint_{key}"] = f"{r['joint']}/{r['n']}"
         v["fc_gro_fisher"] = f"{g.get('fisher_cartel_vs_off_gro', float('nan')):.3f}"
+    # exploratory floor-change mechanism in the auction cartel (x_floor_change_summary.csv, written
+    # by a read-only analysis of the raw logs; cell = full SM-cartel if present, else the pilot)
+    fcs = read("x_floor_change_summary.csv")
+    if fcs is not None:
+        cells = [c for c in fcs.cell.unique() if c.startswith("SM-cartel")]
+        full = [c for c in cells if "full" in c]
+        cell = (full or cells)[0] if cells else None
+        if cell:
+            d = fcs[fcs.cell == cell]
+
+            def cellv(stat, split, digits=2, sign=False):
+                r = d[(d.stat == stat) & (d.split == split)]
+                if r.empty:
+                    return "–"
+                r = r.iloc[0]
+                f = f"{{:+.{digits}f}}" if sign else f"{{:.{digits}f}}"
+                return (f.format(r["mean"]) + f" [{f.format(r.ci_lo)}, {f.format(r.ci_hi)}]"
+                        ).replace("-", "−")
+
+            rows = [("Follower's |logged − mean replayed ask| ($)", "gap_follower", 2),
+                    ("Logged ask within $0.5 of the current floor", "ask_within05", 2),
+                    ("Replayed ask within $0.5 of the current floor", "rep_within05", 2),
+                    ("Joint bet, bits per round (log~2~ E~T~ increment)", "joint_dlog2_E", 2),
+                    ("Likelihood-ratio bet, bits per round", "gro_dlog2_E", 2)]
+            lines = ["| Quantity | Hours after an unchanged floor | Hours after a changed floor "
+                     "| Difference |", "|---|---|---|---|"]
+            for lab, stat, dg in rows:
+                lines.append(f"| {lab} | {cellv(stat, 'same', dg)} | {cellv(stat, 'change', dg)} | "
+                             f"{cellv(stat, 'change_minus_same', dg, sign=True)} |")
+            v["floor_table"] = "\n".join(lines)
+            v["floor_cell"] = cell
+            n = d[(d.stat == "gap_follower") & (d.split.isin(["same", "change"]))]
+            v["floor_n_same"] = str(int(n[n.split == "same"].n_episode_hours.iloc[0])) if (n.split == "same").any() else "–"
+            v["floor_n_change"] = str(int(n[n.split == "change"].n_episode_hours.iloc[0])) if (n.split == "change").any() else "–"
     # fresh pre-registered runs (docs/fresh_plan.md): experiments/fresh_analysis.py
     fr = SUM / "fresh_results.json"
     if fr.exists():
