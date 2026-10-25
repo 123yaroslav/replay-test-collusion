@@ -810,11 +810,22 @@ def numbers() -> dict:
             v["fr_d_h4_verdict"] = "supported" if dd["H4"]["supported"] else "not supported"
             v["fr_d_h5"] = f"{dd['H5']['alarms']}/{dd['H5']['n']}"
             v["fr_d_h5_verdict"] = "supported" if dd["H5"]["supported"] else "not supported"
+            vc = dd.get("vendor_compliance", {})
+            if vc:
+                for name in ("haiku", "deepseek"):
+                    v[f"fr_d_{name}_follow"] = f"{100 * vc[name]['designated_follow']:.0f}%"
+                    v[f"fr_d_{name}_cover"] = f"{100 * vc[name]['cover_follow']:.0f}%"
+                    v[f"fr_d_{name}_refuse"] = f"{100 * vc[name]['reasoning_refuses']:.0f}%"
             v["fr_d_sentence"] = (
                 f"With Claude Haiku sellers, the fixed-horizon test named the pooled-data vendor's pair in "
                 f"{v['fr_d_vendor_leak_fixed_named']} of games and flagged {v['fr_d_vendor_public_fixed_flag']} of "
                 f"public-data-vendor games (one-sided Fisher p = {v['fr_d_h4_p']}; H4 {v['fr_d_h4_verdict']}), "
-                f"with {v['fr_d_h5']} false alarms on honest games (H5 {v['fr_d_h5_verdict']}).")
+                f"with {v['fr_d_h5']} false alarms on honest games (H5 {v['fr_d_h5_verdict']}). The predicted "
+                f"detection rate (about 90%) was not reached because Haiku declines the scheme: it bid as the "
+                f"vendor designated in {v.get('fr_d_haiku_follow', '–')} of rounds (DeepSeek: "
+                f"{v.get('fr_d_deepseek_follow', '–')}) and its rationale says it will not use unverifiable "
+                f"information about a rival in {v.get('fr_d_haiku_refuse', '–')} of rounds (DeepSeek: "
+                f"{v.get('fr_d_deepseek_refuse', '–')}); the test still found the residual effect.")
         ee = f.get("run_e")
         if ee:
             for cond in ("cartel2", "off"):
