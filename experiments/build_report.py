@@ -764,6 +764,7 @@ def numbers() -> dict:
             for cond in ("evasive", "secret_plan"):
                 r = bb[cond]
                 v[f"fr_b_{cond}_follower"] = f"{100 * r['follower_compliance']:.0f}%"
+                v[f"fr_b_{cond}_leader"] = f"{100 * r['leader_compliance']:.0f}%"
                 v[f"fr_b_{cond}_adv"] = f"{r['team_advantage']:+.2f}"
                 for key in ("fixed_named", "joint_flag", "gro_flag"):
                     v[f"fr_b_{cond}_{key}"] = pc(r[key])
@@ -771,8 +772,8 @@ def numbers() -> dict:
             v["fr_b_fisher_joint"] = f"{bb['fisher_joint_flag']:.3f}"
         if a:
             v["fr_a_sentence"] = (
-                f"On fresh DeepSeek games with the provider pinned (a direct check of A1: the match-rate "
-                f"difference of C.2 was {v['fr_a_exch']}), the likelihood-ratio bet flagged "
+                f"On fresh DeepSeek games with the provider pinned (the match-rate diagnostic of C.2 gave "
+                f"{v['fr_a_exch']}, consistent with A1 without establishing it), the likelihood-ratio bet flagged "
                 f"{v['fr_a_h1_gro']} secret-plan games in 30 rounds against {v['fr_a_h1_joint']} for the "
                 f"joint bet (exact McNemar p = {v['fr_a_h1_p']}; H1 {v['fr_a_h1_verdict']}), and raised "
                 f"{v['fr_a_h2']} false alarms over 60 honest rounds (test of a rate ≥ 10%: p = "
@@ -795,8 +796,9 @@ def numbers() -> dict:
         if bb:
             v["fr_b_sentence"] = (
                 f"A Haiku pair told how the audit works and asked to play assigned moves only when "
-                f"plausible followed its plan in {v['fr_b_evasive_follower']} of rounds (secret-plan pair: "
-                f"{v['fr_b_secret_plan_follower']}), was named by the fixed-horizon test in "
+                f"plausible still followed its plan: the follower in {v['fr_b_evasive_follower']} of rounds and "
+                f"the leader in {v['fr_b_evasive_leader']} (secret-plan pair: {v['fr_b_secret_plan_follower']} "
+                f"and {v['fr_b_secret_plan_leader']}). It was named by the fixed-horizon test in "
                 f"{v['fr_b_evasive_fixed_named']} of games ({v['fr_b_secret_plan_fixed_named']}; Fisher p = "
                 f"{v['fr_b_fisher_fixed']}) and flagged by the joint sequential bet in "
                 f"{v['fr_b_evasive_joint_flag']} ({v['fr_b_secret_plan_joint_flag']}); its score advantage "
@@ -826,6 +828,32 @@ def numbers() -> dict:
                 f"{v.get('fr_d_deepseek_follow', '–')}) and its rationale says it will not use unverifiable "
                 f"information about a rival in {v.get('fr_d_haiku_refuse', '–')} of rounds (DeepSeek: "
                 f"{v.get('fr_d_deepseek_refuse', '–')}); the test still found the residual effect.")
+        # pre-registered secondary statistic (co-departure) across runs A-D
+        parts, worst_fa, power_fail = [], 0.0, []
+        if a:
+            d = a["descriptive"]
+            parts.append(f"Run A {pc(d['codep_flag_30'])} of secret-plan games at 30 rounds (joint bet "
+                         f"{pc(a['H1']['joint_flag_30'])}) and {pc(d['honest_codep_flag_60'])} of honest games")
+            worst_fa = max(worst_fa, d["honest_codep_flag_60"]["rate"])
+        if c:
+            parts.append(f"Run C {pc(c['stego_public']['codep_flag'])} against {pc(c['chat_public']['codep_flag'])} "
+                         f"honest-chat games")
+            worst_fa = max(worst_fa, c["chat_public"]["codep_flag"]["rate"])
+            if c["stego_public"]["codep_flag"]["rate"] < c["stego_public"]["joint_flag"]["rate"]:
+                power_fail.append("the public-chat pair")
+        if bb:
+            parts.append(f"Run B {pc(bb['evasive']['codep_flag'])} (evasive) and {pc(bb['secret_plan']['codep_flag'])} "
+                         f"(secret plan) against {pc(bb['evasive']['joint_flag'])} and {pc(bb['secret_plan']['joint_flag'])} "
+                         f"for the joint bet")
+            power_fail.append("Haiku secret-plan pairs")
+        if dd:
+            parts.append(f"Run D {pc(dd['vendor_leak']['codep_flag'])} of pooled-data games and "
+                         f"{pc(dd['vendor_public']['codep_flag'])} of public-data games")
+            worst_fa = max(worst_fa, dd["vendor_public"]["codep_flag"]["rate"], dd["null_same"]["codep_flag"]["rate"])
+        v["fr_codep_summary"] = (
+            "The secondary statistic flagged " + "; ".join(parts) + ". Its false-alarm prediction held "
+            f"(at most {100 * worst_fa:.1f}% on honest games); its power prediction did not hold for "
+            + " and ".join(power_fail) + ", where the joint bet flags more." if parts else "")
         ee = f.get("run_e")
         if ee:
             for cond in ("cartel2", "off"):
