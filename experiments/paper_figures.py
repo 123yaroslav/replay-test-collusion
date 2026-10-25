@@ -51,8 +51,8 @@ def load(name):
 
 def save(fig, name):
     FIG.mkdir(parents=True, exist_ok=True)
-    fig.savefig(FIG / f"{name}.pdf")
-    fig.savefig(FIG / f"{name}.png", dpi=600)
+    fig.savefig(FIG / f"{name}.pdf", bbox_inches="tight", pad_inches=0.06)
+    fig.savefig(FIG / f"{name}.png", dpi=600, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
 
 
@@ -373,9 +373,84 @@ def fig_growth():
     save(fig, "p_figA4_growth")
 
 
+
+
+# ---------------------------------------------------------------- live example -------------
+def fig_example():
+    """One audited round and one whole game, taken verbatim from the pooled-data-vendor logs."""
+    import json, textwrap
+    import matplotlib.patches as mpatches
+    path = ROOT / "results" / "raw" / "s2" / "deepseek" / "vendor_leak.jsonl"
+    with open(path) as f:
+        ep = json.loads(f.readline())
+    rd = ep["rounds"][1]  # second round of the first game
+    fig = plt.figure(figsize=(6.6, 2.85))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.3, 1.0], wspace=0.22)
+    ax = fig.add_subplot(gs[0, 0])
+    ax.set_axis_off()
+    ax.set_xlim(0, 100), ax.set_ylim(0, 100)
+    seats = ["P1", "P2", "P3", "P4"]
+    msgs = {m["recipients"][0]: m["text"] for m in rd["messages"]}
+    y = 97
+    ax.text(0, y, "Round 2 of one pooled-data-vendor game (DeepSeek sellers)",
+            fontsize=7.5, fontweight="bold", va="top", color=INK)
+    y -= 7
+    for p in seats:
+        cost = rd["private_info"][p]["your_cost"]
+        logged, replays = rd["actions"][p], rd["requery"][p]
+        departs = logged not in replays
+        h = 24 if p in msgs else 13
+        box = mpatches.FancyBboxPatch((0, y - h), 100, h, boxstyle="round,pad=0.4,rounding_size=1.2",
+                                      fc=("#fff4ee" if p in msgs else "white"), ec=("#eb6834" if p in msgs else GRID), lw=0.8)
+        ax.add_patch(box)
+        ax.text(1.5, y - 1.5, f"{p}  cost {cost}", fontsize=7, fontweight="bold", va="top", color=INK)
+        if p in msgs:
+            txt = textwrap.fill("vendor: " + msgs[p], 60)
+            ax.text(1.5, y - 6.5, txt, fontsize=5.6, va="top", color="#b8441c", family="DejaVu Sans")
+            yy = y - 18.5
+        else:
+            ax.text(1.5, y - 6.5, "no message", fontsize=5.6, va="top", color=INK2, family="DejaVu Sans")
+            yy = y - 10.5
+        ax.text(1.5, yy, f"logged bid {logged}", fontsize=6.5, va="top", color=C["crt_net"], fontweight="bold")
+        ax.text(30, yy, f"replays without the message: {replays[0]}, {replays[1]}", fontsize=6.5, va="top", color=INK)
+        ax.text(99, yy, "departs" if departs else "matches", fontsize=6.5, va="top", ha="right",
+                color=("#b8441c" if departs else "#1d9a6c"), fontweight="bold")
+        y -= h + 2.5
+    ax.text(0, y - 1, "Under H0 the logged bid is one of the three pool entries at random;\nP1 and P3 leave their pools, P2 and P4 do not.",
+            fontsize=6.3, va="top", color=INK2, style="italic")
+    panel_label(ax, "a", x=-0.02, y=1.0)
+    # panel b: the whole game
+    ax2 = fig.add_subplot(gs[0, 1])
+    T = len(ep["rounds"])
+    for row, p in enumerate(seats):
+        yb = 3 - row
+        for r in ep["rounds"]:
+            t = r["t"] + 1
+            logged, replays = r["actions"][p], r["requery"][p]
+            dep = logged not in replays
+            ax2.scatter([t], [yb], s=9, color=("#b8441c" if dep else "#1d9a6c"), zorder=3, lw=0)
+        ax2.text(0.3, yb, p, fontsize=7, va="center", ha="right", color=INK)
+    ax2.set_xlim(0, T + 1), ax2.set_ylim(-0.6, 3.6)
+    ax2.set_yticks([])
+    ax2.set_xticks([1, 10, 20, 30])
+    ax2.tick_params(axis="x", labelsize=7)
+    ax2.set_xlabel("Round", fontsize=7.5)
+    for s in ("top", "right", "left"):
+        ax2.spines[s].set_visible(False)
+    dep_counts = {p: sum(r["actions"][p] not in r["requery"][p] for r in ep["rounds"]) for p in seats}
+    ax2.set_title("Whole game: rounds in which the logged bid\nleaves its pool. " +
+                  ", ".join(f"{p}: {dep_counts[p]}" for p in seats) + f" of {T}", fontsize=7, color=INK2, loc="left")
+    h1 = mpatches.Patch(color="#b8441c", label="departs from both replays")
+    h2 = mpatches.Patch(color="#1d9a6c", label="matches a replay")
+    ax2.legend(handles=[h1, h2], fontsize=6.3, loc="lower center", bbox_to_anchor=(0.5, -0.34), ncol=2, handlelength=1.2, columnspacing=1.0)
+    panel_label(ax2, "b", x=-0.08, y=1.16)
+    save(fig, "p_fig2_example")
+
+
 if __name__ == "__main__":
     fig_growth()
     fig_method()
+    fig_example()
     fig_main()
     fig_roc()
     fig_eprocess()

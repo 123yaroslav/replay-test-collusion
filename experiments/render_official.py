@@ -44,6 +44,48 @@ GREEK = re.compile(r"([\u0370-\u03ff]+)")
 INLINE = re.compile(r"(\\\(.+?\\\)|\*\*.+?\*\*|\*.+?\*|`.+?`|\^.+?\^|~[^~\s]+?~)")
 
 
+
+_SIMPLE_MACROS = [("\\dots", "…"), ("\\ldots", "…"), ("\\ge", "≥"), ("\\le", "≤"), ("\\ne", "≠"),
+    ("\\alpha", "α"), ("\\gamma", "γ"), ("\\Gamma", "Γ"), ("\\tau", "τ"), ("\\pi", "π"),
+    ("\\varnothing", "∅"), ("\\emptyset", "∅"), ("\\mid", "|"), ("\\cdot", "·"), ("\\in", "∈"),
+    ("\\sim", "∼"), ("\\exists", "∃"), ("\\infty", "∞"), ("\\mathcal{A}", "𝒜"), ("\\mathcal{G}", "𝒢"),
+    ("\\tilde a", "ã"), ("\\tilde{a}", "ã"), ("\\mathbb{1}", "𝟙"), ("\\{", "{"), ("\\}", "}"),
+    ("\\quad", " "), ("\\,", " "), ("\\ ", " "), ("\\%", "%")]
+
+
+def simple_math(latex: str):
+    """Inline math made only of symbols, sub/superscripts and relations -> list of
+    (text, italic, position) runs in the body font; None when it needs real typesetting."""
+    s = latex
+    for a, b in _SIMPLE_MACROS:
+        s = s.replace(a, b)
+    if "\\" in s:
+        return None
+    out, i, n = [], 0, len(s)
+    def take_group(j):  # returns (text, next index) for _x or _{...}
+        if j < n and s[j] == "{":
+            k = s.index("}", j)
+            return s[j + 1:k], k + 1
+        return s[j], j + 1
+    while i < n:
+        ch = s[i]
+        if ch in "_^":
+            g, i = take_group(i + 1)
+            if "{" in g or "\\" in g:
+                return None
+            for piece in g:
+                out.append((piece, piece.isalpha() and piece.isascii(), "sub" if ch == "_" else "sup"))
+            continue
+        out.append((ch, ch.isalpha() and ch.isascii(), ""))
+        i += 1
+    merged = []  # merge adjacent runs with the same style
+    for txt, ital, pos in out:
+        if merged and merged[-1][1] == ital and merged[-1][2] == pos:
+            merged[-1] = (merged[-1][0] + txt, ital, pos)
+        else:
+            merged.append((txt, ital, pos))
+    return merged
+
 # ---------------------------------------------------------------- inline text -----------
 def add_runs(par, text: str, size: float | None = None, italic_all: bool = False,
              color: RGBColor | None = None):
@@ -52,7 +94,21 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
             continue
         bold = italic = code = sup = sub = False
         if part.startswith("\\(") and part.endswith("\\)"):
-            par._p.append(parse_xml(to_omml(part[2:-2])))
+            simple = simple_math(part[2:-2])
+            if simple is None:
+                par._p.append(parse_xml(to_omml(part[2:-2])))
+            else:  # plain symbols: body font, italic letters, real sub/superscripts
+                for txt, ital, pos in simple:
+                    rr = par.add_run(txt)
+                    rr.italic = ital or None
+                    if pos == "sub":
+                        rr.font.subscript = True
+                    elif pos == "sup":
+                        rr.font.superscript = True
+                    if size:
+                        rr.font.size = Pt(size)
+                    if GREEK.fullmatch(txt) or txt in "∅≥≤≠∈∼∃∞·|…{}":
+                        rr.font.name = "Times New Roman"
             continue
         if part.startswith("**") and part.endswith("**"):
             part, bold = part[2:-2], True
