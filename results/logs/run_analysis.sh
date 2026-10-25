@@ -46,6 +46,7 @@ if [ -d results/raw/s3/full_cda ]; then
   uv run python experiments/analyse_cda.py --tag full_cda > results/logs/analysis_full_cda.txt
   uv run python experiments/memory_cartel.py --tag full_cda > /dev/null
   uv run python experiments/gro_cda.py --tag full_cda > /dev/null
+  uv run python experiments/departure_cda.py --tag full_cda > /dev/null
 fi
 # exploratory theory and post-hoc analyses of the likelihood-ratio bet ($0)
 uv run python experiments/s0g_growth.py > results/logs/analysis_s0g.txt

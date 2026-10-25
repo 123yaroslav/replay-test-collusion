@@ -630,6 +630,16 @@ def numbers() -> dict:
     if gg is not None:
         sk = gg[(gg.prior == "skewed") & (gg.channel == "copy")]
         v["growth_joint_neg_max_eps"] = f"{sk[sk.joint_k2 < 0].eps.max():.1f}"
+    # exploratory, post hoc: co-departure on the full auction study (departure_cda.py)
+    fd = SUM / "full_cda_departure.json"
+    if fd.exists():
+        g = json.loads(fd.read_text())
+        for cell, r in g["cells"].items():
+            key = cell.replace("-", "_")
+            v[f"fc_dep_{key}"] = f"{r['pair']}/{r['n']}"
+            v[f"fc_depagent_{key}"] = f"{r['agent']}/{r['n']}"
+        p = g.get("fisher_cartel_vs_off_pair")
+        v["fc_dep_fisher"] = ("p < 10^−6^" if p is not None and p < 1e-6 else f"p = {p:.3f}")
     # exploratory likelihood-ratio bet on the full auction study (gro_cda.py, after confirm)
     fg = SUM / "full_cda_gro.json"
     if fg.exists():
