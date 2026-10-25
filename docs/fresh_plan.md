@@ -96,3 +96,14 @@ Predictions written now (results/summary/fresh_predictions.json, from the existi
 - Global cap passed to each run: spent-so-far + $9 (A), + $3 (B), + $7 (C); key limit $100.
 - Order A, C, B. If the remaining key budget after the auction study is below $10, run A only.
 - Reported whatever the outcome, in the appendix and, if H1 and H2 both hold, in one body sentence.
+
+## Prediction for the full auction study's cartel cell (committed 2026-10-25 16:50 +0500; SM-cartel.jsonl not yet written, not analysed)
+From the pilot cartel games and the finished no-chat cells (exploratory floor-change analysis):
+followers' logged asks depart from their replays almost only in hours when the leader changes the
+floor (replays hold the old floor, logged asks follow the new one), and in exactly those hours the
+pre-registered joint bet loses evidence (its predictor is fitted on past pairs, the logged pair lands
+in a new bin, the replay pool sits in the old one) while the likelihood-ratio bet gains. The full
+study changes the floor every hour. Prediction: the pre-registered C4 (joint bet) gives few or no
+alarms in SM-cartel, close to the no-chat rate; the likelihood-ratio bet (exploratory, run after
+confirm_cda.py) alarms in more SM-cartel games than in SM-off. Either way C4 is reported as
+pre-registered.
