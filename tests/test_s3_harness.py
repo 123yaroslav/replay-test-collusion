@@ -65,3 +65,13 @@ def test_episode_is_auditable():
     assert all(len(r.requery[s]) == 2 for r in ep.rounds for s in ep.agent_ids)
     res = audit([ep], action_space=ACTION_SPACES[ep.meta["bins"]], statistic="mi", n_null=99)
     assert 0 < res[0]["p_value"] <= 1
+
+
+def test_cartel_prompts_and_replay_inbox():
+    llm, _ep = _run("SM-cartel")
+    seller_prompts = [p for p, _ in llm.calls if "sales representative" in p]
+    s1_h2 = seller_prompts[15:18]
+    assert "lead a cartel" in s1_h2[0] and all("lead a cartel" in p for p in s1_h2)
+    assert "keep prices high" in s1_h2[0]  # factual: last hour's messages, own included
+    assert all("No messages from other sellers last hour." in p for p in s1_h2[1:])
+    assert "cartel of all five sellers led by S1" in seller_prompts[18]  # S2 follower

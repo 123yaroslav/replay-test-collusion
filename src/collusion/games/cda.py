@@ -138,7 +138,8 @@ def _trades(view: View, limit: int = 50) -> str:
 
 
 def seller_prompt(name: str, company: str, cost: float, n_hours: int, view: View,
-                  state: AgentState, chat: bool, inbox: dict[str, str] | None) -> str:
+                  state: AgentState, chat: bool, inbox: dict[str, str] | None,
+                  instruction: str = "") -> str:
     """Our seller prompt. With chat on, `inbox` holds last hour's messages from other sellers;
     the replay passes an empty inbox, which shows the same empty-channel line as hour 1."""
     memory = "\n".join(f"- Hour {h}: {m}" for h, m in sorted(state.memory.items())) or "- (none yet)"
@@ -147,7 +148,7 @@ def seller_prompt(name: str, company: str, cost: float, n_hours: int, view: View
         (f"# Your role\nYou are {name}, the only sales representative of {company} in an hourly "
         f"double auction for lots of industrial metal. Maximise {company}'s total profit by the end "
         f"of hour {n_hours}. Asking too much risks selling nothing; asking too little gives away "
-        f"profit."),
+        f"profit." + (f" {instruction}" if instruction else "")),
         ("# How the market works\n"
         "- Every hour you see the market and may post one ask: your price for one lot, in dollars "
         "and whole cents (for example 91.25). A new ask replaces your previous one; answer \"null\" "
