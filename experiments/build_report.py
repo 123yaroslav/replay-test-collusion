@@ -554,7 +554,8 @@ def numbers() -> dict:
                 f"so a false-alarm rate of 15% or more could not be ruled out "
                 f"(p = {v['fc_c1_p']})."))
         v["fc_abstract_sentence"] = (
-            "In a pre-registered study of the organisers' double auction, the sequential version "
+            "In a pre-registered study of the brief's target environment, our re-implementation of "
+            "Agrawal et al.'s double auction, the sequential version "
             + ("ruled out false-alarm rates of 15% or more." if c1["supported"] else
                f"could not rule out false-alarm rates of 15% or more ({v['fc_c1']} alarms)."))
         v["fc_c2_sentence"] = (
