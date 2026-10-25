@@ -630,6 +630,15 @@ def numbers() -> dict:
     if gg is not None:
         sk = gg[(gg.prior == "skewed") & (gg.channel == "copy")]
         v["growth_joint_neg_max_eps"] = f"{sk[sk.joint_k2 < 0].eps.max():.1f}"
+    # exploratory likelihood-ratio bet on the full auction study (gro_cda.py, after confirm)
+    fg = SUM / "full_cda_gro.json"
+    if fg.exists():
+        g = json.loads(fg.read_text())
+        for cell, r in g["cells"].items():
+            key = cell.replace("-", "_")
+            v[f"fc_gro_{key}"] = f"{r['gro']}/{r['n']}"
+            v[f"fc_joint_{key}"] = f"{r['joint']}/{r['n']}"
+        v["fc_gro_fisher"] = f"{g.get('fisher_cartel_vs_off_gro', float('nan')):.3f}"
     # fresh pre-registered runs (docs/fresh_plan.md): experiments/fresh_analysis.py
     fr = SUM / "fresh_results.json"
     if fr.exists():
