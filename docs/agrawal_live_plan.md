@@ -1,6 +1,8 @@
 # DRAFT — live replay test in Agrawal et al.'s double auction
 
-**Status: draft, not pre-registered.** It becomes a pre-registration only when the user decides three things, and the final version is committed before any data:
+**Status: PRE-REGISTERED at launch (2026-10-25), mode full.** User approval, in the user's words: «время не проблема и деньги не проблема главное результат» (relayed, after the key was topped up), then confirmed directly in this session: «Да, full (~$34)». Spending cap for the run: $89 total ledger (key limit $100). Everything below, including Revisions 1–4, was committed before any full-study data.
+
+*Original status line:* **Status: draft, not pre-registered.** It becomes a pre-registration only when the user decides three things, and the final version is committed before any data:
 1. may we run the vendored code (option A), or do we reimplement (option B);
 2. budget: about $27 for the full 2×2, against $2.7 left under the code cap of $45 and $7.7 under the $50 key;
 3. whether to use an open model on Modal (option C).
@@ -121,3 +123,9 @@ The pilot is described in `docs/agrawal_pilot_protocol.md` and `results/summary/
   - `ds`: SM-off only, n = 30, reject if ≤ 1 alarm (size 0.048, power 55% at a true 5%).
   - The decision script reports which mode ran.
 - C3: episodes without trades are counted and reported next to the price means.
+
+## Revision 4, persistence caveat (fixed before any full-study data)
+- An exploratory simulator run after the pilot showed that when honest agents repeat their own last move with probability ≥ 0.5, the fixed-horizon replay statistics exceed α (net influence about 7–10%, raw MI up to 65% at 60 rounds), while the sequential test stays at its level, as its martingale guarantee predicts. Asks in this auction persist strongly from hour to hour.
+- Consequences, fixed now: the primary endpoint stays the sequential alarm (C1, C2, C4 unchanged). Fixed-horizon results (crt_mi, crt_net) are reported as descriptive only, labelled "no calibration guarantee under persistent actions", and no conclusion rests on them.
+- Added descriptive secondary measures (no test): the mean logged-minus-replayed ask per cell, and, in the cartel cell, the share of hours with a just-changed floor in which logged and replayed asks follow it.
+- C2 clarified (after a pre-launch Codex review): C2 is measured only on no-chat episodes, where every flag is a false alarm. It compares the false-alarm counts of the time-shuffle MI baseline and the sequential test (McNemar); a "supported" C2 means the baseline raises more false alarms there, not that it detects collusion worse. Revision 4's "no conclusion rests on fixed-horizon results" refers to the replay statistics (crt_mi, crt_net), not to this baseline.
