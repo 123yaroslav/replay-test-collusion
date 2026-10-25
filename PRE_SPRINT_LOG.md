@@ -17,4 +17,5 @@ sprint. Add an entry for every pre-sprint change; keep it factual.
 | 2026-10-13 | Adapter for Agrawal et al. shipped runs; $0 transfer-entropy pilot on them | `src/collusion/adapters/agrawal.py`, `experiments/pilot_agrawal_te.py`, `results/summary/pilot_agrawal_te.txt` |
 | 2026-10-13 | LLM-agent CRT via policy re-querying and the S1 LLM-RPS experiment script (code only, run with fake replies, no LLM data collected) | `src/collusion/detect/crt_llm.py`, `experiments/s1_llm_rps.py` |
 | 2026-10-13 | Reading list for the team | `docs/reading.md` |
+| 2026-10-13 | Generic N-agent game runner (row added 2026-10-25 to match commit `98f00dc`) | `src/collusion/runner.py`, `tests/test_runner.py` |
 | 2026-10-14 | Analysis of four past 1st-place Apart sprint projects (reports, public reviews, repos) distilled into rules and a submission checklist | `docs/winning_rules.md` |
