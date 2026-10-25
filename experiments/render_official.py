@@ -150,11 +150,38 @@ def fill_front_matter(d, title: str, authors: list[tuple[str, str]], abstract: s
             jc.set(qn("w:val"), "center")
             ppr.append(jc)
         for p, txt in ((pn, name), (pa, aff)):
+            for tag in ("w:tab", "w:br"):  # template tabs and breaks shift the text off centre
+                for el in list(p.iter(qn(tag))):
+                    el.getparent().remove(el)
             ts = list(p.iter(qn("w:t")))
             if ts:
                 ts[0].text = txt
+                ts[0].set("{http://www.w3.org/XML/1998/namespace}space", "default")
                 for t in ts[1:]:
                     t.text = ""
+    # the template's author slot is a 3-column nested table (name | affiliation | empty) that
+    # renders side by side; make it one wide cell with the name above the affiliation
+    for pn, pa in pairs[: len(authors)]:
+        tc_n = pn.getparent()
+        tr = tc_n.getparent()
+        tbl = tr.getparent()
+        tc_n.append(pa)  # move the affiliation paragraph under the name
+        for tc in list(tr.findall(qn("w:tc"))):
+            if tc is not tc_n:
+                tr.remove(tc)
+        tblpr = tbl.find(qn("w:tblPr"))
+        for w in tblpr.findall(qn("w:tblW")):
+            w.set(qn("w:w"), "9000")
+        grid = tbl.find(qn("w:tblGrid"))
+        if grid is not None:
+            for el in list(grid):
+                grid.remove(el)
+            gc = OxmlElement("w:gridCol")
+            gc.set(qn("w:w"), "9000")
+            grid.append(gc)
+        tcw = tc_n.find(qn("w:tcPr")).find(qn("w:tcW"))
+        if tcw is not None:
+            tcw.set(qn("w:w"), "9000")
     # nested author tables left empty by the removed slots only add vertical space: drop them
     for tbl in list(t0._element.iter(qn("w:tbl")))[::-1]:
         if tbl is t0._element:
