@@ -293,7 +293,7 @@ def fig_all_conditions():
             ("deepseek_s2", "vendor_leak", "Auction · pooled-data vendor"),
             ("deepseek_s2", "pair_hidden", "Auction · bid-rotation cartel")]
     rows_c = _rows(audits, coll, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 3.6),
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 3.1),
                              gridspec_kw={"width_ratios": [1, 1], "wspace": 1.15})
     _dots(axes[0], rows_h, ref=5)
     axes[0].set_xlabel("Honest games flagged (%)")

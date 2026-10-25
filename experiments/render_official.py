@@ -360,9 +360,10 @@ def add_table(d, rows):
         trpr = t.rows[i]._tr.get_or_add_trPr()
         cant = OxmlElement("w:cantSplit")
         trpr.append(cant)
-    if len(rows) > 14:  # long tables may break across pages (rows themselves stay whole)
+    if len(rows) > 9:  # long tables may break across pages (rows themselves stay whole)
         for i in range(len(rows)):
-            t.cell(i, 0).paragraphs[0].paragraph_format.keep_with_next = i < 1
+            for j in range(len(rows[0])):
+                t.cell(i, j).paragraphs[0].paragraph_format.keep_with_next = i < 1
     para(d, space_after=4)
 
 
