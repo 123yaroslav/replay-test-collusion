@@ -122,7 +122,7 @@ def fig1():
                    ("Agrawal et al. logs · 5× GPT-4.1, no chat", "bonjour_alpha",
                     int(b.bonjour_alpha.sum()), len(b))]
     rows_c = rate_rows(audits, j1, colluding, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(7.4, 4.6),
+    fig, axes = plt.subplots(1, 2, figsize=(6.4, 4.4),
                              gridspec_kw={"width_ratios": [1.0, 1.0], "wspace": 1.05})
     d1 = dot_panel(axes[0], rows_h, "A  Honest agents: episodes flagged", ref=5)
     axes[0].set_xlabel("Flagged (%), 95% Wilson interval", fontsize=8)
@@ -231,7 +231,7 @@ def fig3(ax=None):
 
 
 def fig23():
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 3.2),
+    fig, axes = plt.subplots(1, 3, figsize=(6.6, 3.1),
                              gridspec_kw={"wspace": 0.38, "width_ratios": [1, 1, 1.1]})
     fig2(axes[:2])
     fig3(axes[2])
