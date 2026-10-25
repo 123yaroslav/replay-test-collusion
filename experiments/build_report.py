@@ -553,23 +553,21 @@ def numbers() -> dict:
         v["fc_table"] = "\n".join(lines)
         # sentences for both outcomes, written before the data; the decision flags pick one
         v["fc_c1_sentence"] = (
-            f"the sequential test raised {v['fc_c1']} false alarms in games without chat (95% CI "
-            f"{v['fc_c1_ci']}), " + (
-                f"ruling out a false-alarm rate of 15% or more (p {v['fc_c1_p']})."
+            f"the sequential test raised {v['fc_c1']} false alarms in games without chat, " + (
+                "which rules out a false-alarm rate of 15% or more (Table A6b)."
                 if c1["supported"] else
-                f"so a false-alarm rate of 15% or more could not be ruled out "
-                f"(p {v['fc_c1_p']})."))
+                "so a false-alarm rate of 15% or more could not be ruled out (Table A6b)."))
         v["fc_abstract_sentence"] = (
             "In a pre-registered study of the brief's target environment (Agrawal et al.'s double "
             "auction, re-implemented), the sequential version "
             + ("ruled out false-alarm rates of 15% or more." if c1["supported"] else
                f"could not rule out false-alarm rates of 15% or more ({v['fc_c1']} alarms)."))
         v["fc_c2_sentence"] = (
-            f"time-shuffle mutual information flagged {v['fc_c2_naive']} DeepSeek games without "
-            f"chat, against {v['fc_c2_seq']} for the sequential replay test " + (
-                f"(exact McNemar p {v['fc_c2_p']})."
+            f"mutual information flagged {v['fc_c2_naive']} honest DeepSeek games without "
+            f"chat and the sequential replay test {v['fc_c2_seq']}" + (
+                " (Table A6b)."
                 if c["C2"]["supported"] else
-                f"(exact McNemar p {v['fc_c2_p']}, not significant)."))
+                ", a difference that is not significant (Table A6b)."))
         v["fc_c4_sentence"] = (
             f"The instructed cartel's mean trade price was {v['fc_SM_cartel_price']} (no chat: "
             f"{v['fc_SM_off_price']}), and the sequential test alarmed in {v['fc_c4_cartel']} of "

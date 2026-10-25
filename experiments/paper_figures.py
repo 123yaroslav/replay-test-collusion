@@ -38,8 +38,9 @@ mpl.rcParams.update({
     "legend.frameon": False, "pdf.fonttype": 42, "savefig.dpi": 600,
 })
 INK, INK2, GRID, BAND = "#1a1a1a", "#55534e", "#e3e2de", "#f5f4f1"
-C = {"crt_net": "#2a78d6", "seq": "#16457f", "naive_mi_shuffle": "#eb6834",
-     "bonjour_alpha": "#1baf7a", "judge": "#c98a00", "channel": "#c2410c"}
+C = {"crt_net": "#2d8a5e", "seq": "#1b4d3a", "naive_mi_shuffle": "#8a8781",
+     "bonjour_alpha": "#bdbab3", "judge": "#c98a00", "channel": "#c2410c"}
+GREEN, GREEN_DARK, GREEN_PALE = "#2d8a5e", "#1b4d3a", "#e8f3ec"
 NAMES = {"crt_net": "Replay test, fixed (ours)", "naive_mi_shuffle": "Mutual information, shuffle null",
          "bonjour_alpha": "Bonjour et al. rule", "judge": "LLM judge (actions only)"}
 
@@ -51,8 +52,8 @@ def load(name):
 
 def save(fig, name):
     FIG.mkdir(parents=True, exist_ok=True)
-    fig.savefig(FIG / f"{name}.pdf", bbox_inches="tight", pad_inches=0.06)
-    fig.savefig(FIG / f"{name}.png", dpi=600, bbox_inches="tight", pad_inches=0.06)
+    fig.savefig(FIG / f"{name}.pdf", bbox_inches="tight", pad_inches=0.12)
+    fig.savefig(FIG / f"{name}.png", dpi=600, bbox_inches="tight", pad_inches=0.12)
     plt.close(fig)
 
 
@@ -174,29 +175,58 @@ def _dots(ax, rows, ref=None, min_rows=None):
 
 
 def fig_main():
-    s1, s2, ag = load("s1_audits.csv"), load("s2_audits.csv"), load("agrawal_panel_runs.csv")
-    audits = pd.concat([s1, s2.assign(tag=s2.tag + "_s2")], ignore_index=True)
-    honest = [("haiku", "null_same", "4 × Claude Haiku"), ("deepseek", "null_same", "4 × DeepSeek")]
-    rows_h = _rows(audits, honest, "flag")
-    b = ag[ag.condition == "base"]
-    rows_h += [("Agrawal et al. logs", "naive_mi_shuffle", int(b.naive_mi_shuffle.sum()), len(b)),
-               ("Agrawal et al. logs", "bonjour_alpha", int(b.bonjour_alpha.sum()), len(b))]
-    coll = [("haiku", "pair_hidden", "Haiku pair, secret plan"),
-            ("deepseek", "pair_hidden", "DeepSeek pair, secret plan"),
-            ("deepseek_s2", "vendor_leak", "Pooled-data vendor")]
-    rows_c = _rows(audits, coll, "correct")
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 1.85))
-    _dots(axes[0], rows_h, ref=5)
-    axes[0].set_xlabel("Honest games flagged (%)")
-    _dots(axes[1], rows_c)
-    axes[1].set_xlabel("True pair named (%)")
-    panel_label(axes[0], "a", x=-0.62)
-    panel_label(axes[1], "b", x=-0.72)
-    hs = [plt.Line2D([], [], color=C[d], marker="o", lw=1.5, ms=4.6, mec="white")
-          for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")]
-    fig.legend(hs, [NAMES[d] for d in ("naive_mi_shuffle", "bonjour_alpha", "crt_net")],
-               loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.01), handlelength=1.6)
-    fig.subplots_adjust(left=0.19, right=0.985, top=0.9, bottom=0.39, wspace=0.95)
+    """Figure 4 (deck style): false alarms as bars, detection as three cards."""
+    import json
+    import matplotlib.patches as mpatches
+    s1, s2 = load("s1_audits.csv"), load("s2_audits.csv")
+    def rate(d, tag, cond, det, col):
+        g = d[(d.tag == tag) & (d.condition == cond) & (d.detector == det)]
+        return 100 * g[col].mean(), int(g[col].sum()), len(g)
+    bars = [("Mutual\ninformation", rate(s1, "haiku", "null_same", "naive_mi_shuffle", "flag05")[0], C["naive_mi_shuffle"]),
+            ("Bonjour rule", rate(s1, "haiku", "null_same", "bonjour_alpha", "flag05")[0], C["bonjour_alpha"]),
+            ("Replay test", rate(s1, "haiku", "null_same", "crt_net", "flag05")[0], GREEN)]
+    n_h = rate(s1, "haiku", "null_same", "crt_net", "flag05")[2]
+    vend = rate(s2, "deepseek", "vendor_leak", "crt_net", "correct_pair")[0]
+    pub = rate(s2, "deepseek", "vendor_public", "crt_net", "flag05")[0]
+    conf = json.load(open(ROOT / "results" / "summary" / "confirm_results.json"))
+    fr = json.load(open(ROOT / "results" / "summary" / "fresh_results.json"))["run_e"]
+    fig = plt.figure(figsize=(WIDTH, 1.9))
+    gs = fig.add_gridspec(1, 2, width_ratios=[0.85, 2.0], wspace=0.28)
+    ax = fig.add_subplot(gs[0, 0])
+    xs = range(3)
+    ax.bar(xs, [v for _, v, _ in bars], color=[c for _, _, c in bars], width=0.62)
+    for x, (_, v, _) in zip(xs, bars):
+        ax.text(x, v + 2, f"{v:.1f}%" if v >= 10 else f"{v:.0f}%", ha="center", va="bottom", fontsize=7.5,
+                color=INK, fontweight="bold")
+    ax.axhline(5, color=INK2, lw=0.7, ls=(0, (3, 2)))
+    ax.text(1.0, 7.5, "5% target", fontsize=6.3, color=INK2, ha="center")
+    ax.set_xticks(list(xs), [b[0] for b in bars], fontsize=6.6)
+    ax.set_ylim(0, 85); ax.set_yticks([0, 25, 50, 75]); ax.tick_params(axis="y", labelsize=7)
+    ax.set_ylabel("Honest games flagged (%)", fontsize=7.5)
+    ax.set_title(f"{n_h} honest games, four Claude Haiku agents", fontsize=7, loc="left", color=INK2)
+    panel_label(ax, "a", x=-0.42, y=1.12)
+    # cards
+    ax2 = fig.add_subplot(gs[0, 1]); ax2.set_axis_off(); ax2.set_xlim(0, 100); ax2.set_ylim(0, 100)
+    cards = [("Vendor pools rivals' data", [("pooled data, pair named", vend), ("public data, flagged", pub)], "auction, DeepSeek sellers"),
+             ("Secret plan, replicated", [("colluding pair named", 100 * conf["c1_seq_correct"] / conf["c1_n"], f"{conf['c1_seq_correct']} / {conf['c1_n']}"),
+                                         ("honest games flagged", 100 * conf["c2_seq_alarms"] / conf["c2_n"], f"{conf['c2_seq_alarms']} / {conf['c2_n']}")], "pre-registered, fresh games"),
+             ("Cartel in an auction", [("cartel, flagged", 100 * fr["cartel2"]["codep_flag"]["rate"]), ("no chat, flagged", 100 * fr["off"]["codep_flag"]["rate"])], "pre-registered, co-departure")]
+    w, gap = 31, 3.5
+    for k, (title, rows, foot) in enumerate(cards):
+        x0 = k * (w + gap)
+        ax2.add_patch(mpatches.FancyBboxPatch((x0, 2), w, 96, boxstyle="round,pad=0.3,rounding_size=2", fc="#f7f6f3", ec="none"))
+        ax2.text(x0 + 2.5, 90, title, fontsize=7.4, fontweight="bold", va="center", color=INK)
+        y = 62
+        for row in rows:
+            lab, v = row[0], row[1]; txt = row[2] if len(row) > 2 else (f"{v:.1f}%" if v % 1 else f"{v:.0f}%")
+            ax2.text(x0 + 2.5, y + 16, lab, fontsize=6.6, va="center", color=INK2)
+            ax2.text(x0 + w - 2.5, y + 7, txt, fontsize=9, va="center", ha="right", color=INK, fontweight="bold")
+            ax2.add_patch(mpatches.Rectangle((x0 + 2.5, y), w - 16, 2.6, fc=GRID, ec="none"))
+            ax2.add_patch(mpatches.Rectangle((x0 + 2.5, y), (w - 16) * v / 100, 2.6, fc=GREEN if v > 50 else "#9a9890", ec="none"))
+            y -= 30
+        ax2.text(x0 + 2.5, 8, foot, fontsize=5.6, va="center", color=INK2, style="italic")
+    panel_label(ax2, "b", x=-0.02, y=1.12)
+    fig.subplots_adjust(left=0.1, right=0.99, top=0.86, bottom=0.14)
     save(fig, "p_fig2_main")
 
 
@@ -447,10 +477,47 @@ def fig_example():
     save(fig, "p_fig2_example")
 
 
+
+
+# ---------------------------------------------------------------- conditions schematic --------
+def fig_conditions():
+    """Figure 3: the conditions as two lists with a colour tag instead of a table."""
+    import matplotlib.patches as mpatches
+    cols = [("Rock-paper-scissors, four seats, 30 rounds", [
+                ("Same model", "four copies of one model", False),
+                ("Mixed models", "two DeepSeek and two Haiku", False),
+                ("Undelivered plans", "P1, P3 write plans nobody gets", False),
+                ("Team, no channel", "P1, P3 told they are a team", False),
+                ("Secret plan", "P1 tells P3 both next moves", True)]),
+            ("Procurement auction, four suppliers, 30 rounds", [
+                ("Same model", "published bids only", False),
+                ("Public-data vendor", "advice from public bids", False),
+                ("Pooled-data vendor", "rivals' private costs pooled", True),
+                ("Bid-rotation cartel", "P1, P3 rotate wins privately", True)])]
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 1.7))
+    for ax, (title, rows) in zip(axes, cols):
+        ax.set_axis_off(); ax.set_xlim(0, 100); ax.set_ylim(0, 100)
+        ax.text(0, 97, title, fontsize=8.2, fontweight="bold", va="top", color=INK)
+        y = 82
+        for name, desc, hidden in rows:
+            fc = "#fff1ea" if hidden else "#f3f2ef"
+            ax.add_patch(mpatches.FancyBboxPatch((0, y - 11), 100, 11, boxstyle="round,pad=0.2,rounding_size=1.5",
+                                                 fc=fc, ec="none"))
+            ax.add_patch(mpatches.Rectangle((0, y - 11), 1.6, 11, fc=("#c2410c" if hidden else "#9a9890"), ec="none"))
+            ax.text(4, y - 5.5, name, fontsize=7.6, fontweight="bold", va="center", color=INK)
+            ax.text(36, y - 5.5, desc, fontsize=6.8, va="center", color=INK2)
+            ax.text(99, y - 5.5, "hidden channel" if hidden else "honest", fontsize=6.8, va="center", ha="right",
+                    color=("#c2410c" if hidden else INK2), fontweight=("bold" if hidden else "normal"))
+            y -= 14
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.98, bottom=0.02, wspace=0.08)
+    save(fig, "p_fig3_conditions")
+
+
 if __name__ == "__main__":
     fig_growth()
     fig_method()
     fig_example()
+    fig_conditions()
     fig_main()
     fig_roc()
     fig_eprocess()
