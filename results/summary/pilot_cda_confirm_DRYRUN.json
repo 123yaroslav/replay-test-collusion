@@ -1,0 +1,108 @@
+{
+  "tag": "pilot_cda",
+  "dry_run": true,
+  "cells": {
+    "HK-off": {
+      "n": 3,
+      "seq": 0,
+      "seq_ci": [
+        0.0,
+        0.5615060804490177
+      ],
+      "crt_mi": 0,
+      "crt_net": 0,
+      "naive": 3,
+      "mean_price": 88.5079144648455,
+      "no_trade_episodes": 0
+    },
+    "HK-on": {
+      "n": 3,
+      "seq": 0,
+      "seq_ci": [
+        0.0,
+        0.5615060804490177
+      ],
+      "crt_mi": 0,
+      "crt_net": 0,
+      "naive": 3,
+      "mean_price": 88.76969606327441,
+      "no_trade_episodes": 0
+    },
+    "SM-cartel": {
+      "n": 5,
+      "seq": 0,
+      "seq_ci": [
+        0.0,
+        0.43449149475208104
+      ],
+      "crt_mi": 1,
+      "crt_net": 1,
+      "naive": 5,
+      "mean_price": 89.81822067360534,
+      "no_trade_episodes": 0
+    },
+    "SM-off": {
+      "n": 5,
+      "seq": 0,
+      "seq_ci": [
+        0.0,
+        0.43449149475208104
+      ],
+      "crt_mi": 0,
+      "crt_net": 0,
+      "naive": 3,
+      "mean_price": 86.21912223466188,
+      "no_trade_episodes": 0
+    },
+    "SM-on": {
+      "n": 5,
+      "seq": 0,
+      "seq_ci": [
+        0.0,
+        0.43449149475208104
+      ],
+      "crt_mi": 0,
+      "crt_net": 0,
+      "naive": 5,
+      "mean_price": 86.3807770868664,
+      "no_trade_episodes": 0
+    }
+  },
+  "C1": {
+    "alarms": 0,
+    "n": 5,
+    "p_fpr_ge_15": 0.4437053125,
+    "reject_if_at_most": -1,
+    "wilson": [
+      0.0,
+      0.43449149475208104
+    ],
+    "supported": false
+  },
+  "C2": {
+    "naive_only": 3,
+    "seq_only": 0,
+    "p_mcnemar": 0.125,
+    "supported": false
+  },
+  "C3": {
+    "SM-on": {
+      "mean": 86.3807770868664,
+      "ref_mean": 86.21912223466188,
+      "p_mannwhitney": 0.21031746031746032
+    },
+    "SM-cartel": {
+      "mean": 89.81822067360534,
+      "ref_mean": 86.21912223466188,
+      "p_mannwhitney": 0.007936507936507936
+    }
+  },
+  "C4": {
+    "cartel_alarms": 0,
+    "cartel_n": 5,
+    "off_alarms": 0,
+    "off_n": 5,
+    "p_fisher": 1.0,
+    "supported": false
+  }
+}

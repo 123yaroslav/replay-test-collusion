@@ -57,7 +57,7 @@ FOLLOWER = ("Secretly, you are in a cartel of all five sellers led by S1. Every 
             "most $0.50; if you have no floor yet, ask freely.")
 CELL_INDEX = {c: i for i, c in enumerate(CELLS)}
 COST, VALUE, TEMP, MAX_TOKENS = 80.0, 100.0, 0.7, 1500
-BINS_VERSION = "v2"  # v1 was the pilot's (coarse); see src/collusion/games/cda.py
+BINS_VERSION = "v3"  # set by --bins; v1/v2 were the pilots', v3 the full study's
 
 
 def _sha(text: str) -> str:
@@ -193,7 +193,10 @@ async def main():
     ap.add_argument("--seed-offset", type=int, default=0)
     ap.add_argument("--tag", required=True)
     ap.add_argument("--budget", type=float, default=None)
+    ap.add_argument("--bins", default="v3", choices=["v1", "v2", "v3"])
     args = ap.parse_args()
+    global BINS_VERSION
+    BINS_VERSION = args.bins
     llm = LLM(budget_usd=args.budget)
     for cell in args.cell:
         t0 = time.time()

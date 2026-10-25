@@ -19,7 +19,10 @@ import numpy as np
 BINS = {"v1": ((85.0, 90.0, 95.0, 100.0), ("lt85", "85-90", "90-95", "95-100", "ge100")),
         "v2": ((84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 95.0, 100.0),
                ("lt84", "84-85", "85-86", "86-87", "87-88", "88-89", "89-90", "90-95", "95-100",
-                "ge100"))}
+                "ge100")),
+        # v3: $1 bins across 84-100 for the full study (plan revision 2, fixed before its data)
+        "v3": (tuple(float(x) for x in range(84, 101)),
+               ("lt84", *[f"{x}-{x + 1}" for x in range(84, 100)], "ge100"))}
 ACTION_SPACES = {v: ["invalid", "none", "null", *labels] for v, (_, labels) in BINS.items()}
 BIN_EDGES, BIN_LABELS = BINS["v1"]
 ACTION_SPACE = ACTION_SPACES["v1"]  # pilot coding, kept for reproducibility
