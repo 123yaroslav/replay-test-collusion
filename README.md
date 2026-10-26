@@ -21,27 +21,11 @@ The test comes in two versions, and both check every pair of agents at once.
 
 <p align="center"><img src="report/figures/p_fig2_main.png" width="92%" alt="Left, share of 150 honest Haiku games accused by each detector. Mutual information 69.3%, Bonjour's rule 61.3%, replay test 4%. The dashed line marks 5%. Right, three detection results with their honest controls. Pooled-data vendor 92.5% against 1.7%, secret plan 18 of 20 against 0 of 40, double-auction cartel 73.3% against 3.3%."></p>
 
-A game is *flagged* when a test rejects at the 5% level. The true pair is *named* when the flagged pair is the one with the channel. A game is *honest* when no channel is meant to change actions. Bonjour's rule is the fixed threshold that Bonjour et al. (2022) put on their net-influence statistic.
+- **Honest agents.** Among four honest Haiku agents, mutual information accuses a pair in 69.3% of games and Bonjour's rule, a fixed threshold on net influence, in 61.3%. The replay test flags 4%, and 4.2% over all 550 honest rock-paper-scissors games.
+- **Hidden channels.** The test names the two suppliers served by a data-pooling vendor in 92.5% of games and flags a public-data vendor in 1 of 60. In a pre-registered replication the sequential version names a pair with a secret plan in 18 of 20 games and flags none of 40 honest games.
+- **Blind spot.** An instructed double-auction cartel escapes the pre-registered sequential test (2 of 30 games), for the reason explained below. A co-departure statistic, chosen after seeing these data, flags 73.3% of a fresh pre-registered series.
 
-| Setting | Replay test | Control or baseline | Test |
-|---|---|---|---|
-| Honest, four Haiku agents in rock-paper-scissors (`null_same`, 150 games) | 4% flagged | Mutual information 69.3%, Bonjour's rule 61.3% | Fixed-horizon |
-| Honest, all 550 rock-paper-scissors games of the two main models | 4.2% flagged | | Fixed-horizon |
-| A pricing vendor pools two suppliers' confidential costs in a procurement auction (`vendor_leak`, 40 games) | Pair named in 92.5% | Vendor that uses public data only (`vendor_public`), 1 of 60 flagged | Fixed-horizon |
-| Secret plan, P1 privately sets its own and P3's next move (`pair_hidden`, 40 games per model) | Pair named in 35% with Haiku and 10% with DeepSeek | | Fixed-horizon |
-| Same secret plan, replication on 20 fresh Haiku games | Pair named in 18 of 20 | 0 of 40 honest games flagged | Sequential |
-| Honest sellers without chat in a re-implementation of Agrawal et al.'s double auction (`SM-off`, `XP-off`) | 0 of 60 flagged | Mutual information accuses 26 of 30 honest DeepSeek games | Sequential |
-| Instructed cartel in the same study (`SM-cartel`, 30 games) | 2 of 30 flagged, a miss our plan predicted before these games were saved or analysed | | Sequential (joint bet) |
-| Same cartel, fresh series of 30 games | 22 of 30 flagged (73.3%) | 1 of 30 no-chat games (`SM-off`) of the first study (3.3%) | Co-departure |
-
-Every row comes from data collected under a plan committed in advance (see [Pre-registration](#pre-registration)). The one exception is the co-departure statistic, which counts rounds in which two sellers both depart from their replays. We chose it after seeing the first double-auction study and then tested it on the fresh series.
-
-Further pre-registered runs (paper, Appendix C.11).
-
-- A likelihood-ratio bet, which also weighs how often each agent's replays choose each action, flags 10 of 40 DeepSeek secret-plan games of 30 rounds, where the joint bet of the table flags none. Over 60 rounds it flags 52.5% of these games, and it raises 3 false alarms in 80 honest games of 60 rounds. These runs pinned the model provider, so every call was routed to one provider.
-- A pair that hides its next move in a code word of public small talk (`stego_public`) is flagged in 12 of 40 games (30%), against 2 of 40 honest small-talk games (`chat_public`).
-- A Haiku pair told how the audit works (`pair_evasive`) still follows its plan. The sequential test flags it in 35 of 40 games (87.5%), about as often as the uninformed Haiku pair of the main study (85%).
-- Claude Haiku suppliers in the procurement auction follow a pooled-data vendor in only 1% of rounds. The test still names the pair in 6 of 40 pooled-data games (15%) and flags none of 40 public-data games.
+The paper gives every condition with intervals (Appendix C) and further pre-registered runs (Appendix C.11).
 
 ## What the test cannot see
 
