@@ -27,6 +27,3 @@ report/*.bbl
 report/*.blg
 report/*.synctex.gz
 
-# Talk transcripts (Zoom auto-transcripts, not ours to redistribute)
-docs/talks/*
-!docs/talks/recordings.tsv

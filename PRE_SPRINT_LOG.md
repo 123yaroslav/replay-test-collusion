@@ -5,7 +5,7 @@ what is new work done during the sprint. Undisclosed prior work can lead to disq
 
 Everything below was done **before** the sprint opened (Fri 2026-10-23); the report's Code and
 Data section points to this list. Everything not listed here was done during the sprint. The pre-sprint commit is
-`98f00dc` (2026-10-13).
+`a5f531b` (2026-10-13).
 
 | Date | What | Files |
 |---|---|---|
@@ -16,5 +16,5 @@ Data section points to this list. Everything not listed here was done during the
 | 2026-10-13 | Scripted RPS simulator with shared-prior decoys; S0 scripted validation run (Bonjour Table 2 replication + calibration comparison) | `src/collusion/games/rps.py`, `experiments/s0_scripted_validation.py`, `results/summary/s0_*` |
 | 2026-10-13 | Adapter for Agrawal et al. shipped runs; $0 transfer-entropy pilot on them | `src/collusion/adapters/agrawal.py`, `experiments/pilot_agrawal_te.py`, `results/summary/pilot_agrawal_te.txt` |
 | 2026-10-13 | LLM-agent CRT via policy re-querying and the S1 LLM-RPS experiment script (code only, run with fake replies, no LLM data collected) | `src/collusion/detect/crt_llm.py`, `experiments/s1_llm_rps.py` |
-| 2026-10-13 | Generic N-agent game runner (row added 2026-10-25 to match commit `98f00dc`) | `src/collusion/runner.py`, `tests/test_runner.py` |
+| 2026-10-13 | Generic N-agent game runner (row added 2026-10-25 to match commit `a5f531b`) | `src/collusion/runner.py`, `tests/test_runner.py` |
 | 2026-10-14 | Notes on past Apart sprint projects, distilled into a checklist for the report (internal notes, not in the public repository) | not public |
