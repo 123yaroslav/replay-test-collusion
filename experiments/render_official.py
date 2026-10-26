@@ -87,6 +87,35 @@ def simple_math(latex: str):
     return merged
 
 # ---------------------------------------------------------------- inline text -----------
+NOLIG = re.compile(r"f(?=[fil])")
+LIG_SPLIT = re.compile(r"(?<=f)(?=[fil])")
+
+
+def nolig(t: str) -> str:
+    """Break fi, fl and ff ligatures with a zero-width non-joiner, so PDF text copies as words."""
+    return t  # zero-width joiners made line spacing uneven in Pages, ligatures are switched off in the styles instead
+
+
+def _no_ligatures(d):
+    """Ask the renderer not to form fi and fl ligatures, so the PDF text copies as words."""
+    W14 = "http://schemas.microsoft.com/office/word/2010/wordml"
+    tag = "{%s}ligatures" % W14
+    xml = '<w14:ligatures xmlns:w14="%s" w14:val="none"/>' % W14
+    rpr = d.styles.element.find(qn("w:docDefaults") + "/" + qn("w:rPrDefault") + "/" + qn("w:rPr"))
+    if rpr is not None and rpr.find(tag) is None:
+        rpr.append(parse_xml(xml))
+    for st in d.styles.element.findall(qn("w:style")):
+        srpr = st.find(qn("w:rPr"))
+        if srpr is not None and srpr.find(tag) is None:
+            srpr.append(parse_xml(xml))
+    for r in d.element.body.iter(qn("w:r")):
+        rp = r.find(qn("w:rPr"))
+        if rp is None:
+            rp = OxmlElement("w:rPr"); r.insert(0, rp)
+        if rp.find(tag) is None:
+            rp.append(parse_xml(xml))
+
+
 def add_runs(par, text: str, size: float | None = None, italic_all: bool = False,
              color: RGBColor | None = None):
     for part in INLINE.split(text):
@@ -121,6 +150,8 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
         elif part.startswith("~") and part.endswith("~") and len(part) > 2:
             part, sub = part[1:-1], True
         # Old Standard TT has no Greek: set Greek letters in Times New Roman (same metrics)
+        if not code:
+            part = nolig(part)
         if not code and GREEK.search(part):
             for piece in GREEK.split(part):
                 if piece:
@@ -137,19 +168,26 @@ def add_runs(par, text: str, size: float | None = None, italic_all: bool = False
                     if GREEK.fullmatch(piece):
                         rr.font.name = "Times New Roman"
             continue
-        run = par.add_run(part)
-        run.bold = bold or None
-        run.italic = (italic or italic_all) or None
-        if code:
-            run.font.name = "Courier New"
-        if sup:
-            run.font.superscript = True
-        if sub:
-            run.font.subscript = True
-        if size:
-            run.font.size = Pt(size)
-        if color is not None:
-            run.font.color.rgb = color
+        chunks = [part] if code else LIG_SPLIT.split(part)
+        for ci, chunk in enumerate(chunks):
+            if ci:  # a 1-pt space in its own run stops Pages from forming an fi, fl or ff ligature
+                gap = par.add_run("\u200c")
+                gap.font.size = Pt(1)
+            if not chunk:
+                continue
+            run = par.add_run(chunk)
+            run.bold = bold or None
+            run.italic = (italic or italic_all) or None
+            if code:
+                run.font.name = "Courier New"
+            if sup:
+                run.font.superscript = True
+            if sub:
+                run.font.subscript = True
+            if size:
+                run.font.size = Pt(size)
+            if color is not None:
+                run.font.color.rgb = color
     return par
 
 
@@ -168,9 +206,9 @@ def set_cell_text_runs(paragraph, text):
     """Replace a paragraph's text while keeping its first run's formatting."""
     runs = paragraph.runs
     if not runs:
-        paragraph.add_run(text)
+        paragraph.add_run(nolig(text))
         return
-    runs[0].text = text
+    runs[0].text = nolig(text)
     for r in runs[1:]:
         if r._element.find(qn("w:footnoteReference")) is None:
             r.text = ""
@@ -503,6 +541,7 @@ def main():
     d, abstract, missing = render((REP / "content.md").read_text(), v)
     tighten_front_matter(d)
     OUT_DOCX.parent.mkdir(parents=True, exist_ok=True)
+    _no_ligatures(d)
     d.save(str(OUT_DOCX))
     strict = len([w for w in re.split(r"[\s\-–—/]+", abstract) if re.search(r"\w", w)])
     print(f"abstract words: {len(abstract.split())} (strict, hyphens and dashes split: {strict})")
