@@ -108,7 +108,7 @@ Coordination carried in memory weakens the test as well. In the pre-registered d
 
 A co-departure statistic, which counts the rounds in which both sellers of a pair depart at once, was chosen after seeing these data and is therefore post hoc. It flags {{fc_dep_SM_cartel}} of these cartel games. In a fresh pre-registered series it flagged {{fr_e_cartel2_codep_flag}} of cartel games against {{fr_e_off_codep_flag}} without chat (Figure 4b, Appendix C.11).
 
-When honest agents repeat their own moves, the fixed-horizon test over-rejects, because its null redraws rounds independently and breaks the runs. The sequential test does not, as Proposition 2 requires. We recommend it for agents whose actions persist (Table A5d).
+When honest agents repeat their own moves, the fixed-horizon test over-rejects, because its null redraws rounds independently and breaks the runs. The sequential test does not, as Proposition 2 requires. We recommend it for agents whose actions persist (Table A5c).
 
 ## 6. Discussion and Limitations
 Labs, platforms and regulators' sandboxes that log each agent's prompt and state can run the test before deployment and during audits. An audit costs two extra calls per agent and round, about {{audit_cost}} for 30 rounds of four agents at DeepSeek prices (Algorithm 1 in Appendix D). Under A1 to A3 a flag is evidence about the audited channel rather than about a shared vendor, at the chosen false-alarm rate.
@@ -276,9 +276,9 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Judge, actions and messages (Claude Haiku) | – | – | {{judge_haiku_talk_no_action_messages_pct}} (DeepSeek {{judge_deepseek_talk_no_action_messages_pct}}) | – |
 | Judge, actions only (GPT-6.1 Sol, 20 games per cell) | {{auroc_haiku_judge_strong_actions}} | {{judge_strong_haiku_null_same_actions_pct}} | – | {{auroc_deepseek_judge_strong_actions}} |
 
-**C.6 Exploratory analyses added after the freeze.** None of these changes a pre-registered result. Tables A5b to A5h give one analysis each, and each caption states its finding.
+**C.6 Exploratory analyses added after the freeze.** None of these changes a pre-registered result. Tables A5 to A5g give one analysis each, and each caption states its finding.
 
-**Table A5b. Agreements sit in the sellers' memory, which replays keep** (double auction, seller-hours in which a keyword count, not a reading of meaning, finds the cartel's floor or leader in a follower's memory before the call).
+**Table A5. Agreements sit in the sellers' memory, which replays keep** (double auction, seller-hours in which a keyword count, not a reading of meaning, finds the cartel's floor or leader in a follower's memory before the call).
 
 | Condition | Pilot (C.8) | Full study (C.7) |
 |---|---|---|
@@ -286,14 +286,14 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Uninstructed chat | {{mem_on_mem}} | – |
 | No chat | {{mem_off_mem}} | – |
 
-**Table A5c. Logged asks follow a floor the leader has just changed more often than replays do** (share of cases in which the ask followed the new floor).
+**Table A5b. Logged asks follow a floor the leader has just changed more often than replays do** (share of cases in which the ask followed the new floor).
 
 | Ask | Pilot (C.8) | Full study (C.7) |
 |---|---|---|
 | Logged | {{mem_changed_logged}} | {{fc_changed_logged}} |
 | Replay | {{mem_changed_replay}} | {{fc_changed_replay}} |
 
-**Table A5d. Honest agents that repeat their own moves.** Replays keep the memory of earlier moves, so each round's null stays exact. A cartel that stores a floor after one message and then falls silent escapes the sequential test. A twin replays each agent from the first round without any channel. It separates this cartel but has no exact null and alarms on honest agents that persist, so it shows the gap between the direct and the total effect and is not a detector. The simulator has five sellers, six price levels, a shared shock and {{s0f_iters}} runs per cell. The repeat probability is the chance that an honest seller repeats its last ask.
+**Table A5c. Honest agents that repeat their own moves.** Replays keep the memory of earlier moves, so each round's null stays exact. A cartel that stores a floor after one message and then falls silent escapes the sequential test. A twin replays each agent from the first round without any channel. It separates this cartel but has no exact null and alarms on honest agents that persist, so it shows the gap between the direct and the total effect and is not a detector. The simulator has five sellers, six price levels, a shared shock and {{s0f_iters}} runs per cell. The repeat probability is the chance that an honest seller repeats its last ask.
 
 | Setting | Statistic | Logs flagged |
 |---|---|---|
@@ -306,7 +306,7 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Cartel storing a floor after one message, then silent | Sequential replay test | {{s0f_silent_replay_seq}} |
 | Cartel storing a floor after one message, then silent | Twin | {{s0f_silent_twin_seq}} |
 
-**Table A5e. With a coalition of three, flagged logs almost always name a pair inside the coalition** (simulator with a leader and two followers, {{s0d_iters}} runs per cell). This calibration holds in this simulator only, and not for honest agents that persist.
+**Table A5d. With a coalition of three, flagged logs almost always name a pair inside the coalition** (simulator with a leader and two followers, {{s0d_iters}} runs per cell). This calibration holds in this simulator only, and not for honest agents that persist.
 
 | Statistic | Coalition logs flagged | Honest logs flagged |
 |---|---|---|
@@ -314,7 +314,7 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Raw mutual information | {{s0d_crt_mi_triple}} | as above |
 | Sequential test | {{s0d_seq_triple}} | at most {{s0d_seq_honest_max}} |
 
-**Table A5f. A cartel that covers less often to stay undetected keeps less of the harm** (four-supplier procurement-auction simulator, {{s0e_iters}} runs per cell, rotation cartel whose cover bids 100). A member that always submits the cover bid creates no pairwise dependence but departs from its replays.
+**Table A5e. A cartel that covers less often to stay undetected keeps less of the harm** (four-supplier procurement-auction simulator, {{s0e_iters}} runs per cell, rotation cartel whose cover bids 100). A member that always submits the cover bid creates no pairwise dependence but departs from its replays.
 
 | Cover strategy | Horizon | Harm | Sequential test, logs flagged |
 |---|---|---|---|
@@ -324,7 +324,7 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Stays near the honest flag rate | 60 rounds | {{s0e_harm_frac_q60}} of the harm kept | {{s0e_seq_q60}} |
 | Member that always bids 100 | – | – | {{s0e_const_seq}} |
 
-**Table A5g. The pool stays valid with one replay instead of two** (fixed-horizon replay test, 40 games per condition). The differences are not established at this sample size, and two replays remain the pre-registered choice.
+**Table A5f. The pool stays valid with one replay instead of two** (fixed-horizon replay test, 40 games per condition). The differences are not established at this sample size, and two replays remain the pre-registered choice.
 
 | Condition | One replay | Two replays (pre-registered) |
 |---|---|---|
@@ -332,7 +332,7 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Pooled-data vendor, true pair named | {{kq_s2_deepseek_vendor_leak_crt_net_k1}} | {{kq_s2_deepseek_vendor_leak_crt_net_k2}} |
 | Honest games flagged | {{kq_honest_crt_net_k1}} | {{kq_honest_crt_net_k2}} |
 
-**Table A5h. Variants of the secret plan in rock-paper-scissors.** Coordination does not pay, because the other agents learned to exploit the identical moves of Haiku pairs. So the secret-plan protocol tests detection of an information flow, not profitable collusion. Warned pairs were named about as often as unwarned ones, and pairs given free-form chat instead of a plan showed almost no coordination. "Named" is the share of games in which the fixed-horizon replay test names the true pair. "Score gap" is the pair's score minus the other seats' score, per round.
+**Table A5g. Variants of the secret plan in rock-paper-scissors.** Coordination does not pay, because the other agents learned to exploit the identical moves of Haiku pairs. So the secret-plan protocol tests detection of an information flow, not profitable collusion. Warned pairs were named about as often as unwarned ones, and pairs given free-form chat instead of a plan showed almost no coordination. "Named" is the share of games in which the fixed-horizon replay test names the true pair. "Score gap" is the pair's score minus the other seats' score, per round.
 
 | Group | Named | Score gap |
 |---|---|---|
@@ -360,7 +360,7 @@ With undelivered plans the leader gets the same instruction, but its messages re
 | Post hoc. Co-departure test (C.10), cartel against no chat | {{fc_dep_SM_cartel}} against {{fc_dep_SM_off}} (one-sided Fisher {{fc_dep_fisher}}) |
 | Post hoc. Per-agent departure test, cartel against no chat | {{fc_depagent_SM_cartel}} against {{fc_depagent_SM_off}} |
 
-**C.8 Double-auction pilot.** The pilot (`docs/agrawal_pilot_protocol.md`) used the mechanics of C.7 with fifteen-hour games. It tested no hypothesis, had three to five games per condition and is excluded from every analysis, so Table A6c is descriptive. Chat produced collusive-sounding messages but no material price rise, the brief's third case type. Time-shuffle mutual information flagged games with no channel at all. In a positive control, sellers followed a leader's announced floor and the trade price rose. Prices concentrated in a narrow band, and the agreement was carried in memory (Table A5b).
+**C.8 Double-auction pilot.** The pilot (`docs/agrawal_pilot_protocol.md`) used the mechanics of C.7 with fifteen-hour games. It tested no hypothesis, had three to five games per condition and is excluded from every hypothesis test, so Table A6c is descriptive. Chat produced collusive-sounding messages but no material price rise, the brief's third case type. Time-shuffle mutual information flagged games with no channel at all. In a positive control, sellers followed a leader's announced floor and the trade price rose. Prices concentrated in a narrow band, and the agreement was carried in memory (Table A5).
 
 **Table A6c. Double-auction pilot.**
 
@@ -400,7 +400,7 @@ for an action \(x\) of the first agent and \(y\) of the second. Its growth rate 
 $$ \mathrm{KL}(P \,\|\, \bar P) \ge \frac{2\delta^2}{R^2} .
 For large \(k\) the fastest bet then reaches \(1/\alpha\) within about \(R^2 \log(1/\alpha) / (2\delta^2)\) rounds. At \(k = 2\) this is a rough scale, not a bound. The replays share the public history, which already carries what the channel did in earlier rounds, so we state the bound against \(\bar P\) and claim no inequality between the two divergences at finite \(k\). The same square law appears in Tailor's detectability bound [2, Theorem 3], in the regret a seller can hide from an audit [13, Theorem 4.5] and in the square-root law of covert communication [27]. The corollary covers only the direct effect of the current channel. An agreement made earlier and stored in memory shifts \(P\) and \(\bar P\) alike, adds nothing to the divergence and can change payoffs by any amount at no cost in detection (Sections 3 and 5.4).
 
-**Comparing the bets.** Figure A4 gives the exact growth of three bets when one agent copies the other's move in a share of rounds. The likelihood-ratio bet grows fastest everywhere, close to the ceiling of Proposition 3. The pre-registered joint bet does not divide by the replay distributions, and under shared skewed priors it loses evidence for channels that copy up to {{growth_joint_neg_max_eps}} of moves. The interaction bet matches the likelihood-ratio bet here but fails when a channel shifts the marginals. Applied after the fact to the existing games (Table A7), the likelihood-ratio bet flags far more games with a channel and matches the fixed-horizon test in the auction. It names fewer Haiku pairs, because it also pays when one agent alone departs, so naming the pair remains the job of a pair statistic (Section 3). Table A5d gives its false-alarm rate on the simulator.
+**Comparing the bets.** Figure A4 gives the exact growth of three bets when one agent copies the other's move in a share of rounds. The likelihood-ratio bet grows fastest everywhere, close to the ceiling of Proposition 3. The pre-registered joint bet does not divide by the replay distributions, and under shared skewed priors it loses evidence for channels that copy up to {{growth_joint_neg_max_eps}} of moves. The interaction bet matches the likelihood-ratio bet here but fails when a channel shifts the marginals. Applied after the fact to the existing games (Table A7), the likelihood-ratio bet flags far more games with a channel and matches the fixed-horizon test in the auction. It names fewer Haiku pairs, because it also pays when one agent alone departs, so naming the pair remains the job of a pair statistic (Section 3). Table A5c gives its false-alarm rate on the simulator.
 
 ![**Figure A4. The likelihood-ratio bet grows fastest, and the pre-registered joint bet can lose evidence.** Exact expected log-growth per round of three bets, for one pair with three actions and two replays per agent, when one agent copies the other's move in a share of rounds, with (a) uniform priors and (b) shared priors (0.6, 0.3, 0.1). The dashed line marks the ceiling of Proposition 3. In this copy channel the interaction bet coincides with the likelihood-ratio bet.](figures/p_figA4_growth.png){6.3}
 
@@ -449,7 +449,7 @@ Algorithm 1 collects the audit in one box, and Section 3 explains each step.
 - Data (CC-BY-4.0), the episode logs and the cache of every model reply, are at https://huggingface.co/datasets/123yaroslav/replay-test-collusion.
 - The idea of the replay test and a first, non-exact implementation predate the sprint. The repository's pre-sprint log lists that work. All experiments and results reported here were produced during the sprint.
 
-**Replays and seeds.** Every reported agent-round has exactly two replays. Had a game had fewer, the analysis would have used the smallest count available in it. Each condition has its own block of episode seeds. Main samples, pilots and the replication use disjoint blocks, and pilot games were excluded from every analysis. Each call's sampling seed derives from call type, episode seed, agent and round, so a logged move and its replays never share a seed. Null resampling is seeded by the episode seed.
+**Replays and seeds.** Every reported agent-round has exactly two replays. Had a game had fewer, the analysis would have used the smallest count available in it. Each condition has its own block of episode seeds. Main samples, pilots and the replication use disjoint blocks, and pilot games were excluded from every hypothesis test. Each call's sampling seed derives from call type, episode seed, agent and round, so a logged move and its replays never share a seed. Null resampling is seeded by the episode seed.
 
 **Deviations from the plan.** Table A9 lists every deviation and what was done.
 
