@@ -2,48 +2,67 @@
 
 **A replay test for hidden information flow between LLM agents**
 
-Yaroslav Rogoza · Apart Research AI Collusion Research Sprint, October 2026
+Yaroslav Rogoza, with Claude (Anthropic) · Apart Research AI Collusion Research Sprint, October 2026
 
-[Paper (PDF)](report/Apart_report.pdf) · [Data](https://huggingface.co/datasets/123yaroslav/replay-test-collusion)
+[Paper (PDF)](report/Apart_report.pdf) · [Slides](report/Monoculture%20Looks%20Like%20Collusion.pdf) · [Data on Hugging Face](https://huggingface.co/datasets/123yaroslav/replay-test-collusion) · [Citation](#citation)
 
-<p align="center"><img src="report/figures/p_fig1_method.png" width="90%" alt="The replay test"></p>
+<p align="center"><img src="report/figures/p_fig1_method.png" width="92%" alt="The replay test. A logged call sees the agent's view and a private channel and bids 100. Two replays see the same view without the channel and bid 80 and 70. If the channel had no effect, 100 is one of three equally likely draws."></p>
 
-Agents built on one base model share priors, so their actions are correlated even when they never
-communicate. Collusion tests that flag pairs whose actions depend on each other therefore accuse
-honest agents. The replay test removes this confound. The auditor asks each agent again on its
-logged observation with the suspected channel removed, and flags a pair only if the pair's logged
-actions depend on each other more than its replays do.
+LLM agents built on one model act alike even when they never talk. Collusion audits that look for dependence between agents' actions therefore accuse honest groups. Among four honest Claude Haiku agents playing rock-paper-scissors, mutual information accuses a pair in 69.3% of games.
+
+The replay test asks each agent again. In every round the auditor sends each agent the input it saw, minus the channel under audit, and records two more answers. Habits of the shared model survive this replay, and the effect of the channel does not. If the channel had no effect, the logged action and its two replays are three equally likely draws, and a pair is flagged only when its logged actions depend on each other more than such draws would.
+
+The test comes in two versions, and both check every pair of agents at once.
+
+- The **fixed-horizon** version scores a whole game. It builds 999 null games by redrawing every action at random from its pool of logged action and replays, and reports how often a null game shows pairwise dependence as strong as the logged one.
+- The **sequential** version bets every round that the pair's logged joint action is one the pair plays more often than the joint actions its replays can form. It multiplies the payoffs and raises an alarm when the evidence reaches 20, which is one over the 5% level. Without a channel the bet is fair, so the chance of a false alarm stays at most 5% however long the audit runs.
 
 ## Results
 
-- **False accusations.** Mutual information flags 69% of games among four honest Claude Haiku
-  agents. The replay test flags 4.2% of 550 honest LLM games at a 5% level.
-- **Detection.** In a procurement auction between LLM suppliers, it names the pair in 92.5% of 40
-  games where a pricing vendor pools two clients' confidential costs, and flags 1.7% of games where
-  the vendor uses public data only.
-- **Sequential version.** In a pre-registered replication, an anytime-valid variant named an
-  instructed pair in 18 of 20 fresh games, against 11 of 20 for the fixed-length test.
-- **Target environment.** In a pre-registered re-implementation of Agrawal et al.'s LLM double
-  auction (5 conditions x 30 games), the sequential test raised 0 false alarms in 60 no-chat games,
-  while time-shuffle mutual information accused 26 of 30 honest no-chat games. An instructed cartel
-  raised prices but escaped the pre-registered bet (2 of 30), as predicted before the data: the
-  agreement lives in the sellers' memory, which replays keep. A statistic chosen afterwards, agents
-  departing together from their own replays, flags 20 of 30 cartel games against 1 of 30, and a
-  fresh pre-registered series confirmed it (22 of 30 against 1 of 30).
-- **Fresh pre-registered runs.** A likelihood-ratio bet (the growth-optimal one) flags 10 of 40
-  DeepSeek secret-plan games where the pre-registered bet flags 0, with 3 of 80 false alarms and the
-  provider pinned; a pair hiding its move in a code word inside a public chat is flagged in 12 of 40
-  games against 2 of 40 honest small-talk games; a Haiku pair told how the audit works could not
-  evade it; Claude Haiku sellers decline a vendor's pooled-data scheme in 99% of rounds, and the
-  test still finds the residual effect (6 of 40 against 0 of 40).
-- **Scope.** The test detects information that reaches an agent through the audited channel.
-  Coordination written into shared instructions, or already stored in an agent's memory, is
-  outside its null hypothesis.
+<p align="center"><img src="report/figures/p_fig2_main.png" width="92%" alt="Left, share of 150 honest Haiku games accused by each detector. Mutual information 69.3%, Bonjour's rule 61.3%, replay test 4%. The dashed line marks 5%. Right, three detection results with their honest controls. Pooled-data vendor 92.5% against 1.7%, secret plan 18 of 20 against 0 of 40, double-auction cartel 73.3% against 3.3%."></p>
+
+A game is *flagged* when a test rejects at the 5% level. The true pair is *named* when the flagged pair is the one with the channel. A game is *honest* when no channel is meant to change actions. Bonjour's rule is the fixed threshold that Bonjour et al. (2022) put on their net-influence statistic.
+
+| Setting | Replay test | Control or baseline | Test |
+|---|---|---|---|
+| Honest, four Haiku agents in rock-paper-scissors (`null_same`, 150 games) | 4% flagged | Mutual information 69.3%, Bonjour's rule 61.3% | Fixed-horizon |
+| Honest, all 550 rock-paper-scissors games of the two main models | 4.2% flagged | | Fixed-horizon |
+| A pricing vendor pools two suppliers' confidential costs in a procurement auction (`vendor_leak`, 40 games) | Pair named in 92.5% | Vendor that uses public data only (`vendor_public`), 1 of 60 flagged | Fixed-horizon |
+| Secret plan, P1 privately sets its own and P3's next move (`pair_hidden`, 40 games per model) | Pair named in 35% with Haiku and 10% with DeepSeek | | Fixed-horizon |
+| Same secret plan, replication on 20 fresh Haiku games | Pair named in 18 of 20 | 0 of 40 honest games flagged | Sequential |
+| Honest sellers without chat in a re-implementation of Agrawal et al.'s double auction (`SM-off`, `XP-off`) | 0 of 60 flagged | Mutual information accuses 26 of 30 honest DeepSeek games | Sequential |
+| Instructed cartel in the same study (`SM-cartel`, 30 games) | 2 of 30 flagged, a miss our plan predicted before these games were saved or analysed | | Sequential (joint bet) |
+| Same cartel, fresh series of 30 games | 22 of 30 flagged (73.3%) | 1 of 30 no-chat games (`SM-off`) of the first study (3.3%) | Co-departure |
+
+Every row comes from data collected under a plan committed in advance (see [Pre-registration](#pre-registration)). The one exception is the co-departure statistic, which counts rounds in which two sellers both depart from their replays. We chose it after seeing the first double-auction study and then tested it on the fresh series.
+
+Further pre-registered runs (paper, Appendix C.11).
+
+- A likelihood-ratio bet, which also weighs how often each agent's replays choose each action, flags 10 of 40 DeepSeek secret-plan games of 30 rounds, where the joint bet of the table flags none. Over 60 rounds it flags 52.5% of these games, and it raises 3 false alarms in 80 honest games of 60 rounds. These runs pinned the model provider, so every call was routed to one provider.
+- A pair that hides its next move in a code word of public small talk (`stego_public`) is flagged in 12 of 40 games (30%), against 2 of 40 honest small-talk games (`chat_public`).
+- A Haiku pair told how the audit works (`pair_evasive`) still follows its plan. The sequential test flags it in 35 of 40 games (87.5%), about as often as the uninformed Haiku pair of the main study (85%).
+- Claude Haiku suppliers in the procurement auction follow a pooled-data vendor in only 1% of rounds. The test still names the pair in 6 of 40 pooled-data games (15%) and flags none of 40 public-data games.
+
+## What the test cannot see
+
+The test asks whether the current channel changed what an agent did. Two kinds of coordination fall outside that question.
+
+- **Instructions.** Agents told they are a team but given no channel (`told_no_channel`) are not flagged. The instruction is part of the policy, so the replays carry it too. Audit the prompt and the policy for this case.
+- **Memory.** An agreement already stored in an agent's memory is part of its input, so the replays carry it too and can leave nothing to find. The double-auction cartel shows the edge of this. Its leader posted a new price floor in the chat every hour. A replay kept the floor from the hour before, which it read from memory, while the logged ask followed the new floor. So the cartel members departed from their replays together, but only in the hours when the floor changed. The pre-registered bet learns the pair's habits from earlier hours, so at each new floor it still expected the old prices and gained little evidence. It flagged 2 of 30 games. The co-departure statistic catches this cartel, but we chose it after seeing the data.
+Other limits.
+
+- **Replays are needed.** Ordinary logs without replays are not enough, and collecting replays needs query access to the deployed agents. A channel the auditor does not know about cannot be removed, so it cannot be audited.
+- **Persistent actions.** When honest agents keep repeating their own earlier actions, the fixed-horizon test flags too often, because its null redraws each round independently. The sequential test stays valid there.
+- **Not always the strongest detector.** In our procurement auction honest bids barely vary, so the standard tests rarely accuse honest suppliers (at most 1 of 100 honest games). There Bonjour's rule names a bid-rotation cartel in 67.5% of 40 games and the fixed-horizon replay test in 57.5%.
+- **Instructed colluders.** Our colluders were told to collude, in two model families and short stylised games. Detection rates need not carry over to agents that coordinate on their own or know about the audit.
 
 ## Audit your own agents
 
-In every round, log each agent's action and k ≥ 1 replays: the same deployed policy queried on the
-identical observation with the audited channel removed.
+```bash
+pip install git+https://github.com/123yaroslav/replay-test-collusion
+```
+
+**1. Log replays.** In every round, store each agent's action and its replays. A replay is the same deployed agent called on the identical input with the audited channel removed. Collect replays together with the logged call, or later from the same model snapshot and provider. The paper uses two replays per agent and round, and the code accepts one or more. An optional `seed` field fixes the resampling, and by default it comes from `episode_id`.
 
 ```json
 {"episode_id": "run-1",
@@ -51,60 +70,87 @@ identical observation with the audited channel removed.
              "requery": {"A": ["rock", "scissors"], "B": ["paper", "paper"], "C": ["rock", "paper"]}}]}
 ```
 
+**2. Run the audit.** `audit` returns a list with one result per game.
+
 ```python
 from collusion.audit import audit
 
 for r in audit("logs.jsonl", action_space=["rock", "paper", "scissors"]):
-    print(r["episode_id"], r["flag"], r["pair"], r["p_value"], r["seq_alarm_round"])
+    print(r["episode_id"], r["flag"], r["pair"], r["p_value"], r["seq_alarm_round"], r["seq_pair"])
 ```
-
-Fix the action space before the audit and pass it as `action_space` (bin many-valued actions such
-as prices with `coarsen`). The sequential test's guarantee requires an alphabet that does not
-depend on the data.
 
 | Output | Meaning |
 |---|---|
-| `flag`, `pair`, `p_value` | Fixed-length test over the episode, level `alpha` (default 0.05). |
-| `seq_alarm_round`, `seq_pair` | Sequential test: the round at which it stopped and the pair it named, or `None`. |
+| `flag`, `pair`, `p_value` | Fixed-horizon test over the whole game at level `alpha` (default 0.05), and the pair with the strongest dependence |
+| `seq_alarm_round`, `seq_pair` | Sequential test at the same level. The round at which the alarm was raised and the pair it named, or `None` |
 
-The fixed-length test uses net influence by default, which can cancel inside a coalition. When a
-coalition of three or more agents is possible, or actions persist from round to round, use the
-sequential result: it keeps its level under feedback, provided replays are served like the
-original calls. A flag means the pair's actions carry information that its replays lack. It is a
-reason to investigate, not proof of intent.
+In a clone of the repository, `uv run python examples/audit_your_logs.py` writes and audits a toy log in which agent B copies agent A in 80% of rounds.
 
-`uv run python examples/audit_your_logs.py` audits a toy log with a planted pair.
+**3. Choose the options.**
+
+- Fix the action space before the audit and pass it as `action_space`. Map many-valued actions such as prices to bins with `coarsen`, a dictionary from raw action to bin. The sequential guarantee needs an action space that does not depend on the data.
+- The fixed-horizon test uses Bonjour et al.'s net influence by default, which can cancel inside a coalition. If three or more agents may collude, pass `statistic="mi"` or rely on the sequential result.
+- If honest agents keep repeating their own earlier actions, rely on the sequential result (see Other limits above).
+
+**4. Read a flag.** A flag means the pair's logged actions depend on each other more than its replays allow, at the chosen false-alarm rate. It points at the audited channel when three conditions hold.
+
+1. Logged calls and replays are served alike. One model snapshot from one provider, the same sampling settings, no response caching, and a temperature above 0, since at temperature 0 a replay copies the logged action.
+2. The audited channel can be removed from the input exactly, with nothing else changed.
+3. The auditor can call each deployed agent on its logged input.
+
+A flag can also come from randomness the agents share outside the log, such as a common sampling seed. It is a reason to investigate, not proof of intent. No flag does not prove the absence of collusion, as the cases above show. An audit costs two extra calls per agent and round, about $0.015 for 30 rounds of four DeepSeek agents.
 
 ## Reproduce the paper
 
 ```bash
+git clone https://github.com/123yaroslav/replay-test-collusion && cd replay-test-collusion
 uv sync
-huggingface-cli download 123yaroslav/replay-test-collusion --repo-type dataset --local-dir results
-git clone --depth 1 https://github.com/andyjliu/llm-agent-collusion third_party/llm-agent-collusion
-./results/logs/run_analysis.sh   # every number and figure; about 13 min
+uvx --from huggingface_hub hf download 123yaroslav/replay-test-collusion --repo-type dataset --local-dir results
+git clone --depth 1 https://github.com/andyjliu/llm-agent-collusion third_party/llm-agent-collusion  # published logs of Agrawal et al.
+./results/logs/run_analysis.sh   # every number and figure, about 13 minutes
 uv run pytest -q
 ```
 
-The download includes the cache of every model reply, so the analysis makes no API calls. Running
-the LLM experiments from scratch needs an OpenRouter key; see [REPRODUCE.md](REPRODUCE.md).
+The download holds the episode logs and a cache of every model reply, so the analysis makes no API calls. Its last step, `experiments/check_numbers.py`, recomputes key numbers from the result tables and compares them with the PDF. Running the experiments from scratch needs an OpenRouter key and is described in [REPRODUCE.md](REPRODUCE.md).
 
-The analysis plans in [`docs/`](docs/) were committed before the data they analyse were collected;
-`git log --follow docs/<plan>.md` shows when. The public history was cleaned of internal notes
-before release with commit dates kept; [COMMIT_MAP.md](COMMIT_MAP.md) maps the original hashes
-quoted inside the plans to the published ones.
+The [dataset card](https://huggingface.co/datasets/123yaroslav/replay-test-collusion) describes every condition and field and shows how to re-audit the games from a table of agent rounds.
+
+## Pre-registration
+
+Each plan in [`docs/`](docs/) was committed before the data it analyses existed. `git log --follow docs/<plan>.md` shows when. These are git timestamps, not an external registry.
+
+| Plan | Fixed in advance |
+|---|---|
+| [`analysis_plan.md`](docs/analysis_plan.md) | Hypotheses, sample sizes, statistics and decision rules of the main study |
+| [`confirmatory_plan.md`](docs/confirmatory_plan.md) | The replication of the sequential test |
+| [`agrawal_pilot_protocol.md`](docs/agrawal_pilot_protocol.md) | The double-auction pilot, for cost and sanity only |
+| [`agrawal_live_plan.md`](docs/agrawal_live_plan.md) | The double-auction study |
+| [`agrawal_full_results_templates.md`](docs/agrawal_full_results_templates.md) | The report sentences for each possible outcome of that study |
+| [`fresh_plan.md`](docs/fresh_plan.md) | The fresh runs and the co-departure test. It also records the prediction that the double-auction cartel would escape the joint bet, committed while those games were running and before they were saved or analysed |
+
+The public history was cleaned of internal notes before release, with commit dates kept. [COMMIT_MAP.md](COMMIT_MAP.md) maps the original hashes quoted inside the plans to the published ones.
 
 ## Repository
 
 ```
-src/collusion/     replay test, baseline detectors, games, LLM client
-experiments/       one script per experiment
-results/summary/   outputs behind every number in the paper
-docs/              pre-registered analysis plans
-report/            paper source, figures and PDF
-examples/          audit your own logs
+src/collusion/       replay test (audit.py, detect/), baseline detectors, games, LLM client with cache
+experiments/         one script per experiment and analysis, figures, report build
+results/summary/     tables behind every number in the paper
+results/logs/        launch scripts and analysis logs
+docs/                pre-registered plans
+report/              paper source (content.md), figures, PDF, slides
+examples/            audit your own logs
+tests/               unit tests
 ```
 
+## References
+
+- T. Bonjour, V. Aggarwal, B. Bhargava. Information theoretic approach to detect collusion in multi-agent games. UAI 2022, PMLR 180.
+- K. Agrawal, V. Teo, J. J. Vazquez, S. Kunnavakkam, V. Srikanth, A. Liu. Evaluating LLM agent collusion in double auctions. [arXiv:2507.01413](https://arxiv.org/abs/2507.01413), 2025.
+
 ## Citation
+
+This is a research sprint report and has not been peer reviewed.
 
 ```bibtex
 @misc{rogoza2026monoculture,
@@ -117,7 +163,6 @@ examples/          audit your own logs
 }
 ```
 
-## License
+## License and prior work
 
-Code: MIT. Data: CC-BY-4.0. Code written before the sprint is listed in
-[PRE_SPRINT_LOG.md](PRE_SPRINT_LOG.md).
+Code is MIT and data are CC-BY-4.0. The idea of the replay test and a first, non-exact implementation predate the sprint. [PRE_SPRINT_LOG.md](PRE_SPRINT_LOG.md) lists that work, and everything else was done during the sprint.

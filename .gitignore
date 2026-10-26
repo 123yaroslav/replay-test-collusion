@@ -12,6 +12,7 @@ __pycache__/
 # raw experiment output and LLM cache (large, regenerable); keep summaries in results/summary/
 results/raw/
 results/cache/
+results/tables/
 !results/summary/
 
 # third-party starter repos are cloned locally, not vendored
